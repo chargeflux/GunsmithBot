@@ -1,15 +1,15 @@
-export interface PartialDestinyManifest {
-  response: PartialManifestData;
-  version: string;
-}
+export type PartialDestinyManifest = {
+  Response: PartialManifestData;
+};
 
-interface PartialManifestData {
+type PartialManifestData = {
   jsonWorldComponentContentPaths: PartialLanguageManifest;
-}
+  version: string;
+};
 
-interface PartialLanguageManifest {
+type PartialLanguageManifest = {
   en: ManifestPayloadPaths;
-}
+};
 
 interface ManifestPayloadPaths {
   [index: string]: string;
@@ -90,10 +90,22 @@ interface ManifestPayloadPaths {
 
 export class ManifestTable {
   name: string;
-  data: string;
+  data: string[];
 
-  constructor(name: string, data: string) {
+  constructor(name: string, data: ManifestTableData) {
     this.name = name;
-    this.data = data;
+    this.data = this.convertToArray(data);
+  }
+
+  convertToArray(data: ManifestTableData): string[] {
+    var manifestData: string[] = [];
+    for (var k in data) {
+      manifestData.push(data[k]);
+    }
+    return manifestData;
   }
 }
+
+export type ManifestTableData = {
+  [index: string]: string; // technically the value is a JSON object
+};
