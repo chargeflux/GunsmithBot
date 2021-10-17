@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 import Discord from "discord.js";
-import deployCommands from "./Services/DeployCommandService";
+import deployCommands from "./services/deploy-command-service";
 
 const client = new Discord.Client({
   intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES],

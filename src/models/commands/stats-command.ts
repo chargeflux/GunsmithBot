@@ -1,4 +1,4 @@
-import BaseCommand from "./BaseCommand";
+import BaseCommand from "./base-command";
 
 export default class StatsCommand implements BaseCommand {
   constructor(input: string) {
