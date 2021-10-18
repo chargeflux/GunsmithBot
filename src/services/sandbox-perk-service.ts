@@ -1,12 +1,12 @@
-import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
+import { DestinySandboxPerkDefinition } from "bungie-api-ts/destiny2";
 import sift from "sift";
 import { getManifestTableData } from "./manifest-service";
 
-export async function getInventoryItemByName(
+export async function getSandboxPerkByName(
   itemName: string
-): Promise<DestinyInventoryItemDefinition[]> {
+): Promise<DestinySandboxPerkDefinition[]> {
   try {
-    var res = await getManifestTableData("DestinyInventoryItemDefinition");
+    var res = await getManifestTableData("DestinySandboxPerkDefinition");
     var items = res.filter(sift({ "displayProperties.name": itemName }));
     return items;
   } catch (err) {

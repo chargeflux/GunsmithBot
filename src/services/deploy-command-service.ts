@@ -1,26 +1,35 @@
-const { SlashCommandBuilder } = require("@discordjs/builders");
-const { REST } = require("@discordjs/rest");
-const { Routes } = require("discord-api-types/v9");
+import {
+  SlashCommandStringOption,
+  SlashCommandBuilder,
+} from "@discordjs/builders";
+import { REST } from "@discordjs/rest";
+import { Routes } from "discord-api-types/v9";
 
 export default function deployCommands() {
-  const rest = new REST({ version: "9" }).setToken(
-    process.env.DISCORD_BOT_TOKEN
-  );
-  let commands = buildCommands();
-  let guild_ids = loadGuilds();
-  for (const id of guild_ids) {
-    rest
-      .put(Routes.applicationGuildCommands(process.env.CLIENT_ID, id), {
-        body: commands,
-      })
-      .then(() =>
-        console.log(
-          "Successfully registered application commands for guild " + id
+  if (process.env.DISCORD_BOT_TOKEN && process.env.CLIENT_ID) {
+    const rest = new REST({ version: "9" }).setToken(
+      process.env.DISCORD_BOT_TOKEN
+    );
+    let commands = buildCommands();
+    let guild_ids = loadGuilds();
+    for (const id of guild_ids) {
+      rest
+        .put(Routes.applicationGuildCommands(process.env.CLIENT_ID, id), {
+          body: commands,
+        })
+        .then(() =>
+          console.log(
+            "Successfully registered application commands for guild " + id
+          )
         )
-      )
-      .catch((err: any) => {
-        console.error(err);
-      });
+        .catch((err: any) => {
+          console.error(err);
+        });
+    }
+  } else {
+    throw Error(
+      "Configuration is not valid. Check DISCORD_BOT_TOKEN and CLIENT_ID"
+    );
   }
 }
 
@@ -47,8 +56,8 @@ function loadGuilds(): string[] {
   return guild_ids;
 }
 
-function buildCommands(): string[] {
-  const commands: string[] = [
+function buildCommands() {
+  const commands = [
     new SlashCommandBuilder()
       .setName("compare")
       .setDescription("Compare stats between 2 weapons"),
@@ -63,7 +72,10 @@ function buildCommands(): string[] {
       .setDescription("Get information about a mod"),
     new SlashCommandBuilder()
       .setName("perk")
-      .setDescription("Get information about a perk"),
+      .setDescription("Get information about a perk")
+      .addStringOption((option: SlashCommandStringOption) =>
+        option.setName("input").setDescription("Name of perk").setRequired(true)
+      ),
     new SlashCommandBuilder()
       .setName("search")
       .setDescription("Search for weapons with specific perks"),

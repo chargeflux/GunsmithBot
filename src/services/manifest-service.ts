@@ -5,6 +5,11 @@ import {
   ManifestTableData,
 } from "../models/bungie-api/partial-destiny-manifest";
 import fs from "fs";
+import {
+  AllDestinyManifestComponents,
+  DestinyDefinitionFrom,
+  DestinyManifestComponentName,
+} from "bungie-api-ts/destiny2";
 
 const BUNGIE_API_MANIFEST_URL =
   "https://www.bungie.net/Platform/Destiny2/Manifest/";
@@ -114,8 +119,10 @@ async function getCurrentVersion(): Promise<string> {
   }
 }
 
-export function getManifestTableData(tableName: string): ManifestTableData[] {
-  var tableData: ManifestTableData[] = JSON.parse(
+export function getManifestTableData<K extends DestinyManifestComponentName>(
+  tableName: K
+): DestinyDefinitionFrom<K>[] {
+  var tableData: DestinyDefinitionFrom<K>[] = JSON.parse(
     fs.readFileSync(MANIFEST_DATA_LOCATION + tableName + ".json", "utf-8")
   );
   return tableData;
