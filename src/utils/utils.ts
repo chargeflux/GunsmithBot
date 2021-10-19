@@ -1,5 +1,7 @@
 import fuzzysort from "fuzzysort";
 import { BaseMetadata } from "../models/commands/base-metadata";
+import { WeaponTierType } from "../models/constants";
+import { Weapon } from "../models/destiny-entities/weapon";
 
 export function toTitleCase(text: string): string {
   return text
@@ -9,7 +11,7 @@ export function toTitleCase(text: string): string {
     .join(" ");
 }
 
-export function orderResults<k extends BaseMetadata>(
+export function orderResultsByName<k extends BaseMetadata>(
   query: string,
   metadata: k[]
 ) {
@@ -19,4 +21,21 @@ export function orderResults<k extends BaseMetadata>(
   });
 
   return results.map((x) => x.obj);
+}
+
+export function orderResultsByRandomOrTierType(
+  weaponResults: Weapon[]
+): Weapon[] {
+  let weapons: Weapon[] = [];
+  for (let weapon of weaponResults) {
+    if (weapon.baseArchetype) {
+      if (
+        weapon.hasRandomRolls ||
+        weapon.baseArchetype.weaponTierType == "Exotic"
+      ) {
+        weapons.splice(0, 0, weapon);
+      } else weapons.push(weapon);
+    }
+  }
+  return weapons;
 }

@@ -3,7 +3,7 @@ import {
   PartialDestinyManifest,
   ManifestTable,
   ManifestTableData,
-} from "../models/bungie-api/partial-destiny-manifest";
+} from "../../models/bungie-api/partial-destiny-manifest";
 import fs from "fs";
 import {
   AllDestinyManifestComponents,
@@ -72,7 +72,7 @@ async function getManifestTables(
             headers: { "X-API-Key": process.env.BUNGIE_KEY },
           }
         );
-        console.log("Received manifest for: " + table);
+        console.log("Received manifest for:", table);
         const manifestTable = new ManifestTable(table, response.data);
         manifestTables.push(manifestTable);
       } catch (error) {
@@ -99,10 +99,10 @@ async function saveManifestData(
         MANIFEST_DATA_LOCATION + table.name + ".json",
         JSON.stringify(table.data, null, 2)
       );
-      console.log("Saved table: ", table.name);
+      console.log("Saved table:", table.name);
     }
     fs.writeFileSync(MANIFEST_DATA_LOCATION + "version", version);
-    console.log("Saved version: ", version);
+    console.log("Saved version:", version);
   } catch (err) {
     console.log(err);
     throw Error("Failed to write manifest");

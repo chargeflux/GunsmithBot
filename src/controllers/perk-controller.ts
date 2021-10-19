@@ -1,13 +1,14 @@
-import PerkCommand, { PerkInfo } from "../models/commands/perk-command";
-import { orderResults } from "../utils/utils";
+import PerkCommand from "../models/commands/perk-command";
+import Perk from "../models/destiny-entities/perk";
+import { orderResultsByName } from "../utils/utils";
 
 export default async function processPerkCommand(
   input?: string
-): Promise<PerkInfo[]> {
+): Promise<Perk[]> {
   if (input) {
     var perkCommand = new PerkCommand(input);
     await perkCommand.process();
-    var perkResults = orderResults(input, perkCommand.perkInfoResults);
+    var perkResults = orderResultsByName(input, perkCommand.perkResults);
     return perkResults;
   }
   return [];

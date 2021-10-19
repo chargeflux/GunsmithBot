@@ -11,8 +11,8 @@ export default function deployCommands() {
       process.env.DISCORD_BOT_TOKEN
     );
     let commands = buildCommands();
-    let guild_ids = loadGuilds();
-    for (const id of guild_ids) {
+    let guildIds = loadGuilds();
+    for (const id of guildIds) {
       rest
         .put(Routes.applicationGuildCommands(process.env.CLIENT_ID, id), {
           body: commands,
@@ -34,18 +34,18 @@ export default function deployCommands() {
 }
 
 function loadGuilds(): string[] {
-  let guild_count = 0;
+  let guildCount = 0;
   if (process.env.NUM_GUILDS != null) {
-    guild_count = parseInt(process.env.NUM_GUILDS);
+    guildCount = parseInt(process.env.NUM_GUILDS);
   } else {
     throw Error("Configuration is not valid. Check NUM_GUILDS");
   }
 
-  const guild_ids: string[] = [];
-  for (let i = 1; i < guild_count + 1; i++) {
+  let guildIds: string[] = [];
+  for (let i = 1; i < guildCount + 1; i++) {
     const id = process.env["GUILD_ID_" + i.toString()];
     if (id) {
-      guild_ids.push(id);
+      guildIds.push(id);
     } else {
       throw Error(
         `Configuration is not valid. Check ${"GUILD_ID_" + i.toString()}`
@@ -53,11 +53,20 @@ function loadGuilds(): string[] {
     }
   }
 
-  return guild_ids;
+  return guildIds;
 }
 
 function buildCommands() {
   const commands = [
+    new SlashCommandBuilder()
+      .setName("weapon")
+      .setDescription("Get information about a weapon")
+      .addStringOption((option: SlashCommandStringOption) =>
+        option
+          .setName("input")
+          .setDescription("Name of weapon")
+          .setRequired(true)
+      ),
     new SlashCommandBuilder()
       .setName("compare")
       .setDescription("Compare stats between 2 weapons"),
