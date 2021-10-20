@@ -65,7 +65,8 @@ export enum DamageType {
   "Arc" = 2,
   "Solar" = 3,
   "Void" = 4,
-  "Stasis" = 5,
+  "Raid" = 5,
+  "Stasis" = 6,
 }
 
 export enum WeaponStat {

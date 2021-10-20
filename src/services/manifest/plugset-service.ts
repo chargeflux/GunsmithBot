@@ -1,27 +1,38 @@
-import { DestinyItemSocketEntryPlugItemRandomizedDefinition } from "bungie-api-ts/destiny2";
-import sift from "sift";
-import { getManifestTableData } from "./manifest-service";
+import {
+  DestinyItemSocketEntryPlugItemRandomizedDefinition,
+  DestinyPlugSetDefinition,
+} from "bungie-api-ts/destiny2";
+import BetterSqlite3 from "better-sqlite3";
+import { DBTableRecordJSON } from "../../models/db";
 
-export async function getPlugItemHash(hash: number): Promise<number> {
+export async function getPlugItemHash(
+  db: BetterSqlite3.Database,
+  hash: number
+): Promise<number> {
   try {
-    var res = await getManifestTableData("DestinyPlugSetDefinition");
-    var item = res.filter(sift({ hash: hash }));
-    return item[0].reusablePlugItems[0].plugItemHash;
-  } catch (err) {
-    console.error(err);
-    throw err;
+    const result: DBTableRecordJSON = db
+      .prepare("SELECT json FROM DestinyPlugSetDefinition WHERE hash = ?")
+      .get(hash.toString());
+    const json_res: DestinyPlugSetDefinition = JSON.parse(result.json);
+    return json_res.reusablePlugItems[0].plugItemHash;
+  } catch (e) {
+    console.error("Failed to get plugItemHash", e);
+    throw e;
   }
 }
 
-export async function getPlugItems(
+export async function getPlugItemsByHash(
+  db: BetterSqlite3.Database,
   hash: number
 ): Promise<DestinyItemSocketEntryPlugItemRandomizedDefinition[]> {
   try {
-    var res = await getManifestTableData("DestinyPlugSetDefinition");
-    var item = res.filter(sift({ hash: hash }));
-    return item[0].reusablePlugItems;
-  } catch (err) {
-    console.error(err);
-    throw err;
+    const result: DBTableRecordJSON = db
+      .prepare("SELECT json FROM DestinyPlugSetDefinition WHERE hash = ?")
+      .get(hash.toString());
+    const json_res: DestinyPlugSetDefinition = JSON.parse(result.json);
+    return json_res.reusablePlugItems;
+  } catch (e) {
+    console.error("Failed to get plugItems by hash", e);
+    throw e;
   }
 }

@@ -1,16 +1,20 @@
 import { DestinySandboxPerkDefinition } from "bungie-api-ts/destiny2";
-import sift from "sift";
-import { getManifestTableData } from "./manifest-service";
+import BetterSqlite3 from "better-sqlite3";
+import { DBTableRecordJSON } from "../../models/db";
 
-export async function getSandboxPerkByName(
-  itemName: string
+export async function getSandboxPerksByName(
+  db: BetterSqlite3.Database,
+  query: string
 ): Promise<DestinySandboxPerkDefinition[]> {
   try {
-    var res = await getManifestTableData("DestinySandboxPerkDefinition");
-    var items = res.filter(sift({ "displayProperties.name": itemName }));
-    return items;
-  } catch (err) {
-    console.error(err);
-    throw err;
+    const items: DBTableRecordJSON[] = db
+      .prepare(
+        "SELECT json FROM DestinySandboxPerkDefinition WHERE name LIKE ?"
+      )
+      .all("%" + query + "%");
+    return items.map((x) => JSON.parse(x.json));
+  } catch (e) {
+    console.error("Failed to get sandbox perk by name", e);
+    throw e;
   }
 }

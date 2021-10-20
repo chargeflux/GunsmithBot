@@ -1,3 +1,9 @@
+import {
+  DestinyDefinitionFrom,
+  DestinyManifestComponentName,
+} from "bungie-api-ts/destiny2";
+import { DBTableRecord } from "../db";
+
 export type PartialDestinyManifest = {
   Response: PartialManifestData;
 };
@@ -89,23 +95,24 @@ interface ManifestPayloadPaths {
 }
 
 export class ManifestTable {
-  name: string;
-  data: string[];
+  name: DestinyManifestComponentName;
+  data: DBTableRecord[];
 
-  constructor(name: string, data: ManifestTableData) {
+  constructor(
+    name: DestinyManifestComponentName,
+    input: DestinyDefinitionFrom<DestinyManifestComponentName>[]
+  ) {
     this.name = name;
-    this.data = this.convertToArray(data);
+    this.data = this.convertToRecords(input);
   }
 
-  convertToArray(data: ManifestTableData): string[] {
-    var manifestData: string[] = [];
-    for (var k in data) {
-      manifestData.push(data[k]);
+  private convertToRecords(
+    data: DestinyDefinitionFrom<DestinyManifestComponentName>[]
+  ): DBTableRecord[] {
+    var dbTableRecords: DBTableRecord[] = [];
+    for (let k in data) {
+      dbTableRecords.push(new DBTableRecord(data[k].hash.toString(), data[k]));
     }
-    return manifestData;
+    return dbTableRecords;
   }
 }
-
-export type ManifestTableData = {
-  [index: string]: string; // technically the value is a JSON object
-};

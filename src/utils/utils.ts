@@ -1,6 +1,5 @@
 import fuzzysort from "fuzzysort";
 import { BaseMetadata } from "../models/commands/base-metadata";
-import { WeaponTierType } from "../models/constants";
 import { Weapon } from "../models/destiny-entities/weapon";
 
 export function toTitleCase(text: string): string {

@@ -1,16 +1,24 @@
-import sift from "sift";
-import { getManifestTableData } from "./manifest-service";
+import BetterSqlite3 from "better-sqlite3";
+import { DBTableRecordJSON } from "../../models/db";
 
-export default async function getPowerCap(hashes: number[]): Promise<number[]> {
+export default async function getPowerCap(
+  db: BetterSqlite3.Database,
+  hashes: number[]
+): Promise<number[]> {
   try {
-    var res = await getManifestTableData("DestinyPowerCapDefinition");
-    var items = res.filter(sift({ hash: { $in: hashes } }));
-    return items
-      .map((x) => x.powerCap)
+    const result: DBTableRecordJSON[] = db
+      .prepare(
+        `SELECT json FROM DestinyPowerCapDefinition WHERE hash in (${"?,"
+          .repeat(hashes.length)
+          .slice(0, -1)})`
+      )
+      .all(hashes.map((x) => x.toString()));
+    return result
+      .map((x) => JSON.parse(x.json).powerCap)
       .sort()
       .reverse(); // newest first
-  } catch (err) {
-    console.error(err);
-    throw err;
+  } catch (e) {
+    console.error("Failed to get power cap levels", e);
+    throw e;
   }
 }

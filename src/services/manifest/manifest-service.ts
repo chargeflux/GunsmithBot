@@ -1,39 +1,41 @@
 import axios from "axios";
 import {
-  PartialDestinyManifest,
-  ManifestTable,
-  ManifestTableData,
-} from "../../models/bungie-api/partial-destiny-manifest";
-import fs from "fs";
-import {
-  AllDestinyManifestComponents,
   DestinyDefinitionFrom,
   DestinyManifestComponentName,
 } from "bungie-api-ts/destiny2";
+import fs from "fs";
+import {
+  ManifestTable,
+  PartialDestinyManifest,
+} from "../../models/bungie-api/partial-destiny-manifest";
+import DBService from "../db-service";
 
 const BUNGIE_API_MANIFEST_URL =
   "https://www.bungie.net/Platform/Destiny2/Manifest/";
 
-const MANIFEST_DATA_LOCATION = "data/";
+export const MANIFEST_DATA_LOCATION = "data/";
 
-const TABLES = [
+export const TABLES = [
   "DestinyInventoryItemDefinition",
   "DestinyPlugSetDefinition",
   "DestinySocketTypeDefinition",
   "DestinyPowerCapDefinition",
   "DestinySandboxPerkDefinition",
   "DestinyCollectibleDefinition",
-];
+] as const;
 
-export default async function updateManifest() {
+export async function updateManifest(db: DBService) {
   var manifest = await getManifest();
+  console.log("Checking if manifest is up to date");
   if (manifest.Response.version != (await getCurrentVersion())) {
-    console.log("Updating manifest");
-    const result = await getManifestTables(manifest);
-    saveManifestData(result, manifest.Response.version);
-    // TODO: process result
-    console.log("Saved new manifest tables");
+    console.log("Version is outdated. Updating manifest");
+    const tables = await getManifestTables(manifest);
+    processAndSaveManifestDataJSON(tables, manifest.Response.version);
+    console.log("Saved new processed manifest tables to JSON");
+    db.construct(tables);
+    console.log("Saved new processed manifest tables to DB");
   }
+  console.log("Manifest is up to date");
 }
 
 async function getManifest(): Promise<PartialDestinyManifest> {
@@ -66,12 +68,11 @@ async function getManifestTables(
     for (var table of TABLES) {
       const url = manifest.Response.jsonWorldComponentContentPaths.en[table];
       try {
-        var response = await axios.get<ManifestTableData>(
-          "https://bungie.net" + url,
-          {
-            headers: { "X-API-Key": process.env.BUNGIE_KEY },
-          }
-        );
+        var response = await axios.get<
+          DestinyDefinitionFrom<DestinyManifestComponentName>[]
+        >("https://bungie.net" + url, {
+          headers: { "X-API-Key": process.env.BUNGIE_KEY },
+        });
         console.log("Received manifest for:", table);
         const manifestTable = new ManifestTable(table, response.data);
         manifestTables.push(manifestTable);
@@ -86,7 +87,7 @@ async function getManifestTables(
   return manifestTables;
 }
 
-async function saveManifestData(
+async function processAndSaveManifestDataJSON(
   manifestTables: ManifestTable[],
   version: string
 ) {
@@ -96,7 +97,7 @@ async function saveManifestData(
     }
     for (var table of manifestTables) {
       fs.writeFileSync(
-        MANIFEST_DATA_LOCATION + table.name + ".json",
+        MANIFEST_DATA_LOCATION + table.name + "Table.json",
         JSON.stringify(table.data, null, 2)
       );
       console.log("Saved table:", table.name);
@@ -117,13 +118,4 @@ async function getCurrentVersion(): Promise<string> {
     console.log(err);
     return "";
   }
-}
-
-export function getManifestTableData<K extends DestinyManifestComponentName>(
-  tableName: K
-): DestinyDefinitionFrom<K>[] {
-  var tableData: DestinyDefinitionFrom<K>[] = JSON.parse(
-    fs.readFileSync(MANIFEST_DATA_LOCATION + tableName + ".json", "utf-8")
-  );
-  return tableData;
 }

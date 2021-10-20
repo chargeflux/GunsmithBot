@@ -1,13 +1,19 @@
-import sift from "sift";
-import { getManifestTableData } from "./manifest-service";
+import { DestinySocketTypeDefinition } from "bungie-api-ts/destiny2";
+import BetterSqlite3 from "better-sqlite3";
+import { DBTableRecordJSON } from "../../models/db";
 
-export async function getSocketTypeHash(hash: number): Promise<number> {
+export async function getSocketTypeHash(
+  db: BetterSqlite3.Database,
+  hash: number
+): Promise<number> {
   try {
-    var res = await getManifestTableData("DestinySocketTypeDefinition");
-    var item = res.filter(sift({ hash: hash }));
-    return item[0].plugWhitelist[0].categoryHash; // assume plugWhiteList has length of 1
-  } catch (err) {
-    console.error(err);
-    throw err;
+    const result: DBTableRecordJSON = db
+      .prepare("SELECT json FROM DestinySocketTypeDefinition WHERE hash = ?")
+      .get(hash.toString());
+    const json_res: DestinySocketTypeDefinition = JSON.parse(result.json);
+    return json_res.plugWhitelist[0].categoryHash; // assume plugWhiteList has length of 1
+  } catch (e) {
+    console.error("Failed to get socketTypeHash", e);
+    throw e;
   }
 }

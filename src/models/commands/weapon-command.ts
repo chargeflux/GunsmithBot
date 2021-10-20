@@ -1,5 +1,4 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
-import { getInventoryItemByName } from "../../services/manifest/inventory-item-service";
 import BaseCommand from "./base-command";
 import { WeaponBase } from "../constants";
 import { Weapon } from "../destiny-entities/weapon";

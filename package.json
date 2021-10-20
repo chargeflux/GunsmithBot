@@ -11,6 +11,7 @@
   "author": "chargeflux",
   "license": "MIT",
   "devDependencies": {
+    "@types/better-sqlite3": "^7.4.0",
     "@types/node": "^16.11.0",
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^8.3.0",
@@ -21,11 +22,11 @@
     "@discordjs/builders": "^0.6.0",
     "@discordjs/rest": "^0.1.0-canary.0",
     "axios": "^0.23.0",
+    "better-sqlite3": "^7.4.3",
     "bungie-api-ts": "^4.11.0",
     "discord-api-types": "^0.23.1",
     "discord.js": "^13.2.0",
     "dotenv": "^10.0.0",
-    "fuzzysort": "^1.1.4",
-    "sift": "^15.0.0"
+    "fuzzysort": "^1.1.4"
   }
 }
