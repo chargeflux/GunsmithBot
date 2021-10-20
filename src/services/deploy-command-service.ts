@@ -1,6 +1,7 @@
 import {
   SlashCommandStringOption,
   SlashCommandBuilder,
+  SlashCommandBooleanOption,
 } from "@discordjs/builders";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
@@ -66,16 +67,20 @@ function buildCommands() {
           .setName("input")
           .setDescription("Name of weapon")
           .setRequired(true)
+      )
+      .addBooleanOption((option: SlashCommandBooleanOption) =>
+        option
+          .setName("full")
+          .setDescription("Get all perks and stats for the weapon")
+      )
+      .addBooleanOption((option: SlashCommandBooleanOption) =>
+        option
+          .setName("default")
+          .setDescription("Get the default rolls for a weapon")
       ),
     new SlashCommandBuilder()
       .setName("compare")
       .setDescription("Compare stats between 2 weapons"),
-    new SlashCommandBuilder()
-      .setName("default")
-      .setDescription("Get default rolls for a weapon"),
-    new SlashCommandBuilder()
-      .setName("full")
-      .setDescription("Get the full information about a weapon"),
     new SlashCommandBuilder()
       .setName("mod")
       .setDescription("Get information about a mod"),

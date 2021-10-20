@@ -33,6 +33,7 @@ import {
   orderResultsByRandomOrTierType,
   orderResultsByName,
 } from "../utils/utils";
+import Discord from "discord.js";
 
 export default class WeaponController {
   dbService: DBService;
@@ -41,17 +42,21 @@ export default class WeaponController {
     this.dbService = dbService;
   }
 
-  async processWeaponCommand(input: string): Promise<Weapon[]> {
+  async processWeaponCommand(
+    input: string,
+    options: Discord.CommandInteractionOptionResolver
+  ): Promise<WeaponCommand | undefined> {
     if (input) {
-      var weaponCommand = new WeaponCommand(input);
+      var weaponCommand = new WeaponCommand(input, options);
       const results = await getInventoryItemsByName(this.dbService.db, input);
-      weaponCommand.setWeaponResults(results);
+      weaponCommand.processWeaponResults(results);
       for (let weapon of weaponCommand.weaponResults) {
         let powerCapValues = await this.processPowerCapHashes(
           weapon.rawData.powerCapHashes
         );
         weapon.setPowerCapValues(powerCapValues);
         let [sockets, intrinsic] = await this.processSocketData(
+          weaponCommand.options.default,
           weapon.rawData.socketData
         );
         let baseArchetype = await this.processBaseArchetype(
@@ -69,9 +74,11 @@ export default class WeaponController {
         weaponCommand.weaponResults
       );
 
-      return orderResultsByName(input, orderedResults);
+      weaponCommand.setWeaponResults(orderResultsByName(input, orderedResults));
+
+      return weaponCommand;
     }
-    return [];
+    return;
   }
 
   async processPowerCapHashes(powerCapHashes: number[]): Promise<number[]> {
@@ -110,12 +117,12 @@ export default class WeaponController {
     if (!weaponTierType)
       throw Error(`Failed to parse tier type hash ${tierTypeHash}`);
 
-    let damageTypeHash = weaponRawData.weaponDamageTypeHash;
-    let damageType = DamageType[damageTypeHash] as
+    let weaponDamageTypeId = weaponRawData.weaponDamageTypeId;
+    let damageType = DamageType[weaponDamageTypeId] as
       | keyof typeof DamageType
       | undefined;
     if (!damageType)
-      throw Error(`Failed to parse damage type hash ${damageTypeHash}`);
+      throw Error(`Failed to parse damage type hash ${weaponDamageTypeId}`);
 
     let baseArchetype = new WeaponBaseArchetype(
       weaponBase,
@@ -130,6 +137,7 @@ export default class WeaponController {
   }
 
   async processSocketData(
+    isDefault: boolean,
     socketData?: DestinyItemSocketBlockDefinition
   ): Promise<[Socket[], Perk]> {
     if (!socketData) {
@@ -146,7 +154,8 @@ export default class WeaponController {
       if (category.socketCategoryHash == SocketCategoryHash.WEAPON_PERKS) {
         sockets = await this.processSocketPerks(
           socketData.socketEntries,
-          category.socketIndexes
+          category.socketIndexes,
+          isDefault
         );
       }
     }
@@ -189,9 +198,11 @@ export default class WeaponController {
 
   async processSocketPerks(
     socketEntries: DestinyItemSocketEntryDefinition[],
-    socketIndices: number[]
+    socketIndices: number[],
+    isDefault: boolean
   ): Promise<Socket[]> {
     let sockets: Socket[] = [];
+    let defaultSockets: Socket[] = [];
     let orderIdx = 0;
     for (let index of socketIndices) {
       let socket = socketEntries[index];
@@ -205,6 +216,26 @@ export default class WeaponController {
         | keyof typeof PlugCategory
         | undefined;
       if (!plugCategory) continue;
+
+      if (isDefault) {
+        let defaultPlugHashes = socket.reusablePlugItems.map(
+          (x) => x.plugItemHash
+        );
+        defaultPlugHashes.push(socket.singleInitialItemHash);
+
+        const results = await getInventoryItemsByHashes(
+          this.dbService.db,
+          defaultPlugHashes
+        );
+        let defaultPerks = [];
+        for (let result of results) {
+          defaultPerks.push(new Perk(result, plugCategory));
+        }
+        defaultSockets.push(
+          new Socket(orderIdx, PlugCategory.Default.toString(), defaultPerks)
+        );
+        continue;
+      }
 
       let plugSetHash;
       if (socket.randomizedPlugSetHash)

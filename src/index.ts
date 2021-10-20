@@ -2,8 +2,8 @@ import Discord from "discord.js";
 import dotenv from "dotenv";
 import PerkController from "./controllers/perk-controller";
 import WeaponController from "./controllers/weapon-controller";
+import WeaponCommand from "./models/commands/weapon-command";
 import Perk from "./models/destiny-entities/perk";
-import { Weapon } from "./models/destiny-entities/weapon";
 import DBService from "./services/db-service";
 import deployCommands from "./services/deploy-command-service";
 import { createPerkEmbed, createWeaponEmbed } from "./services/embed-service";
@@ -66,18 +66,25 @@ client.on("interactionCreate", async (interaction) => {
       }
       case "weapon": {
         console.log(`Searching for '${inputString}'`);
-        let results: Weapon[] = await weaponController.processWeaponCommand(
-          inputString
-        );
-        if (results.length != 0) {
-          console.log(
-            results.length,
-            "results found!:",
-            results.map((x) => x.name).join(", ")
+        let weaponCommand: WeaponCommand | undefined =
+          await weaponController.processWeaponCommand(
+            inputString,
+            interaction.options
           );
-          let embed = createWeaponEmbed(results[0]);
-          console.log("Sending weapon result");
-          interaction.editReply({ embeds: [embed] });
+        if (weaponCommand) {
+          let results = weaponCommand.weaponResults;
+          if (results.length != 0) {
+            console.log(
+              results.length,
+              "results found!:",
+              results.map((x) => x.name).join(", ")
+            );
+            let embed = createWeaponEmbed(results[0], weaponCommand?.options);
+            console.log("Sending weapon result");
+            interaction.editReply({ embeds: [embed] });
+          } else {
+            interaction.editReply("No results found. Please try again");
+          }
         } else {
           interaction.editReply("Invalid input. Please try again");
         }

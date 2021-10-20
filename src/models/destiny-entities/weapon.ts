@@ -5,6 +5,7 @@ import {
   DestinyItemStatBlockDefinition,
 } from "bungie-api-ts/destiny2";
 import { BaseMetadata } from "../commands/base-metadata";
+import { WeaponCommandOptions } from "../commands/weapon-command";
 import {
   BUNGIE_URL_ROOT,
   DamageType,
@@ -24,35 +25,43 @@ export class Weapon implements BaseMetadata {
   screenshot: string;
   hasRandomRolls: boolean;
   hash: number;
-  stats: WeaponStatBlock[];
+  stats: WeaponStatBlock[] = [];
   rawData: WeaponRawData;
   powerCapValues?: number[];
   baseArchetype?: WeaponBaseArchetype;
   sockets: Socket[] = [];
+  options: WeaponCommandOptions;
 
-  constructor(rawWeaponData: DestinyInventoryItemDefinition) {
+  constructor(
+    rawWeaponData: DestinyInventoryItemDefinition,
+    options: WeaponCommandOptions
+  ) {
     this.name = rawWeaponData.displayProperties.name;
     this.flavorText = rawWeaponData.flavorText;
     this.screenshot = BUNGIE_URL_ROOT + rawWeaponData.screenshot;
     this.icon = BUNGIE_URL_ROOT + rawWeaponData.displayProperties.icon;
     this.hasRandomRolls = rawWeaponData.displaySource != "";
     this.hash = rawWeaponData.hash;
-    if (rawWeaponData.stats)
-      this.stats = this.processStats(rawWeaponData.stats);
-    else throw Error("Stats for weapon are missing: " + this.name);
+    this.options = options;
+    if (!this.options.default) {
+      if (rawWeaponData.stats)
+        this.stats = this.processStats(rawWeaponData.stats);
+      else throw Error("Stats for weapon are missing: " + this.name);
+    }
 
     let powerCapHashes =
       rawWeaponData.quality?.versions.map((x) => x.powerCapHash) ?? [];
     let itemCategoryHashes = rawWeaponData.itemCategoryHashes ?? [];
     let weaponTierTypeHash = rawWeaponData.inventory?.tierTypeHash;
-    let weaponDamageTypeHash = rawWeaponData.defaultDamageType;
+    let weaponDamageTypeId = rawWeaponData.defaultDamageType;
+    let sockets = rawWeaponData.sockets;
 
     this.rawData = new WeaponRawData(
       powerCapHashes,
       itemCategoryHashes,
-      weaponDamageTypeHash,
+      weaponDamageTypeId,
       weaponTierTypeHash,
-      rawWeaponData.sockets
+      sockets
     );
   }
 
@@ -106,20 +115,20 @@ export class Weapon implements BaseMetadata {
 export class WeaponRawData {
   powerCapHashes: number[];
   itemCategoryHashes: number[];
-  weaponDamageTypeHash: number;
+  weaponDamageTypeId: number;
   weaponTierTypeHash?: number;
   socketData?: DestinyItemSocketBlockDefinition;
 
   constructor(
     powerCapHashes: number[],
     itemCategoryHashes: number[],
-    weaponDamageTypeHash: number,
+    weaponDamageTypeId: number,
     weaponTierTypeHash?: number,
     socketData?: DestinyItemSocketBlockDefinition
   ) {
     this.powerCapHashes = powerCapHashes;
     this.itemCategoryHashes = itemCategoryHashes;
-    this.weaponDamageTypeHash = weaponDamageTypeHash;
+    this.weaponDamageTypeId = weaponDamageTypeId;
     this.weaponTierTypeHash = weaponTierTypeHash;
     this.socketData = socketData;
   }
@@ -172,7 +181,7 @@ export class WeaponBaseArchetype {
   }
 }
 
-class WeaponStatBlock {
+export class WeaponStatBlock {
   readonly idx: number;
   readonly stat: WeaponStatData;
 
