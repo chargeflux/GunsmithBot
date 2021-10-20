@@ -56,7 +56,7 @@ export default class WeaponController {
         );
         weapon.setPowerCapValues(powerCapValues);
         let [sockets, intrinsic] = await this.processSocketData(
-          weaponCommand.options.default,
+          weaponCommand.options.isDefault,
           weapon.rawData.socketData
         );
         let baseArchetype = await this.processBaseArchetype(
@@ -146,12 +146,12 @@ export default class WeaponController {
     let intrinsic;
     let sockets: Socket[] = [];
     for (let category of socketData.socketCategories) {
-      if (category.socketCategoryHash == SocketCategoryHash.INTRINSICS) {
+      if (category.socketCategoryHash == SocketCategoryHash.Intrinsics) {
         let index = category.socketIndexes[0]; // assume only one intrinisic
         let socket = socketData.socketEntries[index];
         intrinsic = await this.processSocketIntrinisic(socket);
       }
-      if (category.socketCategoryHash == SocketCategoryHash.WEAPON_PERKS) {
+      if (category.socketCategoryHash == SocketCategoryHash.WeaponPerks) {
         sockets = await this.processSocketPerks(
           socketData.socketEntries,
           category.socketIndexes,
@@ -232,8 +232,13 @@ export default class WeaponController {
           defaultPerks.push(new Perk(result, plugCategory));
         }
         defaultSockets.push(
-          new Socket(orderIdx, PlugCategory.Default.toString(), defaultPerks)
+          new Socket(
+            orderIdx,
+            PlugCategory[PlugCategory.Default] + " " + plugCategory,
+            defaultPerks
+          )
         );
+        orderIdx += 1;
         continue;
       }
 
@@ -267,6 +272,6 @@ export default class WeaponController {
       }
       sockets.push(new Socket(orderIdx, plugCategory, perks));
     }
-    return sockets;
+    return isDefault ? defaultSockets : sockets;
   }
 }

@@ -43,7 +43,7 @@ export class Weapon implements BaseMetadata {
     this.hasRandomRolls = rawWeaponData.displaySource != "";
     this.hash = rawWeaponData.hash;
     this.options = options;
-    if (!this.options.default) {
+    if (!this.options.isDefault) {
       if (rawWeaponData.stats)
         this.stats = this.processStats(rawWeaponData.stats);
       else throw Error("Stats for weapon are missing: " + this.name);
@@ -196,7 +196,7 @@ export class WeaponStatBlock {
 }
 
 class WeaponStatData {
-  readonly statType: keyof typeof WeaponStat; // enum WeaponStat
+  readonly statType: keyof typeof WeaponStat;
   readonly value: number;
 
   constructor(statType: keyof typeof WeaponStat, value: number) {

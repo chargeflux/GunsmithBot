@@ -77,6 +77,9 @@ function buildCommands() {
         option
           .setName("default")
           .setDescription("Get the default rolls for a weapon")
+      )
+      .addBooleanOption((option: SlashCommandBooleanOption) =>
+        option.setName("stats").setDescription("Get the stats for a weapon")
       ),
     new SlashCommandBuilder()
       .setName("compare")

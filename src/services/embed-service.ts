@@ -14,6 +14,7 @@ export function createPerkEmbed(perkResult: Perk): MessageEmbed {
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(perkResult.icon);
 
+  console.log("Returning embed");
   return embed;
 }
 
@@ -22,7 +23,9 @@ export function createWeaponEmbed(
   options: WeaponCommandOptions
 ): MessageEmbed {
   let embed;
-  if (!options.full) {
+  if (options.full) embed = constructFullWeaponEmbed(weaponResult);
+  else if (options.stats) embed = constructStatsWeaponEmbed(weaponResult);
+  else {
     console.log("Constructing weapon embed");
     const description: string =
       weaponResult.baseArchetype?.toString() +
@@ -34,7 +37,7 @@ export function createWeaponEmbed(
       .setColor(DISCORD_BG_HEX)
       .setThumbnail(weaponResult.icon);
 
-    if (weaponResult.sockets.length <= 2) {
+    if (weaponResult.sockets.length <= 2 || options.isDefault) {
       for (let socket of weaponResult.sockets) {
         embed.addField("**" + socket.name + "**", socket.toString(), true);
       }
@@ -45,7 +48,7 @@ export function createWeaponEmbed(
         }
       }
     }
-  } else embed = formatFullWeaponEmbed(weaponResult);
+  }
 
   let lightGGURL = "https://www.light.gg/db/items/" + weaponResult.hash;
   let endingTextComponents = [
@@ -54,12 +57,12 @@ export function createWeaponEmbed(
   ];
   let endingText = endingTextComponents.join(" • ");
   embed.addField("\u200b", endingText, false);
-  console.log("Sending weapon result");
+  console.log("Returning embed");
 
   return embed;
 }
 
-function formatFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
+function constructFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
   console.log("Constructing full weapon embed");
   const description: string =
     weaponResult.baseArchetype?.toString() +
@@ -91,5 +94,15 @@ function formatFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
     }
     embed.addField("\u200b", "\u200b", true);
   }
+  return embed;
+}
+function constructStatsWeaponEmbed(weaponResult: Weapon): MessageEmbed {
+  console.log("Constructing stats of weapon embed");
+  let embed = new MessageEmbed()
+    .setTitle(weaponResult.name)
+    .setColor(DISCORD_BG_HEX)
+    .setThumbnail(weaponResult.icon);
+  let STATS = weaponResult.stats.map((x) => x.toString()).join("\n");
+  embed.addField("**Stats**", STATS, true);
   return embed;
 }

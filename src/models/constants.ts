@@ -118,8 +118,8 @@ export enum StatOrder {
 }
 
 export enum SocketCategoryHash {
-  INTRINSICS = 3956125808,
-  WEAPON_PERKS = 4241085061,
+  "Intrinsics" = 3956125808,
+  "WeaponPerks" = 4241085061,
 }
 
 export const MAX_POWER_LEVEL = 999990;

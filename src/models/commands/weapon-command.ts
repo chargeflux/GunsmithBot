@@ -5,23 +5,23 @@ import { Weapon } from "../destiny-entities/weapon";
 import Discord from "discord.js";
 
 export default class WeaponCommand implements BaseCommand {
-  constructor(
-    input: string,
-    options: Discord.CommandInteractionOptionResolver
-  ) {
-    this.input = input;
-    this.options = {
-      full: options.getBoolean("full") ?? false,
-      default: options.getBoolean("default") ?? false,
-    };
-    if ((this.options.full == this.options.default) == true)
-      throw Error("Both 'full' and 'default' cannot be true");
-  }
   name: string = "weapon";
   description: string = "Get information about a weapon";
   input: string;
   weaponResults: Weapon[] = [];
   options: WeaponCommandOptions;
+
+  constructor(
+    input: string,
+    options: Discord.CommandInteractionOptionResolver
+  ) {
+    this.input = input;
+    this.options = new WeaponCommandOptions(
+      options.getBoolean("full") ?? false,
+      options.getBoolean("default") ?? false,
+      options.getBoolean("stats") ?? false
+    );
+  }
 
   processWeaponResults(results: DestinyInventoryItemDefinition[]) {
     for (const result of results) {
@@ -47,7 +47,34 @@ export default class WeaponCommand implements BaseCommand {
   }
 }
 
-export type WeaponCommandOptions = {
-  full: boolean;
-  default: boolean;
-};
+export class WeaponCommandOptions {
+  full = false;
+  isDefault = false;
+  stats = false;
+
+  get state() {
+    return (
+      ((this.stats ? 1 : 0) << 2) |
+      ((this.isDefault ? 1 : 0) << 1) |
+      ((this.full ? 1 : 0) << 0)
+    );
+  }
+  constructor(full: boolean, isDefault: boolean, stats: boolean) {
+    this.full = full;
+    this.isDefault = isDefault;
+    this.stats = stats;
+
+    if (!this.validateState()) throw Error("Command options are invalid");
+  }
+
+  validateState() {
+    return ValidCommandOptionStates[this.state] ? true : false;
+  }
+}
+
+enum ValidCommandOptionStates {
+  NONE = 0,
+  FULL = 1 << 0,
+  DEFAULT = 1 << 1,
+  STATS = 1 << 2,
+}
