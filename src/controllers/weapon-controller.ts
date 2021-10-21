@@ -1,39 +1,35 @@
 import {
   DestinyItemSocketBlockDefinition,
-  DestinyItemSocketEntryDefinition,
+  DestinyItemSocketEntryDefinition
 } from "bungie-api-ts/destiny2";
+import Discord from "discord.js";
 import WeaponCommand from "../models/commands/weapon-command";
 import {
   DamageType,
   PlugCategory,
   SocketCategoryHash,
   WeaponBase,
-  WeaponTierType,
+  WeaponTierType
 } from "../models/constants";
 import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
 import {
-  Weapon,
   WeaponBaseArchetype,
-  WeaponRawData,
+  WeaponRawData
 } from "../models/destiny-entities/weapon";
 import DBService from "../services/db-service";
 import {
-  getInventoryItemsByHashes,
-  getInventoryItemByHash,
-  getInventoryItemsByName,
+  getInventoryItemByHash, getInventoryItemsByHashes, getInventoryItemsByName
 } from "../services/manifest/inventory-item-service";
 import {
   getPlugItemHash,
-  getPlugItemsByHash,
+  getPlugItemsByHash
 } from "../services/manifest/plugset-service";
 import getPowerCap from "../services/manifest/power-cap-service";
 import { getSocketTypeHash } from "../services/manifest/socket-type-service";
 import {
-  orderResultsByRandomOrTierType,
-  orderResultsByName,
+  orderResultsByName, orderResultsByRandomOrTierType
 } from "../utils/utils";
-import Discord from "discord.js";
 
 export default class WeaponController {
   dbService: DBService;

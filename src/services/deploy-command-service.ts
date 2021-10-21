@@ -83,7 +83,13 @@ function buildCommands() {
       ),
     new SlashCommandBuilder()
       .setName("compare")
-      .setDescription("Compare stats between 2 weapons"),
+      .setDescription("Compare stats between 2 weapons")
+      .addStringOption((option: SlashCommandStringOption) =>
+        option
+          .setName("input")
+          .setDescription("Name of 2 weapons separated by a comma")
+          .setRequired(true)
+      ),
     new SlashCommandBuilder()
       .setName("mod")
       .setDescription("Get information about a mod")
@@ -99,9 +105,6 @@ function buildCommands() {
     new SlashCommandBuilder()
       .setName("search")
       .setDescription("Search for weapons with specific perks"),
-    new SlashCommandBuilder()
-      .setName("stats")
-      .setDescription("Get the stats information about weapons"),
   ].map((command) => command.toJSON());
 
   return commands;

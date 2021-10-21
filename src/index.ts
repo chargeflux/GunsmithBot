@@ -3,12 +3,15 @@ import dotenv from "dotenv";
 import ModController from "./controllers/mod-controller";
 import PerkController from "./controllers/perk-controller";
 import WeaponController from "./controllers/weapon-controller";
+import CompareCommand from "./models/commands/compare-command";
 import WeaponCommand from "./models/commands/weapon-command";
 import Mod from "./models/destiny-entities/mod";
 import Perk from "./models/destiny-entities/perk";
+import { Weapon } from "./models/destiny-entities/weapon";
 import DBService from "./services/db-service";
 import deployCommands from "./services/deploy-command-service";
 import {
+  createCompareEmbed,
   createModEmbed,
   createPerkEmbed,
   createWeaponEmbed,
@@ -109,6 +112,32 @@ client.on("interactionCreate", async (interaction) => {
           );
           let embed = createModEmbed(results[0]);
           console.log("Sending mod result");
+          interaction.editReply({ embeds: [embed] });
+        } else {
+          interaction.editReply("Invalid input. Please try again");
+        }
+        return;
+      }
+      case "compare": {
+        console.log(`Comparing '${inputString}'`);
+        let parsedValues = inputString.split(",").map((x) => x.trim());
+        if (parsedValues.length != 2) {
+          interaction.editReply("Please enter only 2 weapons");
+          return;
+        }
+        let compareWeapons: Weapon[] = [];
+        for (let value of parsedValues) {
+          let weaponCommand = await weaponController.processWeaponCommand(
+            value,
+            interaction.options
+          );
+          if (weaponCommand && weaponCommand.weaponResults)
+            compareWeapons.push(weaponCommand.weaponResults[0]);
+        }
+        let processedCommand = new CompareCommand(inputString, compareWeapons);
+        if (processedCommand.weaponStatDiff) {
+          let embed = createCompareEmbed(processedCommand);
+          console.log("Sending compare result");
           interaction.editReply({ embeds: [embed] });
         } else {
           interaction.editReply("Invalid input. Please try again");

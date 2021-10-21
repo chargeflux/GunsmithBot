@@ -1,4 +1,5 @@
 import { MessageEmbed } from "discord.js";
+import CompareCommand from "../models/commands/compare-command";
 import { WeaponCommandOptions } from "../models/commands/weapon-command";
 import { DISCORD_BG_HEX } from "../models/constants";
 import Mod from "../models/destiny-entities/mod";
@@ -28,6 +29,27 @@ export function createModEmbed(modResult: Mod): MessageEmbed {
       "_" + modResult.source + "_\n" + modResult.description
     );
   else embed.addField(modResult.overview, modResult.description);
+  console.log("Returning embed");
+  return embed;
+}
+
+export function createCompareEmbed(
+  processedCommand: CompareCommand
+): MessageEmbed {
+  console.log("Constructing compare embed");
+  let embed = new MessageEmbed().setColor(DISCORD_BG_HEX);
+  embed.addField(
+    processedCommand.weapons[0].name,
+    processedCommand.generateStatDiffString(0),
+    true
+  );
+  embed.addField("Stats", processedCommand.statNames, true);
+  embed.addField(
+    processedCommand.weapons[1].name,
+    processedCommand.generateStatDiffString(1),
+    true
+  );
+
   console.log("Returning embed");
   return embed;
 }
