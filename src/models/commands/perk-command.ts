@@ -4,14 +4,14 @@ import Perk from "../destiny-entities/perk";
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 
 export default class PerkCommand implements BaseCommand {
-  constructor(input: string) {
-    this.input = input;
-  }
-
   readonly name: string = "perk";
   readonly description: string = "Get information about a perk";
   readonly input: string;
   perkResults: Perk[] = [];
+
+  constructor(input: string) {
+    this.input = input;
+  }
 
   async processResults(results: DestinyInventoryItemDefinition[]) {
     for (const result of results) {

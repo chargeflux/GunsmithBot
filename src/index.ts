@@ -1,12 +1,18 @@
 import Discord from "discord.js";
 import dotenv from "dotenv";
+import ModController from "./controllers/mod-controller";
 import PerkController from "./controllers/perk-controller";
 import WeaponController from "./controllers/weapon-controller";
 import WeaponCommand from "./models/commands/weapon-command";
+import Mod from "./models/destiny-entities/mod";
 import Perk from "./models/destiny-entities/perk";
 import DBService from "./services/db-service";
 import deployCommands from "./services/deploy-command-service";
-import { createPerkEmbed, createWeaponEmbed } from "./services/embed-service";
+import {
+  createModEmbed,
+  createPerkEmbed,
+  createWeaponEmbed,
+} from "./services/embed-service";
 import { updateManifest } from "./services/manifest/manifest-service";
 dotenv.config();
 
@@ -16,6 +22,7 @@ const client = new Discord.Client({
 
 let perkController: PerkController;
 let weaponController: WeaponController;
+let modController: ModController;
 let dbService: DBService;
 
 client.once("ready", async () => {
@@ -24,6 +31,7 @@ client.once("ready", async () => {
   await updateManifest(dbService).then(() => {
     perkController = new PerkController(dbService);
     weaponController = new WeaponController(dbService);
+    modController = new ModController(dbService);
   });
 });
 
@@ -90,6 +98,23 @@ client.on("interactionCreate", async (interaction) => {
         }
         return;
       }
+      case "mod": {
+        console.log(`Searching for '${inputString}'`);
+        let results: Mod[] = await modController.processModCommand(inputString);
+        if (results.length != 0) {
+          console.log(
+            results.length,
+            "results found!:",
+            results.map((x) => x.name).join(", ")
+          );
+          let embed = createModEmbed(results[0]);
+          console.log("Sending mod result");
+          interaction.editReply({ embeds: [embed] });
+        } else {
+          interaction.editReply("Invalid input. Please try again");
+        }
+        return;
+      }
       default:
         interaction.editReply("Command has not been implemented yet.");
     }
@@ -104,7 +129,7 @@ client.on("interactionCreate", async (interaction) => {
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 // https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#close---this
-process.on("exit", () => dbService.close());
+process.on("exit", () => dbService?.close());
 process.on("SIGHUP", () => process.exit(128 + 1));
 process.on("SIGINT", () => process.exit(128 + 2));
 process.on("SIGTERM", () => process.exit(128 + 15));

@@ -122,4 +122,28 @@ export enum SocketCategoryHash {
   "WeaponPerks" = 4241085061,
 }
 
+export enum ModCategory {
+  "Mods" = 59,
+  "Armor" = 4104513227,
+  "WeaponDamage" = 1052191496,
+  "Helmet" = 1362265421,
+  "Gauntlets" = 3872696960,
+  "Chest" = 3723676689,
+  "Legs" = 3607371986,
+  "Class Item" = 3196106184,
+  "Aspect" = 962416439,
+  "Fragment" = 1635887355,
+  "Bonus Mods" = 303512563,
+}
+
+export enum EnergyType {
+  "Any" = 0,
+  "Arc" = 1,
+  "Solar" = 2,
+  "Void" = 3,
+  "Ghost" = 4,
+  "Subclass" = 5,
+  "Stasis" = 6,
+}
+
 export const MAX_POWER_LEVEL = 999990;

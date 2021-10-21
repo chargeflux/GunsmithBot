@@ -86,7 +86,10 @@ function buildCommands() {
       .setDescription("Compare stats between 2 weapons"),
     new SlashCommandBuilder()
       .setName("mod")
-      .setDescription("Get information about a mod"),
+      .setDescription("Get information about a mod")
+      .addStringOption((option: SlashCommandStringOption) =>
+        option.setName("input").setDescription("Name of mod").setRequired(true)
+      ),
     new SlashCommandBuilder()
       .setName("perk")
       .setDescription("Get information about a perk")
