@@ -6,6 +6,7 @@ export default class Perk implements BaseMetadata {
   name: string;
   description: string;
   icon: string;
+  hash: number;
   category: keyof typeof PlugCategory;
   currentlyCanRoll: boolean;
 
@@ -19,6 +20,7 @@ export default class Perk implements BaseMetadata {
     this.icon = BUNGIE_URL_ROOT + rawPerkData.displayProperties.icon;
     this.category = category;
     this.currentlyCanRoll = currentlyCanRoll;
+    this.hash = rawPerkData.hash;
   }
 
   toString() {

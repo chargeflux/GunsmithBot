@@ -41,13 +41,24 @@ export default class ModCommand implements BaseCommand {
           ModCategory.Fragment
         ] as keyof typeof ModCategory;
       } else if (result.itemCategoryHashes.includes(ModCategory["Bonus Mods"]))
+        // Armor perks from Armor 1.0
         continue;
-      else
-        throw Error(
-          "Could not identify mod category hashes: " + result.itemCategoryHashes
+      else {
+        console.error(
+          "Could not identify mod category hashes: " +
+            result.itemCategoryHashes +
+            " - " +
+            result.displayProperties.name
         );
-      let mod = new Mod(result, modCategoryName, armorLocation);
-      this.modResults.push(mod);
+        continue;
+      }
+      try {
+        let mod = new Mod(result, modCategoryName, armorLocation);
+        this.modResults.push(mod);
+      } catch (e: any) {
+        console.log(e);
+        continue;
+      }
     }
   }
 }

@@ -34,7 +34,7 @@ export class Weapon implements BaseMetadata {
 
   constructor(
     rawWeaponData: DestinyInventoryItemDefinition,
-    options: WeaponCommandOptions
+    options: WeaponCommandOptions = new WeaponCommandOptions()
   ) {
     this.name = rawWeaponData.displayProperties.name;
     this.flavorText = rawWeaponData.flavorText;
@@ -57,6 +57,7 @@ export class Weapon implements BaseMetadata {
     let sockets = rawWeaponData.sockets;
 
     this.rawData = new WeaponRawData(
+      this.name,
       powerCapHashes,
       itemCategoryHashes,
       weaponDamageTypeId,
@@ -112,7 +113,46 @@ export class Weapon implements BaseMetadata {
   }
 }
 
+export class MinimalWeapon {
+  name: string;
+  hasRandomRolls: boolean;
+  hash: number;
+  rawData: WeaponRawData;
+  powerCapValues?: number[];
+  baseArchetype?: WeaponBaseArchetype;
+
+  constructor(rawWeaponData: DestinyInventoryItemDefinition) {
+    this.name = rawWeaponData.displayProperties.name;
+    this.hasRandomRolls = rawWeaponData.displaySource != "";
+    this.hash = rawWeaponData.hash;
+    let powerCapHashes =
+      rawWeaponData.quality?.versions.map((x) => x.powerCapHash) ?? [];
+    let itemCategoryHashes = rawWeaponData.itemCategoryHashes ?? [];
+    let weaponTierTypeHash = rawWeaponData.inventory?.tierTypeHash;
+    let weaponDamageTypeId = rawWeaponData.defaultDamageType;
+    let sockets = rawWeaponData.sockets;
+
+    this.rawData = new WeaponRawData(
+      this.name,
+      powerCapHashes,
+      itemCategoryHashes,
+      weaponDamageTypeId,
+      weaponTierTypeHash,
+      sockets
+    );
+  }
+
+  setPowerCapValues(powerCapValues: number[]) {
+    this.powerCapValues = powerCapValues;
+  }
+
+  setBaseArchetype(baseArchetype: WeaponBaseArchetype) {
+    this.baseArchetype = baseArchetype;
+  }
+}
+
 export class WeaponRawData {
+  name: string;
   powerCapHashes: number[];
   itemCategoryHashes: number[];
   weaponDamageTypeId: number;
@@ -120,12 +160,14 @@ export class WeaponRawData {
   socketData?: DestinyItemSocketBlockDefinition;
 
   constructor(
+    name: string,
     powerCapHashes: number[],
     itemCategoryHashes: number[],
     weaponDamageTypeId: number,
     weaponTierTypeHash?: number,
     socketData?: DestinyItemSocketBlockDefinition
   ) {
+    this.name = name;
     this.powerCapHashes = powerCapHashes;
     this.itemCategoryHashes = itemCategoryHashes;
     this.weaponDamageTypeId = weaponDamageTypeId;
@@ -135,12 +177,13 @@ export class WeaponRawData {
 }
 
 export class WeaponBaseArchetype {
+  readonly name: string;
   readonly weaponBase: keyof typeof WeaponBase;
   readonly weaponClass: keyof typeof WeaponBase;
   readonly weaponTierType: keyof typeof WeaponTierType;
   readonly weaponDamageType: keyof typeof DamageType;
-  readonly intrinsic: Perk;
-  readonly isEnergy: boolean;
+  readonly intrinsic?: Perk;
+  readonly isKinetic: boolean;
   private _powerCap?: number;
 
   public set powerCap(value: number) {
@@ -152,24 +195,26 @@ export class WeaponBaseArchetype {
   }
 
   constructor(
+    name: string,
     weaponBase: keyof typeof WeaponBase,
     weaponClass: keyof typeof WeaponBase,
     weaponTierType: keyof typeof WeaponTierType,
     weaponDamageType: keyof typeof DamageType,
-    isEnergy: boolean,
-    intrinsic: Perk
+    isKinetic: boolean,
+    intrinsic?: Perk
   ) {
+    this.name = name;
     this.weaponBase = weaponBase;
     this.weaponClass = weaponClass;
     this.weaponTierType = weaponTierType;
     this.weaponDamageType = weaponDamageType;
-    this.isEnergy = isEnergy;
+    this.isKinetic = isKinetic;
     this.intrinsic = intrinsic;
   }
 
   toString() {
     let stringToConstruct = "";
-    if (this.isEnergy) stringToConstruct += this.weaponDamageType + " ";
+    if (!this.isKinetic) stringToConstruct += this.weaponDamageType + " ";
     stringToConstruct += this.weaponBase;
     stringToConstruct += " " + this.weaponClass;
     if (this.powerCap)

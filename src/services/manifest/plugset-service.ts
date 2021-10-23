@@ -15,8 +15,9 @@ export async function getPlugItemHash(
       .get(hash.toString());
     const json_res: DestinyPlugSetDefinition = JSON.parse(result.json);
     return json_res.reusablePlugItems[0].plugItemHash;
-  } catch (e) {
-    console.error("Failed to get plugItemHash", e);
+  } catch (e: any) {
+    console.error(e.stack);
+    console.error("Failed to get plugItemHash");
     throw e;
   }
 }
@@ -31,8 +32,9 @@ export async function getPlugItemsByHash(
       .get(hash.toString());
     const json_res: DestinyPlugSetDefinition = JSON.parse(result.json);
     return json_res.reusablePlugItems;
-  } catch (e) {
-    console.error("Failed to get plugItems by hash", e);
+  } catch (e: any) {
+    console.error(e.stack);
+    console.error("Failed to get plugItems by hash");
     throw e;
   }
 }

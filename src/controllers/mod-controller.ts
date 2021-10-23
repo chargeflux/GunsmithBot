@@ -1,16 +1,16 @@
 import ModCommand from "../models/commands/mod-command";
 import Mod from "../models/destiny-entities/mod";
-import DBService from "../services/db-service";
+import ManifestDBService from "../services/manifest-db-service";
 import { getCollectibleByHash } from "../services/manifest/collectible-service";
 import { getInventoryItemsByName } from "../services/manifest/inventory-item-service";
-import { getSandboxPerkByHash } from "../services/manifest/sandbox-perk-service";
+import { getSandboxPerksByHashes } from "../services/manifest/sandbox-perk-service";
 import { orderResultsByName } from "../utils/utils";
 
 export default class ModController {
-  dbService: DBService;
+  dbService: ManifestDBService;
 
-  constructor(dbService: DBService) {
-    this.dbService = dbService;
+  constructor(dbService?: ManifestDBService) {
+    this.dbService = dbService ?? new ManifestDBService();
   }
 
   async processModCommand(input?: string): Promise<Mod[]> {
@@ -20,7 +20,7 @@ export default class ModController {
       modCommand.processResults(results);
 
       for (let mod of modCommand.modResults) {
-        let sandboxPerks = await getSandboxPerkByHash(
+        let sandboxPerks = await getSandboxPerksByHashes(
           this.dbService.db,
           mod.perkHashes
         );

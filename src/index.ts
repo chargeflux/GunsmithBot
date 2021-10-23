@@ -2,21 +2,28 @@ import Discord from "discord.js";
 import dotenv from "dotenv";
 import ModController from "./controllers/mod-controller";
 import PerkController from "./controllers/perk-controller";
+import SearchController from "./controllers/search-controller";
 import WeaponController from "./controllers/weapon-controller";
 import CompareCommand from "./models/commands/compare-command";
 import WeaponCommand from "./models/commands/weapon-command";
 import Mod from "./models/destiny-entities/mod";
 import Perk from "./models/destiny-entities/perk";
 import { Weapon } from "./models/destiny-entities/weapon";
-import DBService from "./services/db-service";
 import deployCommands from "./services/deploy-command-service";
 import {
   createCompareEmbed,
   createModEmbed,
   createPerkEmbed,
+  createSearchEmbed,
   createWeaponEmbed,
 } from "./services/embed-service";
-import { updateManifest } from "./services/manifest/manifest-service";
+import ManifestDBService from "./services/manifest-db-service";
+import { getInventoryItemsByHashes } from "./services/manifest/inventory-item-service";
+import {
+  getCurrentVersion,
+  updateManifest,
+} from "./services/manifest/manifest-service";
+import WeaponDBService from "./services/weapon-db-service";
 dotenv.config();
 
 const client = new Discord.Client({
@@ -26,16 +33,35 @@ const client = new Discord.Client({
 let perkController: PerkController;
 let weaponController: WeaponController;
 let modController: ModController;
-let dbService: DBService;
+let searchController: SearchController;
 
 client.once("ready", async () => {
   console.log("Ready!");
-  dbService = new DBService();
-  await updateManifest(dbService).then(() => {
-    perkController = new PerkController(dbService);
-    weaponController = new WeaponController(dbService);
-    modController = new ModController(dbService);
-  });
+  let dbService = new ManifestDBService();
+  try {
+    await updateManifest(dbService).then(async (toChange: boolean) => {
+      perkController = new PerkController();
+      weaponController = new WeaponController();
+      modController = new ModController();
+      searchController = new SearchController();
+      if (toChange) {
+        let tables = await searchController.createWeaponTables(
+          weaponController
+        );
+        new WeaponDBService().construct(tables);
+        searchController = new SearchController();
+      }
+    });
+  } catch (e: any) {
+    console.error(e.stack);
+    console.error("Failed to check or update manifest");
+    if (!(await getCurrentVersion()))
+      throw Error("Failed to retrieve manifest data. Shutting down.");
+    perkController = new PerkController();
+    weaponController = new WeaponController();
+    modController = new ModController();
+    searchController = new SearchController();
+  }
 });
 
 client.on("messageCreate", async (message) => {
@@ -49,7 +75,7 @@ client.on("interactionCreate", async (interaction) => {
   await interaction.deferReply();
   try {
     let inputString = interaction.options.getString("input") ?? "";
-    if (inputString?.length < 3) {
+    if (inputString?.length < 3 && commandName != "search") {
       console.error(inputString, "is 3 characters or less");
       interaction.editReply("Please enter a query of 3 or more characters!");
       return;
@@ -144,11 +170,26 @@ client.on("interactionCreate", async (interaction) => {
         }
         return;
       }
+      case "search": {
+        console.log("Performing Search");
+        let searchCommand = await searchController.processSearchCommand(
+          interaction.options
+        );
+        let cnt = searchCommand.getCount();
+        if (cnt != 0) {
+          let embed = createSearchEmbed(searchCommand, cnt);
+          console.log("Sending search result");
+          interaction.editReply({ embeds: [embed] });
+        } else {
+          interaction.editReply("Invalid input. Please try again");
+        }
+        return;
+      }
       default:
         interaction.editReply("Command has not been implemented yet.");
     }
-  } catch (err) {
-    console.log(err);
+  } catch (err: any) {
+    console.error(err.stack);
     interaction.editReply(
       "Failed to process command: **" + commandName + "**. Please try again."
     );
@@ -158,7 +199,13 @@ client.on("interactionCreate", async (interaction) => {
 client.login(process.env.DISCORD_BOT_TOKEN);
 
 // https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#close---this
-process.on("exit", () => dbService?.close());
+process.on("exit", () => {
+  perkController.dbService.close();
+  weaponController.dbService.close();
+  modController.dbService.close();
+  searchController.dbService.close();
+  searchController.weaponDBService.close();
+});
 process.on("SIGHUP", () => process.exit(128 + 1));
 process.on("SIGINT", () => process.exit(128 + 2));
 process.on("SIGTERM", () => process.exit(128 + 15));

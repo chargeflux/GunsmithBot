@@ -1,14 +1,14 @@
 import PerkCommand from "../models/commands/perk-command";
 import Perk from "../models/destiny-entities/perk";
-import DBService from "../services/db-service";
+import ManifestDBService from "../services/manifest-db-service";
 import { getInventoryItemsByName } from "../services/manifest/inventory-item-service";
 import { orderResultsByName } from "../utils/utils";
 
 export default class PerkController {
-  dbService: DBService;
+  dbService: ManifestDBService;
 
-  constructor(dbService: DBService) {
-    this.dbService = dbService;
+  constructor(dbService?: ManifestDBService) {
+    this.dbService = dbService ?? new ManifestDBService();
   }
 
   async processPerkCommand(input?: string): Promise<Perk[]> {

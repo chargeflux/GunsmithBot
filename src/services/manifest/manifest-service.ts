@@ -8,7 +8,7 @@ import {
   ManifestTable,
   PartialDestinyManifest,
 } from "../../models/bungie-api/partial-destiny-manifest";
-import DBService from "../db-service";
+import ManifestDBService from "../manifest-db-service";
 
 const BUNGIE_API_MANIFEST_URL =
   "https://www.bungie.net/Platform/Destiny2/Manifest/";
@@ -24,18 +24,20 @@ export const TABLES = [
   "DestinyCollectibleDefinition",
 ] as const;
 
-export async function updateManifest(db: DBService) {
+export async function updateManifest(db: ManifestDBService): Promise<boolean> {
   var manifest = await getManifest();
   console.log("Checking if manifest is up to date");
   if (manifest.Response.version != (await getCurrentVersion())) {
     console.log("Version is outdated. Updating manifest");
     const tables = await getManifestTables(manifest);
-    processAndSaveManifestDataJSON(tables, manifest.Response.version);
+    processAndSaveManifestDataJSON(manifest, tables);
     console.log("Saved new processed manifest tables to JSON");
     db.construct(tables);
     console.log("Saved new processed manifest tables to DB");
+    return true;
   }
   console.log("Manifest is up to date");
+  return false;
 }
 
 async function getManifest(): Promise<PartialDestinyManifest> {
@@ -88,13 +90,18 @@ async function getManifestTables(
 }
 
 async function processAndSaveManifestDataJSON(
-  manifestTables: ManifestTable[],
-  version: string
+  latestManifest: PartialDestinyManifest,
+  manifestTables: ManifestTable[]
 ) {
   try {
     if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);
     }
+    fs.writeFileSync(
+      MANIFEST_DATA_LOCATION + "LatestManifest.json",
+      JSON.stringify(latestManifest, null, 2)
+    );
+    console.log("Saved latest manifest");
     for (var table of manifestTables) {
       fs.writeFileSync(
         MANIFEST_DATA_LOCATION + table.name + "Table.json",
@@ -102,19 +109,22 @@ async function processAndSaveManifestDataJSON(
       );
       console.log("Saved table:", table.name);
     }
-    fs.writeFileSync(MANIFEST_DATA_LOCATION + "version", version);
-    console.log("Saved version:", version);
-  } catch (err) {
+    fs.writeFileSync(
+      MANIFEST_DATA_LOCATION + "version",
+      latestManifest.Response.version
+    );
+    console.log("Saved version:", latestManifest.Response.version);
+  } catch (err: any) {
     console.log(err);
     throw Error("Failed to write manifest");
   }
 }
 
-async function getCurrentVersion(): Promise<string> {
+export async function getCurrentVersion(): Promise<string> {
   try {
     var version = fs.readFileSync(MANIFEST_DATA_LOCATION + "version", "utf-8");
     return version;
-  } catch (err) {
+  } catch (err: any) {
     console.log(err);
     return "";
   }

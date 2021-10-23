@@ -17,8 +17,9 @@ export default async function getPowerCap(
       .map((x) => JSON.parse(x.json).powerCap)
       .sort()
       .reverse(); // newest first
-  } catch (e) {
-    console.error("Failed to get power cap levels", e);
-    throw e;
+  } catch (e: any) {
+    console.error(e.stack);
+    console.error("Failed to get power cap levels");
+    return [];
   }
 }

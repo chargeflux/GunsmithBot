@@ -1,5 +1,6 @@
 import { MessageEmbed } from "discord.js";
 import CompareCommand from "../models/commands/compare-command";
+import SearchCommand from "../models/commands/search-command";
 import { WeaponCommandOptions } from "../models/commands/weapon-command";
 import { DISCORD_BG_HEX } from "../models/constants";
 import Mod from "../models/destiny-entities/mod";
@@ -59,14 +60,14 @@ export function createWeaponEmbed(
   options: WeaponCommandOptions
 ): MessageEmbed {
   let embed;
-  if (options.full) embed = constructFullWeaponEmbed(weaponResult);
-  else if (options.stats) embed = constructStatsWeaponEmbed(weaponResult);
+  if (options.full) embed = createFullWeaponEmbed(weaponResult);
+  else if (options.stats) embed = createStatsWeaponEmbed(weaponResult);
   else {
     console.log("Constructing weapon embed");
     const description: string =
       weaponResult.baseArchetype?.toString() +
       "\n" +
-      weaponResult.baseArchetype?.intrinsic.name;
+      weaponResult.baseArchetype?.intrinsic?.name;
     embed = new MessageEmbed()
       .setTitle(weaponResult.name)
       .setDescription(description)
@@ -79,7 +80,7 @@ export function createWeaponEmbed(
       }
     } else {
       for (let socket of weaponResult.sockets) {
-        if (socket.name == "Perks") {
+        if (socket.name == "Traits") {
           embed.addField("**" + socket.name + "**", socket.toString(), true);
         }
       }
@@ -98,12 +99,12 @@ export function createWeaponEmbed(
   return embed;
 }
 
-function constructFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
+function createFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
   console.log("Constructing full weapon embed");
   const description: string =
     weaponResult.baseArchetype?.toString() +
     "\n" +
-    weaponResult.baseArchetype?.intrinsic.name +
+    weaponResult.baseArchetype?.intrinsic?.name +
     "\n" +
     weaponResult.flavorText;
   let embed = new MessageEmbed()
@@ -132,7 +133,8 @@ function constructFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
   }
   return embed;
 }
-function constructStatsWeaponEmbed(weaponResult: Weapon): MessageEmbed {
+
+function createStatsWeaponEmbed(weaponResult: Weapon): MessageEmbed {
   console.log("Constructing stats of weapon embed");
   let embed = new MessageEmbed()
     .setTitle(weaponResult.name)
@@ -140,5 +142,33 @@ function constructStatsWeaponEmbed(weaponResult: Weapon): MessageEmbed {
     .setThumbnail(weaponResult.icon);
   let STATS = weaponResult.stats.map((x) => x.toString()).join("\n");
   embed.addField("**Stats**", STATS, true);
+  return embed;
+}
+
+export function createSearchEmbed(searchCommand: SearchCommand, cnt: number) {
+  console.log("Constructing search embed");
+  let embed = new MessageEmbed()
+    .setTitle("Weapon Results")
+    .setDescription(cnt.toString() + " weapons found")
+    .setFooter(searchCommand.input)
+    .setColor(DISCORD_BG_HEX);
+
+  for (let weaponClass in searchCommand.results) {
+    embed.addField(
+      weaponClass,
+      searchCommand.results[weaponClass]
+        .sort()
+        .map((x) => {
+          if (x.powerCap) return "~~" + x.name + "~~";
+          else return x.name;
+        })
+        .join("\n"),
+      true
+    );
+  }
+
+  embed.fields = embed.fields.sort((a, b) =>
+    a.name > b.name ? 1 : a.name < b.name ? -1 : 0
+  );
   return embed;
 }

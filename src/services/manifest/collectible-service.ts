@@ -11,8 +11,9 @@ export async function getCollectibleByHash(
       .prepare("SELECT json FROM DestinyCollectibleDefinition WHERE hash=?")
       .get(hash.toString());
     return JSON.parse(item.json);
-  } catch (e) {
-    console.error("Failed to get collectible by hash", e);
+  } catch (e: any) {
+    console.error(e.stack);
+    console.error("Failed to get collectible by hash");
     throw e;
   }
 }

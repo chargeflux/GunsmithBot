@@ -1,8 +1,8 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
-import BaseCommand from "./base-command";
-import { WeaponBase } from "../constants";
-import { Weapon } from "../destiny-entities/weapon";
 import Discord from "discord.js";
+import { validateWeaponSearch } from "../../utils/utils";
+import { Weapon } from "../destiny-entities/weapon";
+import BaseCommand from "./base-command";
 
 export default class WeaponCommand implements BaseCommand {
   name: string = "weapon";
@@ -25,7 +25,7 @@ export default class WeaponCommand implements BaseCommand {
 
   processWeaponResults(results: DestinyInventoryItemDefinition[]) {
     for (const result of results) {
-      if (this.validateWeaponSearch(result)) {
+      if (validateWeaponSearch(result)) {
         let weapon = new Weapon(result, this.options);
         this.weaponResults.push(weapon);
       }
@@ -35,22 +35,12 @@ export default class WeaponCommand implements BaseCommand {
   setWeaponResults(results: Weapon[]) {
     this.weaponResults = results;
   }
-
-  private validateWeaponSearch(
-    rawWeaponData: DestinyInventoryItemDefinition
-  ): boolean {
-    let categoryHashes = rawWeaponData.itemCategoryHashes ?? [];
-    if (!categoryHashes.includes(WeaponBase.Weapon)) return false;
-    if (categoryHashes.includes(WeaponBase.Dummy)) return false;
-    if (!rawWeaponData.sockets) return false;
-    return true;
-  }
 }
 
 export class WeaponCommandOptions {
-  full = false;
-  isDefault = false;
-  stats = false;
+  full: boolean;
+  isDefault: boolean;
+  stats: boolean;
 
   get state() {
     return (
@@ -59,7 +49,11 @@ export class WeaponCommandOptions {
       ((this.full ? 1 : 0) << 0)
     );
   }
-  constructor(full: boolean, isDefault: boolean, stats: boolean) {
+  constructor(
+    full: boolean = false,
+    isDefault: boolean = false,
+    stats: boolean = false
+  ) {
     this.full = full;
     this.isDefault = isDefault;
     this.stats = stats;

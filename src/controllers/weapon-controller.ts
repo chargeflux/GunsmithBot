@@ -1,6 +1,6 @@
 import {
   DestinyItemSocketBlockDefinition,
-  DestinyItemSocketEntryDefinition
+  DestinyItemSocketEntryDefinition,
 } from "bungie-api-ts/destiny2";
 import Discord from "discord.js";
 import WeaponCommand from "../models/commands/weapon-command";
@@ -9,33 +9,37 @@ import {
   PlugCategory,
   SocketCategoryHash,
   WeaponBase,
-  WeaponTierType
+  WeaponTierType,
 } from "../models/constants";
 import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
 import {
   WeaponBaseArchetype,
-  WeaponRawData
+  WeaponRawData,
 } from "../models/destiny-entities/weapon";
-import DBService from "../services/db-service";
+import ManifestDBService from "../services/manifest-db-service";
 import {
-  getInventoryItemByHash, getInventoryItemsByHashes, getInventoryItemsByName
+  getInventoryItemByHash,
+  getInventoryItemsByHashes,
+  getInventoryItemsByName,
 } from "../services/manifest/inventory-item-service";
 import {
   getPlugItemHash,
-  getPlugItemsByHash
+  getPlugItemsByHash,
 } from "../services/manifest/plugset-service";
 import getPowerCap from "../services/manifest/power-cap-service";
 import { getSocketTypeHash } from "../services/manifest/socket-type-service";
 import {
-  orderResultsByName, orderResultsByRandomOrTierType
+  orderResultsByName,
+  orderResultsByRandomOrTierType,
 } from "../utils/utils";
+import BetterSqlite3 from "better-sqlite3";
 
 export default class WeaponController {
-  dbService: DBService;
+  dbService: ManifestDBService;
 
-  constructor(dbService: DBService) {
-    this.dbService = dbService;
+  constructor(dbService?: ManifestDBService) {
+    this.dbService = dbService ?? new ManifestDBService();
   }
 
   async processWeaponCommand(
@@ -47,15 +51,13 @@ export default class WeaponController {
       const results = await getInventoryItemsByName(this.dbService.db, input);
       weaponCommand.processWeaponResults(results);
       for (let weapon of weaponCommand.weaponResults) {
-        let powerCapValues = await this.processPowerCapHashes(
-          weapon.rawData.powerCapHashes
-        );
+        let powerCapValues = await getPowerCap(this.dbService.db, weapon.rawData.powerCapHashes);
         weapon.setPowerCapValues(powerCapValues);
         let [sockets, intrinsic] = await this.processSocketData(
           weaponCommand.options.isDefault,
           weapon.rawData.socketData
         );
-        let baseArchetype = await this.processBaseArchetype(
+        let baseArchetype = await processBaseArchetype(
           weapon.rawData,
           intrinsic
         );
@@ -75,61 +77,6 @@ export default class WeaponController {
       return weaponCommand;
     }
     return;
-  }
-
-  async processPowerCapHashes(powerCapHashes: number[]): Promise<number[]> {
-    if (powerCapHashes)
-      return await getPowerCap(this.dbService.db, powerCapHashes);
-    else throw Error("No Power Cap hashes found");
-  }
-
-  async processBaseArchetype(
-    weaponRawData: WeaponRawData,
-    intrinsic: Perk
-  ): Promise<WeaponBaseArchetype> {
-    let weaponBase: keyof typeof WeaponBase | undefined;
-    let weaponClass: keyof typeof WeaponBase | undefined;
-    let weaponTierType: keyof typeof WeaponTierType | undefined;
-    let isEnergy: boolean = false;
-    for (let hash of weaponRawData.itemCategoryHashes.sort().slice(1)) {
-      let category = WeaponBase[hash] as keyof typeof WeaponBase | undefined;
-      if (category) {
-        // runtime check
-        if (hash < 5) {
-          weaponBase = category;
-          isEnergy = hash > 2;
-        } else weaponClass = category;
-      }
-    }
-    if (!weaponBase) throw Error("Failed to parse weapon base class"); // also accounts for isEnergy
-    if (!weaponClass) throw Error("Failed to parse weapon class");
-
-    let tierTypeHash = weaponRawData.weaponTierTypeHash;
-    if (tierTypeHash)
-      weaponTierType = WeaponTierType[tierTypeHash] as
-        | keyof typeof WeaponTierType
-        | undefined;
-    else throw Error("Weapon tier type hash is invalid");
-    if (!weaponTierType)
-      throw Error(`Failed to parse tier type hash ${tierTypeHash}`);
-
-    let weaponDamageTypeId = weaponRawData.weaponDamageTypeId;
-    let damageType = DamageType[weaponDamageTypeId] as
-      | keyof typeof DamageType
-      | undefined;
-    if (!damageType)
-      throw Error(`Failed to parse damage type hash ${weaponDamageTypeId}`);
-
-    let baseArchetype = new WeaponBaseArchetype(
-      weaponBase,
-      weaponClass,
-      weaponTierType,
-      damageType,
-      isEnergy,
-      intrinsic
-    );
-
-    return baseArchetype;
   }
 
   async processSocketData(
@@ -160,7 +107,7 @@ export default class WeaponController {
     return [sockets, intrinsic];
   }
 
-  async processSocketIntrinisic(
+  private async processSocketIntrinisic(
     socketEntry: DestinyItemSocketEntryDefinition
   ): Promise<Perk | undefined> {
     if (!socketEntry.reusablePlugSetHash) {
@@ -192,7 +139,7 @@ export default class WeaponController {
     }
   }
 
-  async processSocketPerks(
+  private async processSocketPerks(
     socketEntries: DestinyItemSocketEntryDefinition[],
     socketIndices: number[],
     isDefault: boolean
@@ -231,6 +178,7 @@ export default class WeaponController {
           new Socket(
             orderIdx,
             PlugCategory[PlugCategory.Default] + " " + plugCategory,
+            plugCategoryHash,
             defaultPerks
           )
         );
@@ -262,12 +210,67 @@ export default class WeaponController {
         plugItems.map((x) => x.plugItemHash)
       );
       for (let i = 0; i < plugItems.length; i++) {
-        perks.push(
-          new Perk(items[i], plugCategory, plugItems[i].currentlyCanRoll)
+        let currentItem = items.find(
+          (x) => x.hash == plugItems[i].plugItemHash
         );
+        if (currentItem)
+          perks.push(
+            new Perk(currentItem, plugCategory, plugItems[i].currentlyCanRoll)
+          );
+        else throw Error("plugset item can not be found");
       }
-      sockets.push(new Socket(orderIdx, plugCategory, perks));
+      sockets.push(new Socket(orderIdx, plugCategory, plugCategoryHash, perks));
     }
     return isDefault ? defaultSockets : sockets;
   }
+}
+
+export async function processBaseArchetype(
+  weaponRawData: WeaponRawData,
+  intrinsic?: Perk
+): Promise<WeaponBaseArchetype> {
+  let weaponBase: keyof typeof WeaponBase | undefined;
+  let weaponClass: keyof typeof WeaponBase | undefined;
+  let weaponTierType: keyof typeof WeaponTierType | undefined;
+  let isKinetic: boolean = false;
+  for (let hash of weaponRawData.itemCategoryHashes.sort().slice(1)) {
+    let category = WeaponBase[hash] as keyof typeof WeaponBase | undefined;
+    if (category) {
+      // runtime check
+      if (hash < 5) {
+        weaponBase = category;
+        isKinetic = hash <= 2;
+      } else weaponClass = category;
+    }
+  }
+  if (!weaponBase) throw Error("Failed to parse weapon base class"); // also accounts for isEnergy
+  if (!weaponClass) throw Error("Failed to parse weapon class");
+
+  let tierTypeHash = weaponRawData.weaponTierTypeHash;
+  if (tierTypeHash)
+    weaponTierType = WeaponTierType[tierTypeHash] as
+      | keyof typeof WeaponTierType
+      | undefined;
+  else throw Error("Weapon tier type hash is invalid");
+  if (!weaponTierType)
+    throw Error(`Failed to parse tier type hash ${tierTypeHash}`);
+
+  let weaponDamageTypeId = weaponRawData.weaponDamageTypeId;
+  let damageType = DamageType[weaponDamageTypeId] as
+    | keyof typeof DamageType
+    | undefined;
+  if (!damageType)
+    throw Error(`Failed to parse damage type hash ${weaponDamageTypeId}`);
+
+  let baseArchetype = new WeaponBaseArchetype(
+    weaponRawData.name,
+    weaponBase,
+    weaponClass,
+    weaponTierType,
+    damageType,
+    isKinetic,
+    intrinsic
+  );
+
+  return baseArchetype;
 }

@@ -5,11 +5,14 @@ export default class Socket {
 
   name: string;
 
+  hash: number;
+
   perks: Perk[];
 
-  constructor(idx: number, name: string, perks: Perk[]) {
+  constructor(idx: number, name: string, hash: number, perks: Perk[]) {
     this.idx = idx;
     this.name = name;
+    this.hash = hash;
     this.perks = perks;
   }
 

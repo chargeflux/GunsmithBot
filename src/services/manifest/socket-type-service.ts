@@ -12,8 +12,9 @@ export async function getSocketTypeHash(
       .get(hash.toString());
     const json_res: DestinySocketTypeDefinition = JSON.parse(result.json);
     return json_res.plugWhitelist[0].categoryHash; // assume plugWhiteList has length of 1
-  } catch (e) {
-    console.error("Failed to get socketTypeHash", e);
+  } catch (e: any) {
+    console.error(e.stack);
+    console.error("Failed to get socketTypeHash");
     throw e;
   }
 }

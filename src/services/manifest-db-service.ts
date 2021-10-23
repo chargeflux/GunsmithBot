@@ -6,7 +6,7 @@ import { MANIFEST_DATA_LOCATION, TABLES } from "./manifest/manifest-service";
 
 const dbName = "manifest-db.sqlite3";
 
-export default class DBService {
+export default class ManifestDBService {
   db: BetterSqlite3.Database;
 
   constructor(db?: BetterSqlite3.Database) {
@@ -34,7 +34,7 @@ export default class DBService {
       if (fs.existsSync(MANIFEST_DATA_LOCATION + dbName))
         fs.unlinkSync(MANIFEST_DATA_LOCATION + dbName);
       this.db = this.getOrInitialize();
-    } catch (e) {
+    } catch (e: any) {
       console.log(e);
       throw new Error("Failed to delete manifest DB");
     }
@@ -48,8 +48,8 @@ export default class DBService {
       console.log("Created tables in DB");
       this.addRecords(tables);
       console.log("Added data to DB");
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error(err.stack);
       throw err;
     }
   }
@@ -84,7 +84,7 @@ export default class DBService {
   }
 
   close(): void {
-    console.log("Closing DB");
+    //console.log("Closing DB");
     this.db?.close();
   }
 }

@@ -1,6 +1,6 @@
 import {
   DestinyInventoryItemDefinition,
-  DestinySandboxPerkDefinition
+  DestinySandboxPerkDefinition,
 } from "bungie-api-ts/destiny2";
 import { BaseMetadata } from "../commands/base-metadata";
 import { BUNGIE_URL_ROOT, EnergyType, ModCategory } from "../constants";
@@ -10,6 +10,7 @@ export default class Mod implements BaseMetadata {
   description: string = "";
   source: string = "";
   icon: string;
+  hash: number;
   category: keyof typeof ModCategory;
   energyCost?: number;
   energyType?: keyof typeof EnergyType;
@@ -34,9 +35,11 @@ export default class Mod implements BaseMetadata {
         );
       this.energyType = energyType as keyof typeof EnergyType;
     }
+    this.hash = rawModData.hash;
 
     this.armorLocation = armorLocation;
-    this.perkHashes = rawModData.perks.map((x) => x.perkHash); // assume there is only one
+    this.perkHashes = rawModData.perks.map((x) => x.perkHash);
+    if (this.perkHashes.length == 0) throw Error("Not a mod: " + this.name);
     this.collectibleHash = rawModData.collectibleHash;
   }
 
@@ -66,8 +69,7 @@ export default class Mod implements BaseMetadata {
       else overview = `${this.energyCost} Energy`;
       if (this.armorLocation) overview += ` - ${this.armorLocation}`;
     }
-    else if (this.category == "WeaponDamage") overview += "Weapon"
-    return overview;
+    return overview ?? this.category.startsWith("Weapon") ? "Weapon" : "Armor";
   }
 
   toString() {

@@ -1,10 +1,17 @@
 import {
-  SlashCommandStringOption,
-  SlashCommandBuilder,
   SlashCommandBooleanOption,
+  SlashCommandBuilder,
+  SlashCommandStringOption,
 } from "@discordjs/builders";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
+import {
+  WeaponClasses,
+  WeaponDamageType,
+  WeaponRarity,
+  WeaponTypes,
+} from "../models/commands/search-command";
+import { WeaponTables } from "./weapon-db-service";
 
 export default function deployCommands() {
   if (process.env.DISCORD_BOT_TOKEN && process.env.CLIENT_ID) {
@@ -24,7 +31,7 @@ export default function deployCommands() {
           )
         )
         .catch((err: any) => {
-          console.error(err);
+          console.error(err.stack);
         });
     }
   } else {
@@ -102,10 +109,41 @@ function buildCommands() {
       .addStringOption((option: SlashCommandStringOption) =>
         option.setName("input").setDescription("Name of perk").setRequired(true)
       ),
-    new SlashCommandBuilder()
-      .setName("search")
-      .setDescription("Search for weapons with specific perks"),
-  ].map((command) => command.toJSON());
+  ];
+  let searchBuilder = new SlashCommandBuilder()
+    .setName("search")
+    .setDescription("Search for weapons with specific perks");
+  searchBuilder.addStringOption((option: SlashCommandStringOption) => {
+    option.setName("class").setDescription("Search by weapon class");
+    for (let weaponType of WeaponClasses)
+      option.addChoice(weaponType, weaponType);
+    return option;
+  });
+  searchBuilder.addStringOption((option: SlashCommandStringOption) => {
+    option
+      .setName("type")
+      .setDescription("Search by weapon type: Kinetic, Energy, Power");
+    for (let weaponType of WeaponTypes)
+      option.addChoice(weaponType, weaponType);
+    return option;
+  });
+  searchBuilder.addStringOption((option: SlashCommandStringOption) => {
+    option.setName("rarity").setDescription("Search by weapon rarity");
+    for (let rarity of WeaponRarity) option.addChoice(rarity, rarity);
+    return option;
+  });
+  searchBuilder.addStringOption((option: SlashCommandStringOption) => {
+    option.setName("energy").setDescription("Search by weapon energy type");
+    for (let energy of WeaponDamageType) option.addChoice(energy, energy);
+    return option;
+  });
 
-  return commands;
+  for (let tableName of WeaponTables) {
+    searchBuilder.addStringOption((option: SlashCommandStringOption) =>
+      option.setName(tableName).setDescription("Search by " + tableName)
+    );
+  }
+  commands.push(searchBuilder);
+
+  return commands.map((command) => command.toJSON());
 }

@@ -13,13 +13,14 @@ export async function getSandboxPerksByName(
       )
       .all("%" + query + "%");
     return items.map((x) => JSON.parse(x.json));
-  } catch (e) {
-    console.error("Failed to get sandbox perk by name", e);
+  } catch (e: any) {
+    console.error(e.stack);
+    console.error("Failed to get sandbox perk by name");
     throw e;
   }
 }
 
-export async function getSandboxPerkByHash(
+export async function getSandboxPerksByHashes(
   db: BetterSqlite3.Database,
   hashes: number[]
 ): Promise<DestinySandboxPerkDefinition[]> {
@@ -32,8 +33,9 @@ export async function getSandboxPerkByHash(
       )
       .all(hashes.map((x) => x.toString()));
     return items.map((x) => JSON.parse(x.json));
-  } catch (e) {
-    console.error("Failed to get sandbox perk by hash", e);
+  } catch (e: any) {
+    console.error(e.stack);
+    console.error("Failed to get sandbox perk by hash");
     throw e;
   }
 }

@@ -9,7 +9,7 @@ export enum PlugCategory {
   "Intrinsics" = 1744546145,
   "Stocks" = 577918720,
   "Frames" = 7906839,
-  "Perks" = 7906839, // Overrides Previous Category Name
+  "Traits" = 7906839, // Overrides Previous Category Name
   "Barrels" = 2833605196,
   "Bowstrings" = 3809303875,
   "Magazines" = 1806783418,
