@@ -5,6 +5,7 @@ import {
   WeaponTables,
 } from "../../services/weapon-db-service";
 import { WeaponBaseArchetype } from "../destiny-entities/weapon";
+import { stringIs } from "../../utils/validator";
 
 export const WeaponTypes = ["Kinetic", "Energy", "Power"] as const;
 
@@ -43,6 +44,8 @@ export const WeaponDamageType = [
   "Stasis",
 ] as const;
 
+const ArchetypeQueryCommand = ["type", "class", "rarity", "damage"] as const; // mapped to buildCommands in DeployCommandService
+
 export default class SearchCommand implements BaseCommand {
   readonly name: string = "search";
   readonly description: string = "Search for weapons with specific perks";
@@ -61,17 +64,40 @@ export default class SearchCommand implements BaseCommand {
   constructor(options: Discord.CommandInteractionOptionResolver) {
     let perksToSearchRaw: PerksToSearch = {};
     for (let name of WeaponTables) {
-      perksToSearchRaw[name as keyof typeof WeaponTableHash] =
-        options.getString(name) ?? undefined;
+      perksToSearchRaw[name] = options.getString(name) ?? undefined;
     }
 
-    let archetypeQuery: ArchetypeToSearch = {
-      type: options.getString("type") ?? undefined,
-      weaponClass: options.getString("class") ?? undefined,
-      rarity: options.getString("rarity") ?? undefined,
-      energyType: options.getString("energy") ?? undefined,
-    };
-    this.archetypeToSearch = archetypeQuery;
+    let archetypeToSearch: ArchetypeToSearch = {};
+    for (let name of ArchetypeQueryCommand) {
+      let value = options.getString(name) ?? "";
+      switch (name) {
+        case "type":
+          if (stringIs<typeof WeaponTypes[number]>(value, WeaponTypes))
+            archetypeToSearch.type = value;
+          break;
+        case "class":
+          if (stringIs<typeof WeaponClasses[number]>(value, WeaponClasses))
+            archetypeToSearch.class = value;
+          break;
+        case "damage":
+          if (
+            stringIs<typeof WeaponDamageType[number]>(value, WeaponDamageType)
+          )
+            archetypeToSearch.damage = value;
+          break;
+        case "rarity":
+          if (stringIs<typeof WeaponRarity[number]>(value, WeaponRarity))
+            archetypeToSearch.rarity = value;
+          break;
+        default:
+          // https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking
+          // Prevent not accounting for new query types that was added to ArchetypeQueryCommand
+          const _: never = name;
+          throw Error("Unknown query type");
+      }
+    }
+
+    this.archetypeToSearch = archetypeToSearch;
     this.perksToSearch = perksToSearchRaw;
     if (!this.validateState()) throw Error("Invalid traits combination");
   }
@@ -80,20 +106,16 @@ export default class SearchCommand implements BaseCommand {
     this.input = input;
   }
 
-  addResult(baseArchetype: WeaponBaseArchetype) {
-    if (this.archetypeToSearch.type)
-      if (baseArchetype.weaponBase != this.archetypeToSearch.type) return;
-    if (this.archetypeToSearch.weaponClass)
-      if (baseArchetype.weaponClass != this.archetypeToSearch.weaponClass)
-        return;
-    if (this.archetypeToSearch.rarity)
-      if (baseArchetype.weaponTierType != this.archetypeToSearch.rarity) return;
-    if (this.archetypeToSearch.energyType)
-      if (baseArchetype.weaponDamageType != this.archetypeToSearch.energyType)
-        return;
-    if (this.results[baseArchetype.weaponClass])
-      this.results[baseArchetype.weaponClass].push(baseArchetype);
-    else this.results[baseArchetype.weaponClass] = [baseArchetype];
+  validateAndAddResult(resultArchetype: WeaponBaseArchetype) {
+    // validate archetype properties match between query and result
+    for (let name of ArchetypeQueryCommand) {
+      if (this.archetypeToSearch[name])
+        if (resultArchetype.weaponBase != this.archetypeToSearch[name]) return;
+    }
+
+    if (this.results[resultArchetype.weaponClass])
+      this.results[resultArchetype.weaponClass].push(resultArchetype);
+    else this.results[resultArchetype.weaponClass] = [resultArchetype];
   }
 
   getCount() {
@@ -114,10 +136,10 @@ export type PerksToSearch = Partial<
 >;
 
 export type ArchetypeToSearch = {
-  type?: string;
-  weaponClass?: string;
-  rarity?: string;
-  energyType?: string;
+  type?: typeof WeaponTypes[number];
+  class?: typeof WeaponClasses[number];
+  damage?: typeof WeaponDamageType[number];
+  rarity?: typeof WeaponRarity[number];
 };
 
 export type SearchResult = {

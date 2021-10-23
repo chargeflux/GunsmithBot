@@ -17,6 +17,8 @@ import {
   getWeaponsByExactName,
 } from "../services/manifest/search-service";
 import WeaponDBService, {
+  WeaponTable,
+  WeaponTables,
   WeaponTableHash,
 } from "../services/weapon-db-service";
 import { validateWeaponSearch } from "../utils/utils";
@@ -27,6 +29,7 @@ import SearchCommand, {
 } from "../models/commands/search-command";
 import { MinimalWeapon } from "../models/destiny-entities/weapon";
 import getPowerCap from "../services/manifest/power-cap-service";
+import { stringIs } from "../utils/validator";
 
 export default class SearchController {
   dbService: ManifestDBService;
@@ -46,20 +49,16 @@ export default class SearchController {
     var searchCommand = new SearchCommand(options);
     let traitWeaponIds = new Set<number>();
     let weaponIds = new Set<number>();
-    let queryStringComponents = [];
-    for (let perk in searchCommand.perksToSearch) {
-      let query =
-        searchCommand.perksToSearch[perk as keyof typeof WeaponTableHash];
+    let queryStringComponents: string[] = [];
+    for (let perk of WeaponTables) {
+      let query = searchCommand.perksToSearch[perk];
       if (!query) continue;
-      let exactQuery = await this.narrowFuzzyQuery(
-        perk as keyof typeof WeaponTableHash,
-        query
-      );
+      let exactQuery = await this.narrowFuzzyQuery(perk, query);
       if (!exactQuery) throw Error("Could not narrow query: " + query);
       // Second DB call could be collapsed into first DB call but probably unnecessary
       let weaponHashIds = await getWeaponsByExactName(
         this.weaponDBService.db,
-        perk as keyof typeof WeaponTableHash,
+        perk,
         exactQuery
       );
       if (searchCommand.traitState == ValidTraitsOptions.Traits1AndTraits2) {
@@ -83,9 +82,7 @@ export default class SearchController {
           }
         } else weaponIds = currentSocketWeaponIds;
       }
-      queryStringComponents.push(
-        (perk as keyof typeof WeaponTableHash) + ": " + exactQuery
-      );
+      queryStringComponents.push(perk + ": " + exactQuery);
     }
     searchCommand.setInput(queryStringComponents.join(", "));
     let finalIds;
@@ -108,16 +105,13 @@ export default class SearchController {
         baseArchetype.powerCap = Math.max(...weapon.powerCapValues);
       weapon.setBaseArchetype(baseArchetype);
       if (baseArchetype) {
-        searchCommand.addResult(baseArchetype);
+        searchCommand.validateAndAddResult(baseArchetype);
       }
     }
     return searchCommand;
   }
 
-  private async narrowFuzzyQuery(
-    type: keyof typeof WeaponTableHash,
-    query: string
-  ) {
+  private async narrowFuzzyQuery(type: WeaponTable, query: string) {
     let results = await getFuzzyQueryNames(
       this.weaponDBService.db,
       type,
@@ -190,15 +184,14 @@ export default class SearchController {
           }
         } else {
           for (let perk of socket.perks) {
-            const socketTypeName = WeaponTableHash[
-              socket.hash
-            ] as keyof typeof WeaponTableHash;
-            weaponSocketData = createDBTableRecord(
-              weaponSocketData,
-              socketTypeName,
-              weapon.hash,
-              perk
-            );
+            const socketTypeName = WeaponTableHash[socket.hash];
+            if (stringIs<WeaponTable>(socketTypeName, WeaponTables))
+              weaponSocketData = createDBTableRecord(
+                weaponSocketData,
+                socketTypeName,
+                weapon.hash,
+                perk
+              );
           }
         }
       }
@@ -209,7 +202,7 @@ export default class SearchController {
 
 function createDBTableRecord(
   weaponSocketData: WeaponDBTable,
-  tableName: keyof typeof WeaponTableHash,
+  tableName: WeaponTable,
   weaponHash: string,
   perk: Perk
 ) {

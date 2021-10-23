@@ -51,7 +51,10 @@ export default class WeaponController {
       const results = await getInventoryItemsByName(this.dbService.db, input);
       weaponCommand.processWeaponResults(results);
       for (let weapon of weaponCommand.weaponResults) {
-        let powerCapValues = await getPowerCap(this.dbService.db, weapon.rawData.powerCapHashes);
+        let powerCapValues = await getPowerCap(
+          this.dbService.db,
+          weapon.rawData.powerCapHashes
+        );
         weapon.setPowerCapValues(powerCapValues);
         let [sockets, intrinsic] = await this.processSocketData(
           weaponCommand.options.isDefault,

@@ -133,8 +133,8 @@ function buildCommands() {
     return option;
   });
   searchBuilder.addStringOption((option: SlashCommandStringOption) => {
-    option.setName("energy").setDescription("Search by weapon energy type");
-    for (let energy of WeaponDamageType) option.addChoice(energy, energy);
+    option.setName("damage").setDescription("Search by weapon damage type");
+    for (let damage of WeaponDamageType) option.addChoice(damage, damage);
     return option;
   });
 

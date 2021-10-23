@@ -1,6 +1,7 @@
 import BetterSqlite3 from "better-sqlite3";
 import fs from "fs";
 import { WeaponDBTable, WeaponDBTableRecord } from "../models/db";
+import { stringIs } from "../utils/validator";
 import { MANIFEST_DATA_LOCATION } from "./manifest/manifest-service";
 
 export enum WeaponTableHash {
@@ -37,7 +38,9 @@ export const WeaponTables = [
   "stocks",
   "traits1",
   "traits2",
-];
+] as const;
+
+export type WeaponTable = typeof WeaponTables[number];
 
 const dbName = "weapon-db.sqlite3";
 
@@ -116,7 +119,8 @@ export default class WeaponDBService {
         // Using whitelisted table names
         "INSERT INTO " + table + " (hash, name, weaponHashIds) VALUES (?, ?, ?)"
       );
-      createTxn(tables[table as keyof typeof WeaponTableHash] ?? {}, stmt);
+      if (stringIs<WeaponTable>(table, WeaponTables))
+        createTxn(tables[table] ?? {}, stmt);
     }
   }
 

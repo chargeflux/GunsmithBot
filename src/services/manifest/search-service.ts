@@ -3,11 +3,11 @@ import {
   WeaponDBTableRecordNameResult,
   WeaponDBTableRecordResult,
 } from "../../models/db";
-import { WeaponTableHash } from "../weapon-db-service";
+import { WeaponTable } from "../weapon-db-service";
 
 export async function getFuzzyQueryNames(
   db: BetterSqlite3.Database,
-  type: keyof typeof WeaponTableHash,
+  type: WeaponTable,
   query: string
 ): Promise<string[]> {
   try {
@@ -24,7 +24,7 @@ export async function getFuzzyQueryNames(
 
 export async function getWeaponsByExactName(
   db: BetterSqlite3.Database,
-  type: keyof typeof WeaponTableHash,
+  type: WeaponTable,
   query: string
 ): Promise<number[]> {
   try {

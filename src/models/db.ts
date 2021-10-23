@@ -1,11 +1,8 @@
 import {
   DestinyDefinitionFrom,
-  DestinyInventoryItemDefinition,
-  DestinyItemSocketBlockDefinition,
-  DestinyManifestComponentName,
+  DestinyInventoryItemDefinition, DestinyManifestComponentName
 } from "bungie-api-ts/destiny2";
-import { type } from "os";
-import { WeaponTableHash } from "../services/weapon-db-service";
+import { WeaponTable } from "../services/weapon-db-service";
 
 export class DBTableRecord {
   hash: string;
@@ -39,7 +36,7 @@ export type DBTableRecordJSON = {
 };
 
 export type WeaponDBTable = Record<
-  keyof typeof WeaponTableHash,
+  WeaponTable,
   WeaponDBTableRecord | undefined
 >;
 
