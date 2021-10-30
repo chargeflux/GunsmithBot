@@ -1,5 +1,6 @@
 import Discord from "discord.js";
 import dotenv from "dotenv";
+import cron from "node-cron";
 import ModController from "./controllers/mod-controller";
 import PerkController from "./controllers/perk-controller";
 import SearchController from "./controllers/search-controller";
@@ -15,12 +16,12 @@ import {
   createModEmbed,
   createPerkEmbed,
   createSearchEmbed,
-  createWeaponEmbed
+  createWeaponEmbed,
 } from "./services/embed-service";
 import ManifestDBService from "./services/manifest-db-service";
 import {
   getCurrentVersion,
-  updateManifest
+  updateManifest,
 } from "./services/manifest/manifest-service";
 import WeaponDBService from "./services/weapon-db-service";
 dotenv.config();
@@ -34,8 +35,7 @@ let weaponController: WeaponController;
 let modController: ModController;
 let searchController: SearchController;
 
-client.once("ready", async () => {
-  console.log("Ready!");
+async function initializeControllers() {
   let dbService = new ManifestDBService();
   try {
     await updateManifest(dbService).then(async (toChange: boolean) => {
@@ -61,6 +61,34 @@ client.once("ready", async () => {
     modController = new ModController();
     searchController = new SearchController();
   }
+}
+
+function tearDownDatabases() {
+  perkController.dbService.close();
+  weaponController.dbService.close();
+  modController.dbService.close();
+  searchController.dbService.close();
+  searchController.weaponDBService.close();
+}
+
+function startCronSchedules() {
+  cron.schedule(
+    "5 9 * * *",
+    async () => {
+      console.log("Running update");
+      tearDownDatabases();
+      await initializeControllers();
+    },
+    {
+      timezone: "America/Los_Angeles",
+    }
+  );
+}
+
+client.once("ready", async () => {
+  await initializeControllers();
+  startCronSchedules();
+  console.log("Ready!");
 });
 
 client.on("messageCreate", async (message) => {
@@ -202,11 +230,7 @@ client.login(process.env.DISCORD_BOT_TOKEN);
 
 // https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#close---this
 process.on("exit", () => {
-  perkController.dbService.close();
-  weaponController.dbService.close();
-  modController.dbService.close();
-  searchController.dbService.close();
-  searchController.weaponDBService.close();
+  tearDownDatabases();
 });
 process.on("SIGHUP", () => process.exit(128 + 1));
 process.on("SIGINT", () => process.exit(128 + 2));
