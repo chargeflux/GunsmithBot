@@ -24,6 +24,7 @@ export default class Perk implements BaseMetadata {
   }
 
   toString() {
-    return this.name;
+    if (this.currentlyCanRoll) return this.name;
+    else return "~~" + this.name + "~~";
   }
 }

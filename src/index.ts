@@ -15,13 +15,12 @@ import {
   createModEmbed,
   createPerkEmbed,
   createSearchEmbed,
-  createWeaponEmbed,
+  createWeaponEmbed
 } from "./services/embed-service";
 import ManifestDBService from "./services/manifest-db-service";
-import { getInventoryItemsByHashes } from "./services/manifest/inventory-item-service";
 import {
   getCurrentVersion,
-  updateManifest,
+  updateManifest
 } from "./services/manifest/manifest-service";
 import WeaponDBService from "./services/weapon-db-service";
 dotenv.config();
@@ -65,8 +64,11 @@ client.once("ready", async () => {
 });
 
 client.on("messageCreate", async (message) => {
-  // TODO: condition with application author
-  if (message.content.toLowerCase() === "!deploy") deployCommands();
+  if (
+    message.content.toLowerCase() === "!deploy" &&
+    process.env.APPLICATION_AUTHOR_ID == message.author.id
+  )
+    deployCommands();
 });
 
 client.on("interactionCreate", async (interaction) => {

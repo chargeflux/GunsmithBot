@@ -7,6 +7,7 @@ import {
 import { WeaponBaseArchetype } from "../destiny-entities/weapon";
 import { stringIs } from "../../utils/validator";
 
+// Following readonly arrays map to available options or choices for search command
 export const WeaponTypes = ["Kinetic", "Energy", "Power"] as const;
 
 export const WeaponClasses = [

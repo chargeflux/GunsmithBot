@@ -16,7 +16,17 @@ export default class Socket {
     this.perks = perks;
   }
 
-  toString() {
-    return this.perks.map((x) => x.toString()).join("\n");
+  toString(canRoll = true) {
+    let filteredPerks = this.perks.filter((x) => {
+      if (x.currentlyCanRoll == canRoll) return x;
+    });
+
+    let uniquePerks = new Map<number, Perk>(
+      filteredPerks.map((x) => [x.hash, x])
+    );
+
+    return Array.from(uniquePerks.values())
+      .map((x) => x.toString())
+      .join("\n");
   }
 }

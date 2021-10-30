@@ -2,8 +2,6 @@ export const DISCORD_BG_HEX = 0x2f3136;
 
 export const BUNGIE_URL_ROOT = "https://www.bungie.net";
 
-export type PlugCategoryHashType = keyof typeof PlugCategory;
-
 export enum PlugCategory {
   // socketCategoryHash=4241085061 (WEAPON_PERKS) in DestinySocketTypeDefinition or DestinyInventoryItemDefinition.plug.plugCategoryHash
   "Intrinsics" = 1744546145,

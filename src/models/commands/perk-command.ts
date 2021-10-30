@@ -19,7 +19,7 @@ export default class PerkCommand implements BaseCommand {
         const plugCategoryName = PlugCategory[result.plug?.plugCategoryHash] as
           | keyof typeof PlugCategory
           | undefined;
-        if (!plugCategoryName) continue;
+        if (!plugCategoryName) continue; // runtime check
         let perk = new Perk(result, plugCategoryName);
         this.perkResults.push(perk);
       }
