@@ -5,7 +5,7 @@ Discord bot to retrieve weapon rolls for Destiny 2
 ## Setup
 
 ```bash
-mv .env.sample .env
+cp .env.sample .env
 ```
 
 Fill out the `.env` file with the appropriate values.
