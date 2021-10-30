@@ -10,8 +10,8 @@ export async function getSocketTypeHash(
     const result: DBTableRecordJSON = db
       .prepare("SELECT json FROM DestinySocketTypeDefinition WHERE hash = ?")
       .get(hash.toString());
-    const json_res: DestinySocketTypeDefinition = JSON.parse(result.json);
-    return json_res.plugWhitelist[0].categoryHash; // assume plugWhiteList has length of 1
+    const jsonRes: DestinySocketTypeDefinition = JSON.parse(result.json);
+    return jsonRes.plugWhitelist[0].categoryHash; // assume plugWhiteList has length of 1
   } catch (e: any) {
     console.error(e.stack);
     console.error("Failed to get socketTypeHash");

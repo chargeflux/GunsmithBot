@@ -13,8 +13,8 @@ export async function getPlugItemHash(
     const result: DBTableRecordJSON = db
       .prepare("SELECT json FROM DestinyPlugSetDefinition WHERE hash = ?")
       .get(hash.toString());
-    const json_res: DestinyPlugSetDefinition = JSON.parse(result.json);
-    return json_res.reusablePlugItems[0].plugItemHash;
+    const jsonRes: DestinyPlugSetDefinition = JSON.parse(result.json);
+    return jsonRes.reusablePlugItems[0].plugItemHash;
   } catch (e: any) {
     console.error(e.stack);
     console.error("Failed to get plugItemHash");
