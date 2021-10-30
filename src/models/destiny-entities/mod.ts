@@ -69,7 +69,7 @@ export default class Mod implements BaseMetadata {
       else overview = `${this.energyCost} Energy`;
       if (this.armorLocation) overview += ` - ${this.armorLocation}`;
     }
-    return overview ?? this.category.startsWith("Weapon") ? "Weapon" : "Armor";
+    return overview ?? (this.category.startsWith("Weapon") ? "Weapon" : "Armor");
   }
 
   toString() {

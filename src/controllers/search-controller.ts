@@ -84,6 +84,12 @@ export default class SearchController {
       }
       queryStringComponents.push(perk + ": " + exactQuery);
     }
+    if (queryStringComponents.length == 0) {
+      // TODO: Implement archetype only search
+      throw Error(
+        "Querying by archetype only is not implemented. Please specify a perk to narrow results"
+      );
+    }
     searchCommand.setInput(queryStringComponents.join(", "));
     let finalIds;
     if (weaponIds.size > 0) {
