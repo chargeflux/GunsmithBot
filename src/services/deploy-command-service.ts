@@ -14,7 +14,7 @@ import {
 import { WeaponTables } from "./weapon-db-service";
 
 export default function deployCommands() {
-  if (process.env.DISCORD_BOT_TOKEN && process.env.CLIENT_ID) {
+  if (process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_BOT_CLIENT_ID) {
     const rest = new REST({ version: "9" }).setToken(
       process.env.DISCORD_BOT_TOKEN
     );
@@ -22,9 +22,15 @@ export default function deployCommands() {
     let guildIds = loadGuilds();
     for (const id of guildIds) {
       rest
-        .put(Routes.applicationGuildCommands(process.env.CLIENT_ID, id), {
-          body: commands,
-        })
+        .put(
+          Routes.applicationGuildCommands(
+            process.env.DISCORD_BOT_CLIENT_ID,
+            id
+          ),
+          {
+            body: commands,
+          }
+        )
         .then(() =>
           console.log(
             "Successfully registered application commands for guild " + id
@@ -36,7 +42,7 @@ export default function deployCommands() {
     }
   } else {
     throw Error(
-      "Configuration is not valid. Check DISCORD_BOT_TOKEN and CLIENT_ID"
+      "Configuration is not valid. Check DISCORD_BOT_TOKEN and DISCORD_BOT_CLIENT_ID"
     );
   }
 }
