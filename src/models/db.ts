@@ -1,6 +1,7 @@
 import {
   DestinyDefinitionFrom,
-  DestinyInventoryItemDefinition, DestinyManifestComponentName
+  DestinyInventoryItemDefinition,
+  DestinyManifestComponentName,
 } from "bungie-api-ts/destiny2";
 import { WeaponTable } from "../services/weapon-db-service";
 
@@ -35,7 +36,7 @@ export type DBTableRecordJSON = {
   json: string;
 };
 
-export type WeaponDBTable = Record<
+export type WeaponDBTables = Record<
   WeaponTable,
   WeaponDBTableRecord | undefined
 >;

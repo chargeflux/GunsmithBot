@@ -43,13 +43,13 @@ export function createCompareEmbed(
   _logger.info("Constructing compare embed");
   const embed = new MessageEmbed().setColor(DISCORD_BG_HEX);
   embed.addField(
-    processedCommand.weapons[0].name,
+    processedCommand.results[0].name,
     processedCommand.generateStatDiffString(0),
     true
   );
   embed.addField("Stats", processedCommand.statNames, true);
   embed.addField(
-    processedCommand.weapons[1].name,
+    processedCommand.results[1].name,
     processedCommand.generateStatDiffString(1),
     true
   );
@@ -115,7 +115,9 @@ function createFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
     .setDescription(description)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(weaponResult.icon);
-  const STATS = weaponResult.stats.map((x) => x.toString()).join("\n");
+  if (!weaponResult.stats)
+    throw Error("Weapon has no stats. Aborting embed creation.");
+  const STATS = weaponResult.stats.stats.map((x) => x.toString()).join("\n");
   if (weaponResult.sockets.length <= 2) {
     for (const socket of weaponResult.sockets) {
       embed.addField("**" + socket.name + "**", socket.toString(), true);
@@ -143,7 +145,9 @@ function createStatsWeaponEmbed(weaponResult: Weapon): MessageEmbed {
     .setTitle(weaponResult.name)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(weaponResult.icon);
-  const STATS = weaponResult.stats.map((x) => x.toString()).join("\n");
+  if (!weaponResult.stats)
+    throw Error("Weapon has no stats. Aborting embed creation.");
+  const STATS = weaponResult.stats.stats.map((x) => x.toString()).join("\n");
   embed.addField("**Stats**", STATS, true);
   return embed;
 }

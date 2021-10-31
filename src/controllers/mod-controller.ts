@@ -19,7 +19,7 @@ export default class ModController {
       const results = await getInventoryItemsByName(this.dbService.db, input);
       modCommand.processResults(results);
 
-      for (const mod of modCommand.modResults) {
+      for (const mod of modCommand.results) {
         const sandboxPerks = await getSandboxPerksByHashes(
           this.dbService.db,
           mod.perkHashes
@@ -34,7 +34,7 @@ export default class ModController {
         }
       }
 
-      const modResults = orderResultsByName(input, modCommand.modResults);
+      const modResults = orderResultsByName(input, modCommand.results);
       return modResults;
     }
     return [];

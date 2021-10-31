@@ -6,11 +6,9 @@ import { logger } from "../../services/logger-service";
 
 const _logger = logger.getChildLogger({ name: "Mod" });
 
-export default class ModCommand implements BaseCommand {
-  readonly name: string = "mod";
-  readonly description: string = "Get information about a mod";
+export default class ModCommand implements BaseCommand<Mod> {
   readonly input: string;
-  modResults: Mod[] = [];
+  results: Mod[] = [];
 
   constructor(input: string) {
     this.input = input;
@@ -57,7 +55,7 @@ export default class ModCommand implements BaseCommand {
       }
       try {
         const mod = new Mod(result, modCategoryName, armorLocation);
-        this.modResults.push(mod);
+        this.results.push(mod);
       } catch (e: unknown) {
         _logger.error(e);
         continue;

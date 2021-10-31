@@ -16,7 +16,7 @@ export default class PerkController {
       const perkCommand = new PerkCommand(input);
       const results = await getInventoryItemsByName(this.dbService.db, input);
       await perkCommand.processResults(results);
-      const perkResults = orderResultsByName(input, perkCommand.perkResults);
+      const perkResults = orderResultsByName(input, perkCommand.results);
       return perkResults;
     }
     return [];

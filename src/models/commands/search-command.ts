@@ -4,7 +4,7 @@ import {
   WeaponTableHash,
   WeaponTables,
 } from "../../services/weapon-db-service";
-import { WeaponBaseArchetype } from "../destiny-entities/weapon";
+import { WeaponBaseArchetype } from "../destiny-entities/weapon-base-archetype";
 import { stringIs } from "../../utils/validator";
 
 // Following readonly arrays map to available options or choices for search command
@@ -47,9 +47,7 @@ export const WeaponDamageType = [
 
 const ArchetypeQueryCommand = ["type", "class", "rarity", "damage"] as const; // mapped to buildCommands in DeployCommandService
 
-export default class SearchCommand implements BaseCommand {
-  readonly name: string = "search";
-  readonly description: string = "Search for weapons with specific perks";
+export default class SearchCommand {
   readonly archetypeToSearch: ArchetypeToSearch;
   input = "";
   perksToSearch: PerksToSearch;
@@ -113,12 +111,12 @@ export default class SearchCommand implements BaseCommand {
     // validate archetype properties match between query and result
     for (const name of ArchetypeQueryCommand) {
       if (this.archetypeToSearch[name])
-        if (resultArchetype.weaponBase != this.archetypeToSearch[name]) return;
+        if (resultArchetype[name] != this.archetypeToSearch[name]) return;
     }
 
-    if (this.results[resultArchetype.weaponClass])
-      this.results[resultArchetype.weaponClass].push(resultArchetype);
-    else this.results[resultArchetype.weaponClass] = [resultArchetype];
+    if (this.results[resultArchetype.class])
+      this.results[resultArchetype.class].push(resultArchetype);
+    else this.results[resultArchetype.class] = [resultArchetype];
   }
 
   getCount() {

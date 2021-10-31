@@ -32,7 +32,7 @@ export function orderResultsByRandomOrTierType(
     if (weapon.baseArchetype) {
       if (
         weapon.hasRandomRolls ||
-        weapon.baseArchetype.weaponTierType == "Exotic"
+        weapon.baseArchetype.rarity == "Exotic"
       ) {
         weapons.splice(0, 0, weapon);
       } else weapons.push(weapon);

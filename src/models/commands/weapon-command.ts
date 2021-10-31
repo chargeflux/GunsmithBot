@@ -1,15 +1,25 @@
-import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import Discord from "discord.js";
-import { validateWeaponSearch } from "../../utils/utils";
+import {
+  orderResultsByName,
+  orderResultsByRandomOrTierType,
+} from "../../utils/utils";
 import { Weapon } from "../destiny-entities/weapon";
 import BaseCommand from "./base-command";
 
-export default class WeaponCommand implements BaseCommand {
-  name = "weapon";
-  description = "Get information about a weapon";
+export default class WeaponCommand implements BaseCommand<Weapon> {
   input: string;
-  weaponResults: Weapon[] = [];
+  private _results?: Weapon[];
   options: WeaponCommandOptions;
+  set results(results: Weapon[]) {
+    const orderedResults = orderResultsByRandomOrTierType(results);
+
+    this._results = orderResultsByName(this.input, orderedResults);
+  }
+
+  get results() {
+    if (this._results) return this._results;
+    throw Error("Failed to set weapon results");
+  }
 
   constructor(
     input: string,
@@ -23,17 +33,8 @@ export default class WeaponCommand implements BaseCommand {
     );
   }
 
-  processWeaponResults(results: DestinyInventoryItemDefinition[]) {
-    for (const result of results) {
-      if (validateWeaponSearch(result)) {
-        const weapon = new Weapon(result, this.options);
-        this.weaponResults.push(weapon);
-      }
-    }
-  }
-
   setWeaponResults(results: Weapon[]) {
-    this.weaponResults = results;
+    this.results = results;
   }
 }
 
@@ -49,11 +50,7 @@ export class WeaponCommandOptions {
       ((this.full ? 1 : 0) << 0)
     );
   }
-  constructor(
-    full = false,
-    isDefault = false,
-    stats = false
-  ) {
+  constructor(full = false, isDefault = false, stats = false) {
     this.full = full;
     this.isDefault = isDefault;
     this.stats = stats;

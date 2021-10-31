@@ -1,22 +1,17 @@
 import {
+  DestinyInventoryItemDefinition,
   DestinyItemSocketBlockDefinition,
   DestinyItemSocketEntryDefinition,
 } from "bungie-api-ts/destiny2";
 import Discord from "discord.js";
-import WeaponCommand from "../models/commands/weapon-command";
-import {
-  DamageType,
-  PlugCategory,
-  SocketCategoryHash,
-  WeaponBase,
-  WeaponTierType,
-} from "../models/constants";
+import WeaponCommand, {
+  WeaponCommandOptions,
+} from "../models/commands/weapon-command";
+import { PlugCategory, SocketCategoryHash } from "../models/constants";
 import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
-import {
-  WeaponBaseArchetype,
-  WeaponRawData,
-} from "../models/destiny-entities/weapon";
+import { Weapon } from "../models/destiny-entities/weapon";
+import { logger } from "../services/logger-service";
 import ManifestDBService from "../services/manifest-db-service";
 import {
   getInventoryItemByHash,
@@ -29,11 +24,7 @@ import {
 } from "../services/manifest/plugset-service";
 import getPowerCap from "../services/manifest/power-cap-service";
 import { getSocketTypeHash } from "../services/manifest/socket-type-service";
-import {
-  orderResultsByName,
-  orderResultsByRandomOrTierType,
-} from "../utils/utils";
-import { logger } from "../services/logger-service";
+import { validateWeaponSearch } from "../utils/utils";
 
 const _logger = logger.getChildLogger({ name: "Weapon" });
 
@@ -51,37 +42,58 @@ export default class WeaponController {
     if (input) {
       const weaponCommand = new WeaponCommand(input, options);
       const results = await getInventoryItemsByName(this.dbService.db, input);
-      weaponCommand.processWeaponResults(results);
-      for (const weapon of weaponCommand.weaponResults) {
-        const powerCapValues = await getPowerCap(
-          this.dbService.db,
-          weapon.rawData.powerCapHashes
+      const weaponResults: Weapon[] = [];
+      for (const weaponData of results) {
+        if (!validateWeaponSearch(weaponData)) continue;
+        const newWeapon = await this.createWeapon(
+          weaponData,
+          weaponCommand.options
         );
-        weapon.setPowerCapValues(powerCapValues);
-        const [sockets, intrinsic] = await this.processSocketData(
-          weaponCommand.options.isDefault,
-          weapon.rawData.socketData
-        );
-        const baseArchetype = await processBaseArchetype(
-          weapon.rawData,
-          intrinsic
-        );
-        if (weapon.powerCapValues)
-          baseArchetype.powerCap = Math.max(...weapon.powerCapValues);
-        else throw Error("Failed to set power cap values");
-        weapon.setBaseArchetype(baseArchetype);
-        weapon.setSockets(sockets);
+        weaponResults.push(newWeapon);
       }
 
-      const orderedResults = orderResultsByRandomOrTierType(
-        weaponCommand.weaponResults
-      );
-
-      weaponCommand.setWeaponResults(orderResultsByName(input, orderedResults));
-
+      weaponCommand.results = weaponResults;
       return weaponCommand;
     }
     return;
+  }
+
+  async createWeapon(
+    weaponData: DestinyInventoryItemDefinition,
+    options: WeaponCommandOptions,
+    minimal = false
+  ) {
+    const powerCapValues = await this.getPowerCapValues(weaponData);
+    let newWeapon;
+    if (minimal) {
+      _logger.debug("Skipping parsing of sockets and intrinsic");
+      newWeapon = new Weapon(weaponData, options, powerCapValues, []);
+    } else {
+      const [sockets, intrinsic] = await this.processSocketData(
+        options.isDefault,
+        weaponData.sockets
+      );
+
+      newWeapon = new Weapon(
+        weaponData,
+        options,
+        powerCapValues,
+        sockets,
+        intrinsic
+      );
+    }
+
+    return newWeapon;
+  }
+
+  async getPowerCapValues(
+    rawWeaponData: DestinyInventoryItemDefinition
+  ): Promise<number[]> {
+    const powerCapHashes =
+      rawWeaponData.quality?.versions.map((x) => x.powerCapHash) ?? [];
+
+    const powerCapValues = await getPowerCap(this.dbService.db, powerCapHashes);
+    return powerCapValues;
   }
 
   async processSocketData(
@@ -231,54 +243,4 @@ export default class WeaponController {
     }
     return isDefault ? defaultSockets : sockets;
   }
-}
-
-export async function processBaseArchetype(
-  weaponRawData: WeaponRawData,
-  intrinsic?: Perk
-): Promise<WeaponBaseArchetype> {
-  let weaponBase: keyof typeof WeaponBase | undefined;
-  let weaponClass: keyof typeof WeaponBase | undefined;
-  let weaponTierType: keyof typeof WeaponTierType | undefined;
-  let isKinetic = false;
-  for (const hash of weaponRawData.itemCategoryHashes.sort().slice(1)) {
-    const category = WeaponBase[hash] as keyof typeof WeaponBase | undefined;
-    if (category) {
-      // runtime check
-      if (hash < 5) {
-        weaponBase = category;
-        isKinetic = hash <= 2;
-      } else weaponClass = category;
-    }
-  }
-  if (!weaponBase) throw Error("Failed to parse weapon base class"); // also accounts for isEnergy
-  if (!weaponClass) throw Error("Failed to parse weapon class");
-
-  const tierTypeHash = weaponRawData.weaponTierTypeHash;
-  if (tierTypeHash)
-    weaponTierType = WeaponTierType[tierTypeHash] as
-      | keyof typeof WeaponTierType
-      | undefined;
-  else throw Error("Weapon tier type hash is invalid");
-  if (!weaponTierType)
-    throw Error(`Failed to parse tier type hash ${tierTypeHash}`);
-
-  const weaponDamageTypeId = weaponRawData.weaponDamageTypeId;
-  const damageType = DamageType[weaponDamageTypeId] as
-    | keyof typeof DamageType
-    | undefined;
-  if (!damageType)
-    throw Error(`Failed to parse damage type hash ${weaponDamageTypeId}`);
-
-  const baseArchetype = new WeaponBaseArchetype(
-    weaponRawData.name,
-    weaponBase,
-    weaponClass,
-    weaponTierType,
-    damageType,
-    isKinetic,
-    intrinsic
-  );
-
-  return baseArchetype;
 }

@@ -1,33 +1,33 @@
 import { StatOrder } from "../constants";
 import { Weapon } from "../destiny-entities/weapon";
+import WeaponStats from "../destiny-entities/weapon-stats";
 import BaseCommand from "./base-command";
 
-export default class CompareCommand implements BaseCommand {
-  readonly name: string = "compare";
-  readonly description: string = "Compare stats between 2 weapons";
+export default class CompareCommand implements BaseCommand<WeaponStats> {
   readonly input: string;
-  readonly weapons: Weapon[];
+  readonly results: WeaponStats[] = [];
   statNames = "";
   weaponStatDiff?: WeaponStatDiff;
 
-  constructor(input: string, weapons: Weapon[]) {
+  constructor(input: string, weaponA: Weapon, weaponB: Weapon) {
     this.input = input;
-    this.weapons = weapons;
-    this.process();
+    if (!weaponA.stats || !weaponB.stats)
+      throw Error("One or both weapons are missing stat values: " + input);
+
+    this.results.push(weaponA.stats);
+    this.results.push(weaponB.stats);
+
+    this.compareStats();
   }
 
-  private process() {
-    if (this.weapons.length != 2)
-      throw Error("Number of weapons for comparison is not 2");
-    if (!this.weapons[0].stats && !this.weapons[1].stats)
-      throw Error("One or both Weapons are missing stat values");
-    const set1 = new Set(this.weapons[0].stats.map((x) => x.stat.statType));
-    const set2 = new Set(this.weapons[1].stats.map((x) => x.stat.statType));
+  private compareStats() {
+    const set1 = new Set(this.results[0].stats.map((x) => x.stat.statType));
+    const set2 = new Set(this.results[1].stats.map((x) => x.stat.statType));
     const commonStats = new Set([...set1].filter((x) => set2.has(x)));
-    let statsW1 = this.weapons[0].stats.filter((x) =>
+    let statsW1 = this.results[0].stats.filter((x) =>
       [...commonStats].includes(x.stat.statType)
     );
-    let statsW2 = this.weapons[1].stats.filter((x) =>
+    let statsW2 = this.results[1].stats.filter((x) =>
       [...commonStats].includes(x.stat.statType)
     );
     statsW1 = [...statsW1].sort((a, b) =>

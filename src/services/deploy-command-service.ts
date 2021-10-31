@@ -102,8 +102,14 @@ function buildCommands() {
       .setDescription("Compare stats between 2 weapons")
       .addStringOption((option: SlashCommandStringOption) =>
         option
-          .setName("input")
-          .setDescription("Name of 2 weapons separated by a comma")
+          .setName("input_a")
+          .setDescription("Name of weapon")
+          .setRequired(true)
+      )
+      .addStringOption((option: SlashCommandStringOption) =>
+        option
+          .setName("input_b")
+          .setDescription("Name of weapon")
           .setRequired(true)
       ),
     new SlashCommandBuilder()

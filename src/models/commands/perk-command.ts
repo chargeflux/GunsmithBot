@@ -3,11 +3,9 @@ import { PlugCategory } from "../constants";
 import Perk from "../destiny-entities/perk";
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 
-export default class PerkCommand implements BaseCommand {
-  readonly name: string = "perk";
-  readonly description: string = "Get information about a perk";
+export default class PerkCommand implements BaseCommand<Perk> {
   readonly input: string;
-  perkResults: Perk[] = [];
+  results: Perk[] = [];
 
   constructor(input: string) {
     this.input = input;
@@ -21,7 +19,7 @@ export default class PerkCommand implements BaseCommand {
           | undefined;
         if (!plugCategoryName) continue; // runtime check
         const perk = new Perk(result, plugCategoryName);
-        this.perkResults.push(perk);
+        this.results.push(perk);
       }
     }
   }

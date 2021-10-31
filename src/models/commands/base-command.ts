@@ -1,5 +1,4 @@
-export default interface BaseCommand {
-  readonly name: string;
-  readonly description: string;
+export default interface BaseCommand<T> {
   input: string;
+  results: Iterable<T>;
 }

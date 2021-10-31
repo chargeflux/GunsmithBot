@@ -1,6 +1,6 @@
 import BetterSqlite3 from "better-sqlite3";
 import fs from "fs";
-import { WeaponDBTable, WeaponDBTableRecord } from "../models/db";
+import { WeaponDBTables, WeaponDBTableRecord } from "../models/db";
 import { stringIs } from "../utils/validator";
 import { MANIFEST_DATA_LOCATION } from "./manifest/manifest-service";
 import { logger } from "./logger-service";
@@ -81,7 +81,7 @@ export default class WeaponDBService {
     }
   }
 
-  construct(tables: WeaponDBTable) {
+  construct(tables: WeaponDBTables) {
     this.reinitialize();
     _logger.info("Reinitialized DB");
     this.createTables();
@@ -101,7 +101,7 @@ export default class WeaponDBService {
     }
   }
 
-  private addRecords(tables: WeaponDBTable) {
+  private addRecords(tables: WeaponDBTables) {
     const createTxn = this.db.transaction(
       (records: WeaponDBTableRecord, stmt) => {
         for (const hash in records)

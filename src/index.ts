@@ -9,7 +9,6 @@ import CompareCommand from "./models/commands/compare-command";
 import WeaponCommand from "./models/commands/weapon-command";
 import Mod from "./models/destiny-entities/mod";
 import Perk from "./models/destiny-entities/perk";
-import { Weapon } from "./models/destiny-entities/weapon";
 import deployCommands from "./services/deploy-command-service";
 import {
   createCompareEmbed,
@@ -18,13 +17,14 @@ import {
   createSearchEmbed,
   createWeaponEmbed,
 } from "./services/embed-service";
+import { logger, rotateLog } from "./services/logger-service";
 import ManifestDBService from "./services/manifest-db-service";
+import { getInventoryItemsWeapons } from "./services/manifest/inventory-item-service";
 import {
   getCurrentVersion,
   updateManifest,
 } from "./services/manifest/manifest-service";
 import WeaponDBService from "./services/weapon-db-service";
-import { logger, rotateLog } from "./services/logger-service";
 const _logger = logger;
 dotenv.config();
 
@@ -46,9 +46,8 @@ async function initializeControllers() {
       modController = new ModController();
       searchController = new SearchController();
       if (toChange) {
-        const tables = await searchController.createWeaponTables(
-          weaponController
-        );
+        const weaponItems = await getInventoryItemsWeapons(dbService.db);
+        const tables = await searchController.createWeaponTables(weaponItems);
         try {
           new WeaponDBService().construct(tables);
         } catch (e) {
@@ -97,6 +96,7 @@ function startCronSchedules() {
 }
 
 client.once("ready", async () => {
+  rotateLog();
   await initializeControllers();
   startCronSchedules();
   _logger.info("Ready!");
@@ -107,7 +107,12 @@ client.on("messageCreate", async (message) => {
     message.content.toLowerCase() === "!deploy" &&
     process.env.APPLICATION_AUTHOR_ID == message.author.id
   )
-    deployCommands();
+    try {
+      deployCommands();
+    } catch (e) {
+      _logger.error("Failed to deploy commands", e);
+      message.reply("Failed to deploy commands");
+    }
 });
 
 client.on("interactionCreate", async (interaction) => {
@@ -116,7 +121,10 @@ client.on("interactionCreate", async (interaction) => {
   await interaction.deferReply();
   let inputString = interaction.options.getString("input") ?? "";
   try {
-    if (inputString?.length < 3 && commandName != "search") {
+    if (
+      inputString.length < 3 &&
+      !["search", "compare"].includes(commandName)
+    ) {
       _logger.error(inputString, "is 3 characters or less");
       interaction.editReply("Please enter a query of 3 or more characters!");
       return;
@@ -150,7 +158,7 @@ client.on("interactionCreate", async (interaction) => {
             interaction.options
           );
         if (weaponCommand) {
-          const results = weaponCommand.weaponResults;
+          const results = weaponCommand.results;
           if (results.length != 0) {
             _logger.info(
               results.length,
@@ -188,29 +196,41 @@ client.on("interactionCreate", async (interaction) => {
         return;
       }
       case "compare": {
-        _logger.info(`Comparing '${inputString}'`);
-        const parsedValues = inputString.split(",").map((x) => x.trim());
-        if (parsedValues.length != 2) {
-          interaction.editReply("Please enter only 2 weapons");
+        const inputA = interaction.options.getString("input_a") ?? "";
+        const inputB = interaction.options.getString("input_b") ?? "";
+        if (inputA.length < 3 || inputB.length < 3) {
+          _logger.error(inputA + " or " + inputB + " is 3 characters or less");
+          interaction.editReply(
+            "Please enter queries that are 3 or more characters!"
+          );
           return;
         }
-        const compareWeapons: Weapon[] = [];
-        for (const value of parsedValues) {
-          const weaponCommand = await weaponController.processWeaponCommand(
-            value,
+        _logger.info(`Comparing '${inputA}' and '${inputB}'`);
+        const weaponA = (
+          await weaponController.processWeaponCommand(
+            inputA,
             interaction.options
+          )
+        )?.results[0];
+        const weaponB = (
+          await weaponController.processWeaponCommand(
+            inputB,
+            interaction.options
+          )
+        )?.results[0];
+        if (weaponA && weaponB) {
+          const processedCommand = new CompareCommand(
+            inputA + ", " + inputB,
+            weaponA,
+            weaponB
           );
-          if (weaponCommand && weaponCommand.weaponResults)
-            compareWeapons.push(weaponCommand.weaponResults[0]);
-        }
-        const processedCommand = new CompareCommand(
-          inputString,
-          compareWeapons
-        );
-        if (processedCommand.weaponStatDiff) {
-          const embed = createCompareEmbed(processedCommand);
-          _logger.info("Sending compare result");
-          interaction.editReply({ embeds: [embed] });
+          if (processedCommand.weaponStatDiff) {
+            const embed = createCompareEmbed(processedCommand);
+            _logger.info("Sending compare result");
+            interaction.editReply({ embeds: [embed] });
+          } else {
+            interaction.editReply("Invalid input. Please try again");
+          }
         } else {
           interaction.editReply("Invalid input. Please try again");
         }
@@ -238,7 +258,7 @@ client.on("interactionCreate", async (interaction) => {
     _logger.error(
       "Failed to process command '" +
         commandName +
-        "' with input" +
+        "' with input " +
         inputString,
       err
     );

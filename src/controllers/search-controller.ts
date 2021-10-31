@@ -1,33 +1,31 @@
 import Discord from "discord.js";
 import fuzzysort from "fuzzysort";
 import SearchCommand, {
-  ValidTraitsOptions
+  ValidTraitsOptions,
 } from "../models/commands/search-command";
+import { WeaponCommandOptions } from "../models/commands/weapon-command";
 import { PlugCategory } from "../models/constants";
 import {
   DBTableRecordResultAllWeaponsParsed,
-  WeaponDBTable,
-  WeaponDBTableRecord
+  WeaponDBTableRecord,
+  WeaponDBTables,
 } from "../models/db";
 import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
-import { MinimalWeapon } from "../models/destiny-entities/weapon";
 import ManifestDBService from "../services/manifest-db-service";
-import {
-  getInventoryItemsByHashes,
-  getInventoryItemsWeapons
-} from "../services/manifest/inventory-item-service";
-import getPowerCap from "../services/manifest/power-cap-service";
+import { getInventoryItemsByHashes } from "../services/manifest/inventory-item-service";
 import {
   getFuzzyQueryNames,
-  getWeaponsByExactName
+  getWeaponsByExactName,
 } from "../services/manifest/search-service";
 import WeaponDBService, {
-  WeaponTable, WeaponTableHash, WeaponTables
+  WeaponTable,
+  WeaponTableHash,
+  WeaponTables,
 } from "../services/weapon-db-service";
 import { validateWeaponSearch } from "../utils/utils";
 import { stringIs } from "../utils/validator";
-import WeaponController, { processBaseArchetype } from "./weapon-controller";
+import WeaponController from "./weapon-controller";
 
 export default class SearchController {
   dbService: ManifestDBService;
@@ -99,20 +97,17 @@ export default class SearchController {
       this.dbService.db,
       finalIds
     );
+
+    const weaponController = new WeaponController(this.dbService);
     for (const result of results) {
-      const weapon = new MinimalWeapon(result);
-      const powerCapValues = await getPowerCap(
-        this.dbService.db,
-        weapon.rawData.powerCapHashes
+      const newWeapon = await weaponController.createWeapon(
+        result,
+        new WeaponCommandOptions(),
+        true
       );
 
-      const baseArchetype = await processBaseArchetype(weapon.rawData);
-      weapon.setPowerCapValues(powerCapValues);
-      if (weapon.powerCapValues)
-        baseArchetype.powerCap = Math.max(...weapon.powerCapValues);
-      weapon.setBaseArchetype(baseArchetype);
-      if (baseArchetype) {
-        searchCommand.validateAndAddResult(baseArchetype);
+      if (newWeapon.baseArchetype) {
+        searchCommand.validateAndAddResult(newWeapon.baseArchetype);
       }
     }
     return searchCommand;
@@ -131,11 +126,8 @@ export default class SearchController {
     else return "";
   }
 
-  async createWeaponTables(weaponController: WeaponController) {
-    const weaponItems: DBTableRecordResultAllWeaponsParsed[] =
-      await getInventoryItemsWeapons(this.dbService.db);
-
-    let weaponSocketData: WeaponDBTable = {
+  async createWeaponTables(weaponItems: DBTableRecordResultAllWeaponsParsed[]) {
+    let weaponDBTables: WeaponDBTables = {
       intrinsics: undefined,
       stocks: undefined,
       traits1: undefined,
@@ -152,6 +144,7 @@ export default class SearchController {
       arrows: undefined,
       launchers: undefined,
     };
+    const weaponController = new WeaponController(this.dbService);
     for (const weapon of weaponItems) {
       if (!validateWeaponSearch(weapon.data)) continue;
       const [sockets, intrinsic] = await weaponController.processSocketData(
@@ -171,8 +164,8 @@ export default class SearchController {
         if (socket.name == PlugCategory[PlugCategory.Traits]) {
           if (!traits1Completed) {
             for (const perk of socket.perks) {
-              weaponSocketData = createDBTableRecord(
-                weaponSocketData,
+              weaponDBTables = this.createDBTableRecord(
+                weaponDBTables,
                 "traits1",
                 weapon.hash,
                 perk
@@ -181,8 +174,8 @@ export default class SearchController {
             traits1Completed = true;
           } else {
             for (const perk of socket.perks) {
-              weaponSocketData = createDBTableRecord(
-                weaponSocketData,
+              weaponDBTables = this.createDBTableRecord(
+                weaponDBTables,
                 "traits2",
                 weapon.hash,
                 perk
@@ -193,8 +186,8 @@ export default class SearchController {
           for (const perk of socket.perks) {
             const socketTypeName = WeaponTableHash[socket.hash];
             if (stringIs<WeaponTable>(socketTypeName, WeaponTables))
-              weaponSocketData = createDBTableRecord(
-                weaponSocketData,
+              weaponDBTables = this.createDBTableRecord(
+                weaponDBTables,
                 socketTypeName,
                 weapon.hash,
                 perk
@@ -203,35 +196,34 @@ export default class SearchController {
         }
       }
     }
-    return weaponSocketData;
+    return weaponDBTables;
   }
-}
-
-function createDBTableRecord(
-  weaponSocketData: WeaponDBTable,
-  tableName: WeaponTable,
-  weaponHash: string,
-  perk: Perk
-) {
-  let data = weaponSocketData[tableName];
-  if (!data) {
-    const newRecordData: WeaponDBTableRecord = {};
-    newRecordData[perk.hash.toString()] = [
-      perk.name,
-      new Set<string>().add(weaponHash),
-    ];
-    data = newRecordData;
-  } else if (data[perk.hash.toString()]) {
-    const existing = data[perk.hash.toString()];
-    existing[1] = existing[1].add(weaponHash);
-    data[perk.hash] = existing;
-  } else {
-    const newRecordData: [string, Set<string>] = [
-      perk.name,
-      new Set<string>().add(weaponHash),
-    ];
-    data[perk.hash.toString()] = newRecordData;
+  private createDBTableRecord(
+    weaponDBTables: WeaponDBTables,
+    tableName: WeaponTable,
+    weaponHash: string,
+    perk: Perk
+  ) {
+    let data = weaponDBTables[tableName];
+    if (!data) {
+      const newRecordData: WeaponDBTableRecord = {};
+      newRecordData[perk.hash.toString()] = [
+        perk.name,
+        new Set<string>().add(weaponHash),
+      ];
+      data = newRecordData;
+    } else if (data[perk.hash.toString()]) {
+      const existing = data[perk.hash.toString()];
+      existing[1] = existing[1].add(weaponHash);
+      data[perk.hash] = existing;
+    } else {
+      const newRecordData: [string, Set<string>] = [
+        perk.name,
+        new Set<string>().add(weaponHash),
+      ];
+      data[perk.hash.toString()] = newRecordData;
+    }
+    weaponDBTables[tableName] = data;
+    return weaponDBTables;
   }
-  weaponSocketData[tableName] = data;
-  return weaponSocketData;
 }
