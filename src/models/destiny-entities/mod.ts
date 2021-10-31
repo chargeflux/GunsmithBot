@@ -7,8 +7,8 @@ import { BUNGIE_URL_ROOT, EnergyType, ModCategory } from "../constants";
 
 export default class Mod implements BaseMetadata {
   name: string;
-  description: string = "";
-  source: string = "";
+  description = "";
+  source = "";
   icon: string;
   hash: number;
   category: keyof typeof ModCategory;
@@ -28,7 +28,7 @@ export default class Mod implements BaseMetadata {
     this.category = category;
     this.energyCost = rawModData.plug?.energyCost?.energyCost;
     if (rawModData.plug?.energyCost) {
-      let energyType = EnergyType[rawModData.plug.energyCost.energyType];
+      const energyType = EnergyType[rawModData.plug.energyCost.energyType];
       if (!energyType)
         throw Error(
           "Energy Type not known: " + rawModData.plug.energyCost.energyType
@@ -44,7 +44,7 @@ export default class Mod implements BaseMetadata {
   }
 
   setDescription(sandboxPerks: DestinySandboxPerkDefinition[]) {
-    let description = sandboxPerks
+    const description = sandboxPerks
       .map((x) => x.displayProperties.description)
       .filter((x) => (x ? true : false))
       .join("\n• ");
@@ -53,7 +53,7 @@ export default class Mod implements BaseMetadata {
       this.category == ModCategory[ModCategory.Fragment]
     )
       // address "[Stasis] Stasis"
-      this.description = description.replace(/\ \[.*?\]/, "");
+      this.description = description.replace(/ \[.*?\]/, "");
     else this.description = description;
   }
 

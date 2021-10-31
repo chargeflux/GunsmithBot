@@ -24,6 +24,8 @@ import {
   updateManifest,
 } from "./services/manifest/manifest-service";
 import WeaponDBService from "./services/weapon-db-service";
+import { logger, rotateLog } from "./services/logger-service";
+const _logger = logger;
 dotenv.config();
 
 const client = new Discord.Client({
@@ -36,7 +38,7 @@ let modController: ModController;
 let searchController: SearchController;
 
 async function initializeControllers() {
-  let dbService = new ManifestDBService();
+  const dbService = new ManifestDBService();
   try {
     await updateManifest(dbService).then(async (toChange: boolean) => {
       perkController = new PerkController();
@@ -44,18 +46,26 @@ async function initializeControllers() {
       modController = new ModController();
       searchController = new SearchController();
       if (toChange) {
-        let tables = await searchController.createWeaponTables(
+        const tables = await searchController.createWeaponTables(
           weaponController
         );
-        new WeaponDBService().construct(tables);
+        try {
+          new WeaponDBService().construct(tables);
+        } catch (e) {
+          _logger.fatal("Failed to construct WeaponDB. Shutting down.");
+          client.destroy();
+          process.exit();
+        }
         searchController = new SearchController();
       }
     });
-  } catch (e: any) {
-    console.error(e.stack);
-    console.error("Failed to check or update manifest");
-    if (!(await getCurrentVersion()))
-      throw Error("Failed to retrieve manifest data. Shutting down.");
+  } catch (e) {
+    _logger.error("Failed to check or update manifest", e);
+    if (!(await getCurrentVersion())) {
+      _logger.fatal("Failed to retrieve manifest data. Shutting down.");
+      client.destroy();
+      process.exit();
+    }
     perkController = new PerkController();
     weaponController = new WeaponController();
     modController = new ModController();
@@ -64,18 +74,19 @@ async function initializeControllers() {
 }
 
 function tearDownDatabases() {
-  perkController.dbService.close();
-  weaponController.dbService.close();
-  modController.dbService.close();
-  searchController.dbService.close();
-  searchController.weaponDBService.close();
+  perkController?.dbService.close();
+  weaponController?.dbService.close();
+  modController?.dbService.close();
+  searchController?.dbService.close();
+  searchController?.weaponDBService.close();
 }
 
 function startCronSchedules() {
   cron.schedule(
     "5 9 * * *",
     async () => {
-      console.log("Running update");
+      _logger.info("Running update");
+      rotateLog();
       tearDownDatabases();
       await initializeControllers();
     },
@@ -88,7 +99,7 @@ function startCronSchedules() {
 client.once("ready", async () => {
   await initializeControllers();
   startCronSchedules();
-  console.log("Ready!");
+  _logger.info("Ready!");
 });
 
 client.on("messageCreate", async (message) => {
@@ -103,28 +114,28 @@ client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
   const commandName = interaction.commandName;
   await interaction.deferReply();
+  let inputString = interaction.options.getString("input") ?? "";
   try {
-    let inputString = interaction.options.getString("input") ?? "";
     if (inputString?.length < 3 && commandName != "search") {
-      console.error(inputString, "is 3 characters or less");
+      _logger.error(inputString, "is 3 characters or less");
       interaction.editReply("Please enter a query of 3 or more characters!");
       return;
     }
     inputString = inputString.replace("’", "'");
     switch (commandName) {
       case "perk": {
-        console.log(`Searching for '${inputString}'`);
-        let results: Perk[] = await perkController.processPerkCommand(
+        _logger.info(`Searching for '${inputString}'`);
+        const results: Perk[] = await perkController.processPerkCommand(
           inputString
         );
         if (results.length != 0) {
-          console.log(
+          _logger.info(
             results.length,
             "results found!:",
             results.map((x) => x.name).join(", ")
           );
-          let embed = createPerkEmbed(results[0]);
-          console.log("Sending perk result");
+          const embed = createPerkEmbed(results[0]);
+          _logger.info("Sending perk result");
           interaction.editReply({ embeds: [embed] });
         } else {
           interaction.editReply("Invalid input. Please try again");
@@ -132,22 +143,22 @@ client.on("interactionCreate", async (interaction) => {
         return;
       }
       case "weapon": {
-        console.log(`Searching for '${inputString}'`);
-        let weaponCommand: WeaponCommand | undefined =
+        _logger.info(`Searching for '${inputString}'`);
+        const weaponCommand: WeaponCommand | undefined =
           await weaponController.processWeaponCommand(
             inputString,
             interaction.options
           );
         if (weaponCommand) {
-          let results = weaponCommand.weaponResults;
+          const results = weaponCommand.weaponResults;
           if (results.length != 0) {
-            console.log(
+            _logger.info(
               results.length,
               "results found!:",
               results.map((x) => x.name).join(", ")
             );
-            let embed = createWeaponEmbed(results[0], weaponCommand?.options);
-            console.log("Sending weapon result");
+            const embed = createWeaponEmbed(results[0], weaponCommand?.options);
+            _logger.info("Sending weapon result");
             interaction.editReply({ embeds: [embed] });
           } else {
             interaction.editReply("No results found. Please try again");
@@ -158,16 +169,18 @@ client.on("interactionCreate", async (interaction) => {
         return;
       }
       case "mod": {
-        console.log(`Searching for '${inputString}'`);
-        let results: Mod[] = await modController.processModCommand(inputString);
+        _logger.info(`Searching for '${inputString}'`);
+        const results: Mod[] = await modController.processModCommand(
+          inputString
+        );
         if (results.length != 0) {
-          console.log(
+          _logger.info(
             results.length,
             "results found!:",
             results.map((x) => x.name).join(", ")
           );
-          let embed = createModEmbed(results[0]);
-          console.log("Sending mod result");
+          const embed = createModEmbed(results[0]);
+          _logger.info("Sending mod result");
           interaction.editReply({ embeds: [embed] });
         } else {
           interaction.editReply("Invalid input. Please try again");
@@ -175,25 +188,28 @@ client.on("interactionCreate", async (interaction) => {
         return;
       }
       case "compare": {
-        console.log(`Comparing '${inputString}'`);
-        let parsedValues = inputString.split(",").map((x) => x.trim());
+        _logger.info(`Comparing '${inputString}'`);
+        const parsedValues = inputString.split(",").map((x) => x.trim());
         if (parsedValues.length != 2) {
           interaction.editReply("Please enter only 2 weapons");
           return;
         }
-        let compareWeapons: Weapon[] = [];
-        for (let value of parsedValues) {
-          let weaponCommand = await weaponController.processWeaponCommand(
+        const compareWeapons: Weapon[] = [];
+        for (const value of parsedValues) {
+          const weaponCommand = await weaponController.processWeaponCommand(
             value,
             interaction.options
           );
           if (weaponCommand && weaponCommand.weaponResults)
             compareWeapons.push(weaponCommand.weaponResults[0]);
         }
-        let processedCommand = new CompareCommand(inputString, compareWeapons);
+        const processedCommand = new CompareCommand(
+          inputString,
+          compareWeapons
+        );
         if (processedCommand.weaponStatDiff) {
-          let embed = createCompareEmbed(processedCommand);
-          console.log("Sending compare result");
+          const embed = createCompareEmbed(processedCommand);
+          _logger.info("Sending compare result");
           interaction.editReply({ embeds: [embed] });
         } else {
           interaction.editReply("Invalid input. Please try again");
@@ -201,14 +217,14 @@ client.on("interactionCreate", async (interaction) => {
         return;
       }
       case "search": {
-        console.log("Performing Search");
-        let searchCommand = await searchController.processSearchCommand(
+        _logger.info("Performing Search");
+        const searchCommand = await searchController.processSearchCommand(
           interaction.options
         );
-        let cnt = searchCommand.getCount();
+        const cnt = searchCommand.getCount();
         if (cnt != 0) {
-          let embed = createSearchEmbed(searchCommand, cnt);
-          console.log("Sending search result");
+          const embed = createSearchEmbed(searchCommand, cnt);
+          _logger.info("Sending search result");
           interaction.editReply({ embeds: [embed] });
         } else {
           interaction.editReply("Invalid input. Please try again");
@@ -218,8 +234,11 @@ client.on("interactionCreate", async (interaction) => {
       default:
         interaction.editReply("Command has not been implemented yet.");
     }
-  } catch (err: any) {
-    console.error(err.stack);
+  } catch (err) {
+    _logger.error(
+      "Failed to process command " + commandName + " with input" + inputString,
+      err
+    );
     interaction.editReply(
       "Failed to process command: **" + commandName + "**. Please try again."
     );

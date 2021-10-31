@@ -12,14 +12,17 @@ import {
   WeaponTypes,
 } from "../models/commands/search-command";
 import { WeaponTables } from "./weapon-db-service";
+import { logger } from "./logger-service";
+
+const _logger = logger.getChildLogger({ name: "Deploy" });
 
 export default function deployCommands() {
   if (process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_BOT_CLIENT_ID) {
     const rest = new REST({ version: "9" }).setToken(
       process.env.DISCORD_BOT_TOKEN
     );
-    let commands = buildCommands();
-    let guildIds = loadGuilds();
+    const commands = buildCommands();
+    const guildIds = loadGuilds();
     for (const id of guildIds) {
       rest
         .put(
@@ -32,12 +35,12 @@ export default function deployCommands() {
           }
         )
         .then(() =>
-          console.log(
+          _logger.info(
             "Successfully registered application commands for guild " + id
           )
         )
-        .catch((err: any) => {
-          console.error(err.stack);
+        .catch((err) => {
+          _logger.error("Failed to deploy commands", err);
         });
     }
   } else {
@@ -55,7 +58,7 @@ function loadGuilds(): string[] {
     throw Error("Configuration is not valid. Check NUM_GUILDS");
   }
 
-  let guildIds: string[] = [];
+  const guildIds: string[] = [];
   for (let i = 1; i < guildCount + 1; i++) {
     const id = process.env["GUILD_ID_" + i.toString()];
     if (id) {
@@ -116,12 +119,12 @@ function buildCommands() {
         option.setName("input").setDescription("Name of perk").setRequired(true)
       ),
   ];
-  let searchBuilder = new SlashCommandBuilder()
+  const searchBuilder = new SlashCommandBuilder()
     .setName("search")
     .setDescription("Search for weapons with specific perks");
   searchBuilder.addStringOption((option: SlashCommandStringOption) => {
     option.setName("class").setDescription("Search by weapon class");
-    for (let weaponType of WeaponClasses)
+    for (const weaponType of WeaponClasses)
       option.addChoice(weaponType, weaponType);
     return option;
   });
@@ -129,22 +132,22 @@ function buildCommands() {
     option
       .setName("type")
       .setDescription("Search by weapon type: Kinetic, Energy, Power");
-    for (let weaponType of WeaponTypes)
+    for (const weaponType of WeaponTypes)
       option.addChoice(weaponType, weaponType);
     return option;
   });
   searchBuilder.addStringOption((option: SlashCommandStringOption) => {
     option.setName("rarity").setDescription("Search by weapon rarity");
-    for (let rarity of WeaponRarity) option.addChoice(rarity, rarity);
+    for (const rarity of WeaponRarity) option.addChoice(rarity, rarity);
     return option;
   });
   searchBuilder.addStringOption((option: SlashCommandStringOption) => {
     option.setName("damage").setDescription("Search by weapon damage type");
-    for (let damage of WeaponDamageType) option.addChoice(damage, damage);
+    for (const damage of WeaponDamageType) option.addChoice(damage, damage);
     return option;
   });
 
-  for (let tableName of WeaponTables) {
+  for (const tableName of WeaponTables) {
     searchBuilder.addStringOption((option: SlashCommandStringOption) =>
       option.setName(tableName).setDescription("Search by " + tableName)
     );

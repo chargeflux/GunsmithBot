@@ -51,7 +51,7 @@ export default class SearchCommand implements BaseCommand {
   readonly name: string = "search";
   readonly description: string = "Search for weapons with specific perks";
   readonly archetypeToSearch: ArchetypeToSearch;
-  input: string = "";
+  input = "";
   perksToSearch: PerksToSearch;
   results: SearchResult = {};
 
@@ -63,14 +63,14 @@ export default class SearchCommand implements BaseCommand {
   }
 
   constructor(options: Discord.CommandInteractionOptionResolver) {
-    let perksToSearchRaw: PerksToSearch = {};
-    for (let name of WeaponTables) {
+    const perksToSearchRaw: PerksToSearch = {};
+    for (const name of WeaponTables) {
       perksToSearchRaw[name] = options.getString(name) ?? undefined;
     }
 
-    let archetypeToSearch: ArchetypeToSearch = {};
-    for (let name of ArchetypeQueryCommand) {
-      let value = options.getString(name) ?? "";
+    const archetypeToSearch: ArchetypeToSearch = {};
+    for (const name of ArchetypeQueryCommand) {
+      const value = options.getString(name) ?? "";
       switch (name) {
         case "type":
           if (stringIs<typeof WeaponTypes[number]>(value, WeaponTypes))
@@ -90,11 +90,13 @@ export default class SearchCommand implements BaseCommand {
           if (stringIs<typeof WeaponRarity[number]>(value, WeaponRarity))
             archetypeToSearch.rarity = value;
           break;
-        default:
+        default: {
           // https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking
           // Prevent not accounting for new query types that was added to ArchetypeQueryCommand
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const _: never = name;
           throw Error("Unknown query type");
+        }
       }
     }
 
@@ -109,7 +111,7 @@ export default class SearchCommand implements BaseCommand {
 
   validateAndAddResult(resultArchetype: WeaponBaseArchetype) {
     // validate archetype properties match between query and result
-    for (let name of ArchetypeQueryCommand) {
+    for (const name of ArchetypeQueryCommand) {
       if (this.archetypeToSearch[name])
         if (resultArchetype.weaponBase != this.archetypeToSearch[name]) return;
     }
@@ -121,7 +123,7 @@ export default class SearchCommand implements BaseCommand {
 
   getCount() {
     let count = 0;
-    for (let weaponClass in this.results) {
+    for (const weaponClass in this.results) {
       count += this.results[weaponClass].length;
     }
     return count;

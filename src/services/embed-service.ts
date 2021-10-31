@@ -6,21 +6,24 @@ import { DISCORD_BG_HEX } from "../models/constants";
 import Mod from "../models/destiny-entities/mod";
 import Perk from "../models/destiny-entities/perk";
 import { Weapon } from "../models/destiny-entities/weapon";
+import { logger } from "./logger-service";
+
+const _logger = logger.getChildLogger({ name: "Embed" });
 
 export function createPerkEmbed(perkResult: Perk): MessageEmbed {
-  console.log("Constructing perk embed");
-  let embed = new MessageEmbed()
+  _logger.info("Constructing perk embed");
+  const embed = new MessageEmbed()
     .setTitle(perkResult.category)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(perkResult.icon);
   embed.addField(perkResult.name, perkResult.description);
-  console.log("Returning embed");
+  _logger.info("Returning embed");
   return embed;
 }
 
 export function createModEmbed(modResult: Mod): MessageEmbed {
-  console.log("Constructing mod embed");
-  let embed = new MessageEmbed()
+  _logger.info("Constructing mod embed");
+  const embed = new MessageEmbed()
     .setTitle(modResult.name)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(modResult.icon);
@@ -30,15 +33,15 @@ export function createModEmbed(modResult: Mod): MessageEmbed {
       "_" + modResult.source + "_\n" + modResult.description
     );
   else embed.addField(modResult.overview, modResult.description);
-  console.log("Returning embed");
+  _logger.info("Returning embed");
   return embed;
 }
 
 export function createCompareEmbed(
   processedCommand: CompareCommand
 ): MessageEmbed {
-  console.log("Constructing compare embed");
-  let embed = new MessageEmbed().setColor(DISCORD_BG_HEX);
+  _logger.info("Constructing compare embed");
+  const embed = new MessageEmbed().setColor(DISCORD_BG_HEX);
   embed.addField(
     processedCommand.weapons[0].name,
     processedCommand.generateStatDiffString(0),
@@ -51,7 +54,7 @@ export function createCompareEmbed(
     true
   );
 
-  console.log("Returning embed");
+  _logger.info("Returning embed");
   return embed;
 }
 
@@ -63,7 +66,7 @@ export function createWeaponEmbed(
   if (options.full) embed = createFullWeaponEmbed(weaponResult);
   else if (options.stats) embed = createStatsWeaponEmbed(weaponResult);
   else {
-    console.log("Constructing weapon embed");
+    _logger.info("Constructing weapon embed");
     const description: string =
       weaponResult.baseArchetype?.toString() +
       "\n" +
@@ -75,11 +78,11 @@ export function createWeaponEmbed(
       .setThumbnail(weaponResult.icon);
 
     if (weaponResult.sockets.length <= 2 || options.isDefault) {
-      for (let socket of weaponResult.sockets) {
+      for (const socket of weaponResult.sockets) {
         embed.addField("**" + socket.name + "**", socket.toString(), true);
       }
     } else {
-      for (let socket of weaponResult.sockets) {
+      for (const socket of weaponResult.sockets) {
         if (socket.name == "Traits") {
           embed.addField("**" + socket.name + "**", socket.toString(), true);
         }
@@ -87,40 +90,40 @@ export function createWeaponEmbed(
     }
   }
 
-  let lightGGURL = "https://www.light.gg/db/items/" + weaponResult.hash;
-  let endingTextComponents = [
+  const lightGGURL = "https://www.light.gg/db/items/" + weaponResult.hash;
+  const endingTextComponents = [
     `[Screenshot](${weaponResult.screenshot})`,
     `[light.gg](${lightGGURL})`,
   ];
-  let endingText = endingTextComponents.join(" • ");
+  const endingText = endingTextComponents.join(" • ");
   embed.addField("\u200b", endingText, false);
-  console.log("Returning embed");
+  _logger.info("Returning embed");
 
   return embed;
 }
 
 function createFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
-  console.log("Constructing full weapon embed");
+  _logger.info("Constructing full weapon embed");
   const description: string =
     weaponResult.baseArchetype?.toString() +
     "\n" +
     weaponResult.baseArchetype?.intrinsic?.name +
     "\n" +
     weaponResult.flavorText;
-  let embed = new MessageEmbed()
+  const embed = new MessageEmbed()
     .setTitle(weaponResult.name)
     .setDescription(description)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(weaponResult.icon);
-  let STATS = weaponResult.stats.map((x) => x.toString()).join("\n");
+  const STATS = weaponResult.stats.map((x) => x.toString()).join("\n");
   if (weaponResult.sockets.length <= 2) {
-    for (let socket of weaponResult.sockets) {
+    for (const socket of weaponResult.sockets) {
       embed.addField("**" + socket.name + "**", socket.toString(), true);
     }
     embed.addField("**Stats**", STATS, true);
   } else {
     let fieldIdx = 0;
-    for (let socket of weaponResult.sockets) {
+    for (const socket of weaponResult.sockets) {
       if ((fieldIdx + 1) % 3 == 0) {
         if (fieldIdx + 1 == 3) embed.addField("**Stats**", STATS, true);
         else embed.addField("\u200b", "\u200b", true);
@@ -135,25 +138,25 @@ function createFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
 }
 
 function createStatsWeaponEmbed(weaponResult: Weapon): MessageEmbed {
-  console.log("Constructing stats of weapon embed");
-  let embed = new MessageEmbed()
+  _logger.info("Constructing stats of weapon embed");
+  const embed = new MessageEmbed()
     .setTitle(weaponResult.name)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(weaponResult.icon);
-  let STATS = weaponResult.stats.map((x) => x.toString()).join("\n");
+  const STATS = weaponResult.stats.map((x) => x.toString()).join("\n");
   embed.addField("**Stats**", STATS, true);
   return embed;
 }
 
 export function createSearchEmbed(searchCommand: SearchCommand, cnt: number) {
-  console.log("Constructing search embed");
-  let embed = new MessageEmbed()
+  _logger.info("Constructing search embed");
+  const embed = new MessageEmbed()
     .setTitle("Weapon Results")
     .setDescription(cnt.toString() + " weapons found")
     .setFooter(searchCommand.input)
     .setColor(DISCORD_BG_HEX);
 
-  for (let weaponClass in searchCommand.results) {
+  for (const weaponClass in searchCommand.results) {
     embed.addField(
       weaponClass,
       searchCommand.results[weaponClass]

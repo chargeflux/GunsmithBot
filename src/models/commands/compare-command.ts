@@ -7,7 +7,7 @@ export default class CompareCommand implements BaseCommand {
   readonly description: string = "Compare stats between 2 weapons";
   readonly input: string;
   readonly weapons: Weapon[];
-  statNames: string = "";
+  statNames = "";
   weaponStatDiff?: WeaponStatDiff;
 
   constructor(input: string, weapons: Weapon[]) {
@@ -21,9 +21,9 @@ export default class CompareCommand implements BaseCommand {
       throw Error("Number of weapons for comparison is not 2");
     if (!this.weapons[0].stats && !this.weapons[1].stats)
       throw Error("One or both Weapons are missing stat values");
-    let set1 = new Set(this.weapons[0].stats.map((x) => x.stat.statType));
-    let set2 = new Set(this.weapons[1].stats.map((x) => x.stat.statType));
-    let commonStats = new Set([...set1].filter((x) => set2.has(x)));
+    const set1 = new Set(this.weapons[0].stats.map((x) => x.stat.statType));
+    const set2 = new Set(this.weapons[1].stats.map((x) => x.stat.statType));
+    const commonStats = new Set([...set1].filter((x) => set2.has(x)));
     let statsW1 = this.weapons[0].stats.filter((x) =>
       [...commonStats].includes(x.stat.statType)
     );
@@ -45,9 +45,9 @@ export default class CompareCommand implements BaseCommand {
         : 0
     );
 
-    let statBaseValues = [];
-    let statDiffValues = [];
-    let statNames = [];
+    const statBaseValues = [];
+    const statDiffValues = [];
+    const statNames = [];
     for (let i = 0; i < statsW1.length; i++) {
       statNames.push(statsW1[i].stat.statType);
       statBaseValues.push(statsW1[i].stat.value);
@@ -58,11 +58,11 @@ export default class CompareCommand implements BaseCommand {
   }
 
   generateStatDiffString(idx: number): string {
-    let stats: string[] = [];
+    const stats: string[] = [];
     if (!this.weaponStatDiff) throw Error("Stat Diffs were not computed");
     if (idx == 0) {
-      for (let data of this.weaponStatDiff) {
-        let [baseValue, diffValue]: number[] = data;
+      for (const data of this.weaponStatDiff) {
+        const [baseValue, diffValue]: number[] = data;
         if (diffValue > 0)
           stats.push("**" + baseValue.toString() + ` (+${diffValue})**`);
         else stats.push(baseValue.toString());
@@ -70,8 +70,8 @@ export default class CompareCommand implements BaseCommand {
       return stats.join("\n");
     }
     if (idx == 1) {
-      for (let data of this.weaponStatDiff) {
-        let [baseValue, diffValue]: number[] = data;
+      for (const data of this.weaponStatDiff) {
+        const [baseValue, diffValue]: number[] = data;
         if (diffValue < 0)
           stats.push(
             "**" +

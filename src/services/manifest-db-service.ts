@@ -3,6 +3,9 @@ import fs from "fs";
 import { ManifestTable } from "../models/bungie-api/partial-destiny-manifest";
 import { DBTableRecord } from "../models/db";
 import { MANIFEST_DATA_LOCATION, TABLES } from "./manifest/manifest-service";
+import { logger } from "./logger-service";
+
+const _logger = logger.getChildLogger({ name: "ManifestDB" });
 
 const dbName = "manifest-db.sqlite3";
 
@@ -20,7 +23,7 @@ export default class ManifestDBService {
   private getOrInitialize(): BetterSqlite3.Database {
     if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);
-      console.warn(
+      _logger.warn(
         "DB and manifest data location does not exist. Creating folder"
       );
     }
@@ -34,28 +37,23 @@ export default class ManifestDBService {
       if (fs.existsSync(MANIFEST_DATA_LOCATION + dbName))
         fs.unlinkSync(MANIFEST_DATA_LOCATION + dbName);
       this.db = this.getOrInitialize();
-    } catch (e: any) {
-      console.log(e);
+    } catch (e) {
+      _logger.error(e);
       throw new Error("Failed to delete manifest DB");
     }
   }
 
   construct(tables: ManifestTable[]) {
-    try {
-      this.reinitialize();
-      console.log("Reinitialized DB");
-      this.createTables();
-      console.log("Created tables in DB");
-      this.addRecords(tables);
-      console.log("Added data to DB");
-    } catch (err: any) {
-      console.error(err.stack);
-      throw err;
-    }
+    this.reinitialize();
+    _logger.info("Reinitialized DB");
+    this.createTables();
+    _logger.info("Created tables in DB");
+    this.addRecords(tables);
+    _logger.info("Added data to DB");
   }
 
   private createTables() {
-    for (let table of TABLES) {
+    for (const table of TABLES) {
       // Using whitelisted table names
       this.db.exec(
         "CREATE TABLE IF NOT EXISTS " +
@@ -74,7 +72,7 @@ export default class ManifestDBService {
           JSON.stringify(record.json)
         );
     });
-    for (let table of tables) {
+    for (const table of tables) {
       const stmt = this.db.prepare(
         // Using whitelisted table names
         "INSERT INTO " + table.name + " (hash, name, json) VALUES (?, ?, ?)"
@@ -84,7 +82,6 @@ export default class ManifestDBService {
   }
 
   close(): void {
-    //console.log("Closing DB");
     this.db?.close();
   }
 }

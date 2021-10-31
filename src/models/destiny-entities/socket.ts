@@ -17,11 +17,11 @@ export default class Socket {
   }
 
   toString(canRoll = true) {
-    let filteredPerks = this.perks.filter((x) => {
+    const filteredPerks = this.perks.filter((x) => {
       if (x.currentlyCanRoll == canRoll) return x;
     });
 
-    let uniquePerks = new Map<number, Perk>(
+    const uniquePerks = new Map<number, Perk>(
       filteredPerks.map((x) => [x.hash, x])
     );
 

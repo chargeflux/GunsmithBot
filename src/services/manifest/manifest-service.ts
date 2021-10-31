@@ -9,6 +9,9 @@ import {
   PartialDestinyManifest,
 } from "../../models/bungie-api/partial-destiny-manifest";
 import ManifestDBService from "../manifest-db-service";
+import { logger } from "../logger-service";
+
+const _logger = logger.getChildLogger({ name: "ManifestService" });
 
 const BUNGIE_API_MANIFEST_URL =
   "https://www.bungie.net/Platform/Destiny2/Manifest/";
@@ -25,38 +28,33 @@ export const TABLES = [
 ] as const;
 
 export async function updateManifest(db: ManifestDBService): Promise<boolean> {
-  var manifest = await getManifest();
-  console.log("Checking if manifest is up to date");
+  const manifest = await getManifest();
+  _logger.info("Checking if manifest is up to date");
   if (manifest.Response.version != (await getCurrentVersion())) {
-    console.log("Version is outdated. Updating manifest");
+    _logger.info("Version is outdated. Updating manifest");
     const tables = await getManifestTables(manifest);
     processAndSaveManifestDataJSON(manifest, tables);
-    console.log("Saved new processed manifest tables to JSON");
+    _logger.info("Saved new processed manifest tables to JSON");
     db.construct(tables);
-    console.log("Saved new processed manifest tables to DB");
+    _logger.info("Saved new processed manifest tables to DB");
     return true;
   }
-  console.log("Manifest is up to date");
+  _logger.info("Manifest is up to date");
   return false;
 }
 
 async function getManifest(): Promise<PartialDestinyManifest> {
   let result: PartialDestinyManifest;
   if (process.env.BUNGIE_KEY) {
-    try {
-      var response = await axios.get<PartialDestinyManifest>(
-        BUNGIE_API_MANIFEST_URL,
-        {
-          headers: { "X-API-Key": process.env.BUNGIE_KEY },
-        }
-      );
-      console.log("Received manifest");
-      result = response.data;
-      return result;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
+    const response = await axios.get<PartialDestinyManifest>(
+      BUNGIE_API_MANIFEST_URL,
+      {
+        headers: { "X-API-Key": process.env.BUNGIE_KEY },
+      }
+    );
+    _logger.info("Received manifest");
+    result = response.data;
+    return result;
   } else {
     throw new Error("Configuration is invalid. Check BUNGIE_KEY");
   }
@@ -65,23 +63,18 @@ async function getManifest(): Promise<PartialDestinyManifest> {
 async function getManifestTables(
   manifest: PartialDestinyManifest
 ): Promise<ManifestTable[]> {
-  var manifestTables: ManifestTable[] = [];
+  const manifestTables: ManifestTable[] = [];
   if (process.env.BUNGIE_KEY) {
-    for (var table of TABLES) {
+    for (const table of TABLES) {
       const url = manifest.Response.jsonWorldComponentContentPaths.en[table];
-      try {
-        var response = await axios.get<
-          DestinyDefinitionFrom<DestinyManifestComponentName>[]
-        >("https://bungie.net" + url, {
-          headers: { "X-API-Key": process.env.BUNGIE_KEY },
-        });
-        console.log("Received manifest for:", table);
-        const manifestTable = new ManifestTable(table, response.data);
-        manifestTables.push(manifestTable);
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
+      const response = await axios.get<
+        DestinyDefinitionFrom<DestinyManifestComponentName>[]
+      >("https://bungie.net" + url, {
+        headers: { "X-API-Key": process.env.BUNGIE_KEY },
+      });
+      _logger.info("Received manifest for:", table);
+      const manifestTable = new ManifestTable(table, response.data);
+      manifestTables.push(manifestTable);
     }
   } else {
     throw new Error("Configuration is invalid. Check BUNGIE_KEY");
@@ -101,31 +94,34 @@ async function processAndSaveManifestDataJSON(
       MANIFEST_DATA_LOCATION + "LatestManifest.json",
       JSON.stringify(latestManifest, null, 2)
     );
-    console.log("Saved latest manifest");
-    for (var table of manifestTables) {
+    _logger.info("Saved latest manifest");
+    for (const table of manifestTables) {
       fs.writeFileSync(
         MANIFEST_DATA_LOCATION + table.name + "Table.json",
         JSON.stringify(table.data, null, 2)
       );
-      console.log("Saved table:", table.name);
+      _logger.info("Saved table:", table.name);
     }
     fs.writeFileSync(
       MANIFEST_DATA_LOCATION + "version",
       latestManifest.Response.version
     );
-    console.log("Saved version:", latestManifest.Response.version);
-  } catch (err: any) {
-    console.log(err);
+    _logger.info("Saved version:", latestManifest.Response.version);
+  } catch (err) {
+    _logger.info(err);
     throw Error("Failed to write manifest");
   }
 }
 
 export async function getCurrentVersion(): Promise<string> {
   try {
-    var version = fs.readFileSync(MANIFEST_DATA_LOCATION + "version", "utf-8");
+    const version = fs.readFileSync(
+      MANIFEST_DATA_LOCATION + "version",
+      "utf-8"
+    );
     return version;
-  } catch (err: any) {
-    console.log(err);
+  } catch {
+    _logger.error("Failed to open version in " + MANIFEST_DATA_LOCATION);
     return "";
   }
 }

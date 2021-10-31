@@ -1,6 +1,9 @@
 import { DestinySandboxPerkDefinition } from "bungie-api-ts/destiny2";
 import BetterSqlite3 from "better-sqlite3";
 import { DBTableRecordJSON } from "../../models/db";
+import { logger } from "../logger-service";
+
+const _logger = logger.getChildLogger({ name: "SandboxPerkService" });
 
 export async function getSandboxPerksByName(
   db: BetterSqlite3.Database,
@@ -13,9 +16,8 @@ export async function getSandboxPerksByName(
       )
       .all("%" + query + "%");
     return items.map((x) => JSON.parse(x.json));
-  } catch (e: any) {
-    console.error(e.stack);
-    console.error("Failed to get sandbox perk by name");
+  } catch (e) {
+    _logger.error("Failed to get sandbox perk by name", e);
     throw e;
   }
 }
@@ -33,9 +35,8 @@ export async function getSandboxPerksByHashes(
       )
       .all(hashes.map((x) => x.toString()));
     return items.map((x) => JSON.parse(x.json));
-  } catch (e: any) {
-    console.error(e.stack);
-    console.error("Failed to get sandbox perk by hash");
+  } catch (e) {
+    _logger.error("Failed to get sandbox perk by hash", e);
     throw e;
   }
 }

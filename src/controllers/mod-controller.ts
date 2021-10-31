@@ -15,18 +15,18 @@ export default class ModController {
 
   async processModCommand(input?: string): Promise<Mod[]> {
     if (input) {
-      var modCommand = new ModCommand(input);
+      const modCommand = new ModCommand(input);
       const results = await getInventoryItemsByName(this.dbService.db, input);
       modCommand.processResults(results);
 
-      for (let mod of modCommand.modResults) {
-        let sandboxPerks = await getSandboxPerksByHashes(
+      for (const mod of modCommand.modResults) {
+        const sandboxPerks = await getSandboxPerksByHashes(
           this.dbService.db,
           mod.perkHashes
         );
         mod.setDescription(sandboxPerks);
         if (mod.collectibleHash) {
-          let collectible = await getCollectibleByHash(
+          const collectible = await getCollectibleByHash(
             this.dbService.db,
             mod.collectibleHash
           );
@@ -34,7 +34,7 @@ export default class ModController {
         }
       }
 
-      var modResults = orderResultsByName(input, modCommand.modResults);
+      const modResults = orderResultsByName(input, modCommand.modResults);
       return modResults;
     }
     return [];

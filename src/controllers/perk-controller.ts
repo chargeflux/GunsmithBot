@@ -13,10 +13,10 @@ export default class PerkController {
 
   async processPerkCommand(input?: string): Promise<Perk[]> {
     if (input) {
-      var perkCommand = new PerkCommand(input);
+      const perkCommand = new PerkCommand(input);
       const results = await getInventoryItemsByName(this.dbService.db, input);
       await perkCommand.processResults(results);
-      var perkResults = orderResultsByName(input, perkCommand.perkResults);
+      const perkResults = orderResultsByName(input, perkCommand.perkResults);
       return perkResults;
     }
     return [];

@@ -109,8 +109,8 @@ export class ManifestTable {
   private convertToRecords(
     data: DestinyDefinitionFrom<DestinyManifestComponentName>[]
   ): DBTableRecord[] {
-    var dbTableRecords: DBTableRecord[] = [];
-    for (let k in data) {
+    const dbTableRecords: DBTableRecord[] = [];
+    for (const k in data) {
       dbTableRecords.push(new DBTableRecord(data[k].hash.toString(), data[k]));
     }
     return dbTableRecords;

@@ -5,8 +5,8 @@ import { Weapon } from "../destiny-entities/weapon";
 import BaseCommand from "./base-command";
 
 export default class WeaponCommand implements BaseCommand {
-  name: string = "weapon";
-  description: string = "Get information about a weapon";
+  name = "weapon";
+  description = "Get information about a weapon";
   input: string;
   weaponResults: Weapon[] = [];
   options: WeaponCommandOptions;
@@ -26,7 +26,7 @@ export default class WeaponCommand implements BaseCommand {
   processWeaponResults(results: DestinyInventoryItemDefinition[]) {
     for (const result of results) {
       if (validateWeaponSearch(result)) {
-        let weapon = new Weapon(result, this.options);
+        const weapon = new Weapon(result, this.options);
         this.weaponResults.push(weapon);
       }
     }
@@ -50,9 +50,9 @@ export class WeaponCommandOptions {
     );
   }
   constructor(
-    full: boolean = false,
-    isDefault: boolean = false,
-    stats: boolean = false
+    full = false,
+    isDefault = false,
+    stats = false
   ) {
     this.full = full;
     this.isDefault = isDefault;

@@ -1,5 +1,8 @@
 import BetterSqlite3 from "better-sqlite3";
 import { DBTableRecordJSON } from "../../models/db";
+import { logger } from "../logger-service";
+
+const _logger = logger.getChildLogger({ name: "PowerCapService" });
 
 export default async function getPowerCap(
   db: BetterSqlite3.Database,
@@ -17,9 +20,8 @@ export default async function getPowerCap(
       .map((x) => JSON.parse(x.json).powerCap)
       .sort()
       .reverse(); // newest first
-  } catch (e: any) {
-    console.error(e.stack);
-    console.error("Failed to get power cap levels");
+  } catch (e) {
+    _logger.error("Failed to get power cap levels", e);
     return [];
   }
 }

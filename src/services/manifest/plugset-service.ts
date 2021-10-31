@@ -4,6 +4,9 @@ import {
 } from "bungie-api-ts/destiny2";
 import BetterSqlite3 from "better-sqlite3";
 import { DBTableRecordJSON } from "../../models/db";
+import { logger } from "../logger-service";
+
+const _logger = logger.getChildLogger({ name: "PlugsetService" });
 
 export async function getPlugItemHash(
   db: BetterSqlite3.Database,
@@ -15,9 +18,8 @@ export async function getPlugItemHash(
       .get(hash.toString());
     const jsonRes: DestinyPlugSetDefinition = JSON.parse(result.json);
     return jsonRes.reusablePlugItems[0].plugItemHash;
-  } catch (e: any) {
-    console.error(e.stack);
-    console.error("Failed to get plugItemHash");
+  } catch (e) {
+    _logger.error("Failed to get plugItemHash");
     throw e;
   }
 }
@@ -32,9 +34,8 @@ export async function getPlugItemsByHash(
       .get(hash.toString());
     const json_res: DestinyPlugSetDefinition = JSON.parse(result.json);
     return json_res.reusablePlugItems;
-  } catch (e: any) {
-    console.error(e.stack);
-    console.error("Failed to get plugItems by hash");
+  } catch (e) {
+    _logger.error("Failed to get plugItems by hash", e);
     throw e;
   }
 }

@@ -17,6 +17,9 @@ import {
 } from "../constants";
 import Perk from "./perk";
 import Socket from "./socket";
+import { logger } from "../../services/logger-service";
+
+const _logger = logger.getChildLogger({ name: "Weapon" });
 
 export class Weapon implements BaseMetadata {
   name: string;
@@ -49,12 +52,12 @@ export class Weapon implements BaseMetadata {
       else throw Error("Stats for weapon are missing: " + this.name);
     }
 
-    let powerCapHashes =
+    const powerCapHashes =
       rawWeaponData.quality?.versions.map((x) => x.powerCapHash) ?? [];
-    let itemCategoryHashes = rawWeaponData.itemCategoryHashes ?? [];
-    let weaponTierTypeHash = rawWeaponData.inventory?.tierTypeHash;
-    let weaponDamageTypeId = rawWeaponData.defaultDamageType;
-    let sockets = rawWeaponData.sockets;
+    const itemCategoryHashes = rawWeaponData.itemCategoryHashes ?? [];
+    const weaponTierTypeHash = rawWeaponData.inventory?.tierTypeHash;
+    const weaponDamageTypeId = rawWeaponData.defaultDamageType;
+    const sockets = rawWeaponData.sockets;
 
     this.rawData = new WeaponRawData(
       this.name,
@@ -79,23 +82,24 @@ export class Weapon implements BaseMetadata {
   }
 
   processStats(statsData: DestinyItemStatBlockDefinition): WeaponStatBlock[] {
-    let weaponStats: WeaponStatBlock[] = [];
+    const weaponStats: WeaponStatBlock[] = [];
     let idx = 0;
-    for (let statHash in statsData.stats) {
-      let stat: DestinyInventoryItemStatDefinition = statsData.stats[statHash];
-      let statType = WeaponStat[statHash] as
+    for (const statHash in statsData.stats) {
+      const stat: DestinyInventoryItemStatDefinition =
+        statsData.stats[statHash];
+      const statType = WeaponStat[statHash] as
         | keyof typeof WeaponStat
         | undefined;
       if (!statType) {
-        console.debug("Failed to match weapon stat hash:", statHash);
+        _logger.debug("Failed to match weapon stat hash:", statHash);
         continue;
       }
-      let statValue = stat.value;
+      const statValue = stat.value;
       if (statValue == 0) {
-        console.debug(statType, "had a value of 0");
+        _logger.debug(statType, "had a value of 0");
         continue;
       }
-      let weaponStatBlock = new WeaponStatBlock(
+      const weaponStatBlock = new WeaponStatBlock(
         idx,
         new WeaponStatData(statType, statValue)
       );
@@ -125,12 +129,12 @@ export class MinimalWeapon {
     this.name = rawWeaponData.displayProperties.name;
     this.hasRandomRolls = rawWeaponData.displaySource != "";
     this.hash = rawWeaponData.hash;
-    let powerCapHashes =
+    const powerCapHashes =
       rawWeaponData.quality?.versions.map((x) => x.powerCapHash) ?? [];
-    let itemCategoryHashes = rawWeaponData.itemCategoryHashes ?? [];
-    let weaponTierTypeHash = rawWeaponData.inventory?.tierTypeHash;
-    let weaponDamageTypeId = rawWeaponData.defaultDamageType;
-    let sockets = rawWeaponData.sockets;
+    const itemCategoryHashes = rawWeaponData.itemCategoryHashes ?? [];
+    const weaponTierTypeHash = rawWeaponData.inventory?.tierTypeHash;
+    const weaponDamageTypeId = rawWeaponData.defaultDamageType;
+    const sockets = rawWeaponData.sockets;
 
     this.rawData = new WeaponRawData(
       this.name,

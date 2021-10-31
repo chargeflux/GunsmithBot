@@ -2,6 +2,9 @@ import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import { ModCategory } from "../constants";
 import Mod from "../destiny-entities/mod";
 import BaseCommand from "./base-command";
+import { logger } from "../../services/logger-service";
+
+const _logger = logger.getChildLogger({ name: "Mod" });
 
 export default class ModCommand implements BaseCommand {
   readonly name: string = "mod";
@@ -44,7 +47,7 @@ export default class ModCommand implements BaseCommand {
         // Armor perks from Armor 1.0
         continue;
       else {
-        console.error(
+        _logger.error(
           "Could not identify mod category hashes: " +
             result.itemCategoryHashes +
             " - " +
@@ -53,10 +56,10 @@ export default class ModCommand implements BaseCommand {
         continue;
       }
       try {
-        let mod = new Mod(result, modCategoryName, armorLocation);
+        const mod = new Mod(result, modCategoryName, armorLocation);
         this.modResults.push(mod);
-      } catch (e: any) {
-        console.log(e);
+      } catch (e: unknown) {
+        _logger.error(e);
         continue;
       }
     }

@@ -14,7 +14,7 @@ Depending on the value of `NUM_GUILDS`, add entries of `GUILD_ID_n` where n is i
 
 ## Installation
 
-Node v16 is recommended.
+Node.js v16 is recommended.
 
 ```bash
 npm install

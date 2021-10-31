@@ -13,7 +13,7 @@ export default class Perk implements BaseMetadata {
   constructor(
     rawPerkData: DestinyInventoryItemDefinition,
     category: keyof typeof PlugCategory,
-    currentlyCanRoll: boolean = true
+    currentlyCanRoll = true
   ) {
     this.name = rawPerkData.displayProperties.name;
     this.description = rawPerkData.displayProperties.description;

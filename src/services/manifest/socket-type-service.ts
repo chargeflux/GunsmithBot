@@ -1,6 +1,9 @@
 import { DestinySocketTypeDefinition } from "bungie-api-ts/destiny2";
 import BetterSqlite3 from "better-sqlite3";
 import { DBTableRecordJSON } from "../../models/db";
+import { logger } from "../logger-service";
+
+const _logger = logger.getChildLogger({ name: "SocketService" });
 
 export async function getSocketTypeHash(
   db: BetterSqlite3.Database,
@@ -12,9 +15,8 @@ export async function getSocketTypeHash(
       .get(hash.toString());
     const jsonRes: DestinySocketTypeDefinition = JSON.parse(result.json);
     return jsonRes.plugWhitelist[0].categoryHash; // assume plugWhiteList has length of 1
-  } catch (e: any) {
-    console.error(e.stack);
-    console.error("Failed to get socketTypeHash");
+  } catch (e) {
+    _logger.error("Failed to get socketTypeHash", e);
     throw e;
   }
 }

@@ -3,6 +3,9 @@ import fs from "fs";
 import { WeaponDBTable, WeaponDBTableRecord } from "../models/db";
 import { stringIs } from "../utils/validator";
 import { MANIFEST_DATA_LOCATION } from "./manifest/manifest-service";
+import { logger } from "./logger-service";
+
+const _logger = logger.getChildLogger({ name: "WeaponDB" });
 
 export enum WeaponTableHash {
   "arrows" = 1257608559,
@@ -58,7 +61,7 @@ export default class WeaponDBService {
   private getOrInitialize(): BetterSqlite3.Database {
     if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);
-      console.warn(
+      _logger.warn(
         "DB and manifest data location does not exist. Creating folder"
       );
     }
@@ -72,28 +75,23 @@ export default class WeaponDBService {
       if (fs.existsSync(MANIFEST_DATA_LOCATION + dbName))
         fs.unlinkSync(MANIFEST_DATA_LOCATION + dbName);
       this.db = this.getOrInitialize();
-    } catch (e: any) {
-      console.log(e);
+    } catch (e) {
+      _logger.error(e);
       throw new Error("Failed to delete manifest DB");
     }
   }
 
   construct(tables: WeaponDBTable) {
-    try {
-      this.reinitialize();
-      console.log("Reinitialized DB");
-      this.createTables();
-      console.log("Created tables in DB");
-      this.addRecords(tables);
-      console.log("Added data to DB");
-    } catch (err: any) {
-      console.error(err.stack);
-      throw err;
-    }
+    this.reinitialize();
+    _logger.info("Reinitialized DB");
+    this.createTables();
+    _logger.info("Created tables in DB");
+    this.addRecords(tables);
+    _logger.info("Added data to DB");
   }
 
   private createTables() {
-    for (let table of WeaponTables) {
+    for (const table of WeaponTables) {
       // Using whitelisted table names
       this.db.exec(
         "CREATE TABLE IF NOT EXISTS " +
@@ -114,7 +112,7 @@ export default class WeaponDBService {
           );
       }
     );
-    for (let table in tables) {
+    for (const table in tables) {
       const stmt = this.db.prepare(
         // Using whitelisted table names
         "INSERT INTO " + table + " (hash, name, weaponHashIds) VALUES (?, ?, ?)"
@@ -125,7 +123,6 @@ export default class WeaponDBService {
   }
 
   close(): void {
-    //console.log("Closing DB");
     this.db?.close();
   }
 }

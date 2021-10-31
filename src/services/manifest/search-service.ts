@@ -4,6 +4,9 @@ import {
   WeaponDBTableRecordResult,
 } from "../../models/db";
 import { WeaponTable } from "../weapon-db-service";
+import { logger } from "../logger-service";
+
+const _logger = logger.getChildLogger({ name: "SearchService" });
 
 export async function getFuzzyQueryNames(
   db: BetterSqlite3.Database,
@@ -15,9 +18,8 @@ export async function getFuzzyQueryNames(
       .prepare("SELECT name FROM " + type + " WHERE name LIKE ?")
       .all("%" + query + "%");
     return results.map((x) => x.name);
-  } catch (e: any) {
-    console.error(e.stack);
-    console.error("Failed to get fuzzy matches of name");
+  } catch (e) {
+    _logger.error("Failed to get fuzzy matches of name", e);
     return [];
   }
 }
@@ -31,12 +33,15 @@ export async function getWeaponsByExactName(
     const results: WeaponDBTableRecordResult = db
       .prepare("SELECT weaponHashIds FROM " + type + " WHERE name is ?")
       .get(query);
-    let parsedResults = results.weaponHashIds
+    const parsedResults = results.weaponHashIds
       .split(",")
       .map((x) => parseInt(x));
     return parsedResults;
-  } catch (e: any) {
-    console.error(`Failed to get weapons in table ${type} by name: ${query}`);
+  } catch (e) {
+    _logger.error(
+      `Failed to get weapons in table ${type} by name: ${query}`,
+      e
+    );
     return [];
   }
 }

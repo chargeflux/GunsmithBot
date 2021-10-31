@@ -33,7 +33,9 @@ import {
   orderResultsByName,
   orderResultsByRandomOrTierType,
 } from "../utils/utils";
-import BetterSqlite3 from "better-sqlite3";
+import { logger } from "../services/logger-service";
+
+const _logger = logger.getChildLogger({ name: "Weapon" });
 
 export default class WeaponController {
   dbService: ManifestDBService;
@@ -47,20 +49,20 @@ export default class WeaponController {
     options: Discord.CommandInteractionOptionResolver
   ): Promise<WeaponCommand | undefined> {
     if (input) {
-      var weaponCommand = new WeaponCommand(input, options);
+      const weaponCommand = new WeaponCommand(input, options);
       const results = await getInventoryItemsByName(this.dbService.db, input);
       weaponCommand.processWeaponResults(results);
-      for (let weapon of weaponCommand.weaponResults) {
-        let powerCapValues = await getPowerCap(
+      for (const weapon of weaponCommand.weaponResults) {
+        const powerCapValues = await getPowerCap(
           this.dbService.db,
           weapon.rawData.powerCapHashes
         );
         weapon.setPowerCapValues(powerCapValues);
-        let [sockets, intrinsic] = await this.processSocketData(
+        const [sockets, intrinsic] = await this.processSocketData(
           weaponCommand.options.isDefault,
           weapon.rawData.socketData
         );
-        let baseArchetype = await processBaseArchetype(
+        const baseArchetype = await processBaseArchetype(
           weapon.rawData,
           intrinsic
         );
@@ -71,7 +73,7 @@ export default class WeaponController {
         weapon.setSockets(sockets);
       }
 
-      let orderedResults = orderResultsByRandomOrTierType(
+      const orderedResults = orderResultsByRandomOrTierType(
         weaponCommand.weaponResults
       );
 
@@ -91,10 +93,10 @@ export default class WeaponController {
     }
     let intrinsic;
     let sockets: Socket[] = [];
-    for (let category of socketData.socketCategories) {
+    for (const category of socketData.socketCategories) {
       if (category.socketCategoryHash == SocketCategoryHash.Intrinsics) {
-        let index = category.socketIndexes[0]; // assume only one intrinisic
-        let socket = socketData.socketEntries[index];
+        const index = category.socketIndexes[0]; // assume only one intrinisic
+        const socket = socketData.socketEntries[index];
         intrinsic = await this.processSocketIntrinisic(socket);
       }
       if (category.socketCategoryHash == SocketCategoryHash.WeaponPerks) {
@@ -114,25 +116,25 @@ export default class WeaponController {
     socketEntry: DestinyItemSocketEntryDefinition
   ): Promise<Perk | undefined> {
     if (!socketEntry.reusablePlugSetHash) {
-      console.error(
+      logger.error(
         "reusablePlugSetHash not found in socket entry for intrinisic"
       );
       return;
     }
 
-    let plugItemHash = await getPlugItemHash(
+    const plugItemHash = await getPlugItemHash(
       this.dbService.db,
       socketEntry.reusablePlugSetHash
     );
 
-    let item = await getInventoryItemByHash(this.dbService.db, plugItemHash);
+    const item = await getInventoryItemByHash(this.dbService.db, plugItemHash);
     const plugCategoryHash = item.plug?.plugCategoryHash;
     if (plugCategoryHash) {
-      let category = PlugCategory[plugCategoryHash] as
+      const category = PlugCategory[plugCategoryHash] as
         | keyof typeof PlugCategory
         | undefined;
       if (!category) {
-        console.error(
+        _logger.error(
           "Unknown plug category hash for intrinsic:",
           plugCategoryHash
         ); // expect only one valid intrinsic and should be matched accordingly
@@ -147,24 +149,24 @@ export default class WeaponController {
     socketIndices: number[],
     isDefault: boolean
   ): Promise<Socket[]> {
-    let sockets: Socket[] = [];
-    let defaultSockets: Socket[] = [];
+    const sockets: Socket[] = [];
+    const defaultSockets: Socket[] = [];
     let orderIdx = 0;
-    for (let index of socketIndices) {
-      let socket = socketEntries[index];
-      let socketTypeHash = socket.socketTypeHash;
+    for (const index of socketIndices) {
+      const socket = socketEntries[index];
+      const socketTypeHash = socket.socketTypeHash;
 
-      let plugCategoryHash = await getSocketTypeHash(
+      const plugCategoryHash = await getSocketTypeHash(
         this.dbService.db,
         socketTypeHash
       );
-      let plugCategory = PlugCategory[plugCategoryHash] as
+      const plugCategory = PlugCategory[plugCategoryHash] as
         | keyof typeof PlugCategory
         | undefined;
       if (!plugCategory) continue;
 
       if (isDefault) {
-        let defaultPlugHashes = socket.reusablePlugItems.map(
+        const defaultPlugHashes = socket.reusablePlugItems.map(
           (x) => x.plugItemHash
         );
         defaultPlugHashes.push(socket.singleInitialItemHash);
@@ -173,8 +175,8 @@ export default class WeaponController {
           this.dbService.db,
           defaultPlugHashes
         );
-        let defaultPerks = [];
-        for (let result of results) {
+        const defaultPerks = [];
+        for (const result of results) {
           defaultPerks.push(new Perk(result, plugCategory));
         }
         defaultSockets.push(
@@ -195,25 +197,28 @@ export default class WeaponController {
       else if (socket.reusablePlugItems)
         plugSetHash = socket.reusablePlugSetHash;
       else {
-        console.error(
+        _logger.error(
           "randomizedPlugSetHash or reusablePlugSetHash not found in socket entry for weapon perks"
         );
         continue;
       }
       if (!plugSetHash) {
-        console.error("plugSetHash is undefined");
+        _logger.debug("plugSetHash is undefined");
         continue;
       }
 
-      var plugItems = await getPlugItemsByHash(this.dbService.db, plugSetHash);
+      const plugItems = await getPlugItemsByHash(
+        this.dbService.db,
+        plugSetHash
+      );
 
-      let perks = [];
-      let items = await getInventoryItemsByHashes(
+      const perks = [];
+      const items = await getInventoryItemsByHashes(
         this.dbService.db,
         plugItems.map((x) => x.plugItemHash)
       );
       for (let i = 0; i < plugItems.length; i++) {
-        let currentItem = items.find(
+        const currentItem = items.find(
           (x) => x.hash == plugItems[i].plugItemHash
         );
         if (currentItem)
@@ -235,9 +240,9 @@ export async function processBaseArchetype(
   let weaponBase: keyof typeof WeaponBase | undefined;
   let weaponClass: keyof typeof WeaponBase | undefined;
   let weaponTierType: keyof typeof WeaponTierType | undefined;
-  let isKinetic: boolean = false;
-  for (let hash of weaponRawData.itemCategoryHashes.sort().slice(1)) {
-    let category = WeaponBase[hash] as keyof typeof WeaponBase | undefined;
+  let isKinetic = false;
+  for (const hash of weaponRawData.itemCategoryHashes.sort().slice(1)) {
+    const category = WeaponBase[hash] as keyof typeof WeaponBase | undefined;
     if (category) {
       // runtime check
       if (hash < 5) {
@@ -249,7 +254,7 @@ export async function processBaseArchetype(
   if (!weaponBase) throw Error("Failed to parse weapon base class"); // also accounts for isEnergy
   if (!weaponClass) throw Error("Failed to parse weapon class");
 
-  let tierTypeHash = weaponRawData.weaponTierTypeHash;
+  const tierTypeHash = weaponRawData.weaponTierTypeHash;
   if (tierTypeHash)
     weaponTierType = WeaponTierType[tierTypeHash] as
       | keyof typeof WeaponTierType
@@ -258,14 +263,14 @@ export async function processBaseArchetype(
   if (!weaponTierType)
     throw Error(`Failed to parse tier type hash ${tierTypeHash}`);
 
-  let weaponDamageTypeId = weaponRawData.weaponDamageTypeId;
-  let damageType = DamageType[weaponDamageTypeId] as
+  const weaponDamageTypeId = weaponRawData.weaponDamageTypeId;
+  const damageType = DamageType[weaponDamageTypeId] as
     | keyof typeof DamageType
     | undefined;
   if (!damageType)
     throw Error(`Failed to parse damage type hash ${weaponDamageTypeId}`);
 
-  let baseArchetype = new WeaponBaseArchetype(
+  const baseArchetype = new WeaponBaseArchetype(
     weaponRawData.name,
     weaponBase,
     weaponClass,

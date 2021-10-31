@@ -27,8 +27,8 @@ export function orderResultsByName<k extends BaseMetadata>(
 export function orderResultsByRandomOrTierType(
   weaponResults: Weapon[]
 ): Weapon[] {
-  let weapons: Weapon[] = [];
-  for (let weapon of weaponResults) {
+  const weapons: Weapon[] = [];
+  for (const weapon of weaponResults) {
     if (weapon.baseArchetype) {
       if (
         weapon.hasRandomRolls ||
@@ -44,7 +44,7 @@ export function orderResultsByRandomOrTierType(
 export function validateWeaponSearch(
   rawWeaponData: DestinyInventoryItemDefinition
 ): boolean {
-  let categoryHashes = rawWeaponData.itemCategoryHashes ?? [];
+  const categoryHashes = rawWeaponData.itemCategoryHashes ?? [];
   if (!categoryHashes.includes(WeaponBase.Weapon)) return false;
   if (categoryHashes.includes(WeaponBase.Dummy)) return false;
   if (!rawWeaponData.sockets) return false;
