@@ -236,7 +236,10 @@ client.on("interactionCreate", async (interaction) => {
     }
   } catch (err) {
     _logger.error(
-      "Failed to process command " + commandName + " with input" + inputString,
+      "Failed to process command '" +
+        commandName +
+        "' with input" +
+        inputString,
       err
     );
     interaction.editReply(

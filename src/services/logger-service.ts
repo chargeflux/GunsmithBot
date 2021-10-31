@@ -1,7 +1,10 @@
 import { ILogObject, Logger } from "tslog";
 import fs from "fs";
 
-export const logger: Logger = new Logger({ name: "Main" });
+export const logger: Logger = new Logger({
+  name: "Main",
+  printLogMessageInNewLine: true,
+});
 const defaultLogFilename = "logs/GunsmithBot.log";
 
 function logToTransport(logObject: ILogObject) {
