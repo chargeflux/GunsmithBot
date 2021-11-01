@@ -7,34 +7,19 @@ import { Weapon } from "../destiny-entities/weapon";
 import BaseCommand from "./base-command";
 
 export default class WeaponCommand implements BaseCommand<Weapon> {
-  input: string;
-  private _results?: Weapon[];
+  readonly input: string;
+  readonly results: Weapon[];
   options: WeaponCommandOptions;
-  set results(results: Weapon[]) {
-    const orderedResults = orderResultsByRandomOrTierType(results);
-
-    this._results = orderResultsByName(this.input, orderedResults);
-  }
-
-  get results() {
-    if (this._results) return this._results;
-    throw Error("Failed to set weapon results");
-  }
-
   constructor(
     input: string,
-    options: Discord.CommandInteractionOptionResolver
+    options: WeaponCommandOptions,
+    weaponResults: Weapon[]
   ) {
     this.input = input;
-    this.options = new WeaponCommandOptions(
-      options.getBoolean("full") ?? false,
-      options.getBoolean("default") ?? false,
-      options.getBoolean("stats") ?? false
-    );
-  }
+    this.options = options;
 
-  setWeaponResults(results: Weapon[]) {
-    this.results = results;
+    const orderedResults = orderResultsByRandomOrTierType(weaponResults);
+    this.results = orderResultsByName(this.input, orderedResults);
   }
 }
 
@@ -56,6 +41,16 @@ export class WeaponCommandOptions {
     this.stats = stats;
 
     if (!this.validateState()) throw Error("Command options are invalid");
+  }
+
+  static parseDiscordInteractionOptions(
+    options: Discord.CommandInteractionOptionResolver
+  ): WeaponCommandOptions {
+    const full = options.getBoolean("full") ?? false;
+    const isDefault = options.getBoolean("default") ?? false;
+    const stats = options.getBoolean("stats") ?? false;
+
+    return new WeaponCommandOptions(full, isDefault, stats);
   }
 
   validateState() {

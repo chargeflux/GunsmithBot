@@ -1,26 +1,14 @@
-import BaseCommand from "./base-command";
-import { PlugCategory } from "../constants";
+import { orderResultsByName } from "../../utils/utils";
 import Perk from "../destiny-entities/perk";
-import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
+import BaseCommand from "./base-command";
 
 export default class PerkCommand implements BaseCommand<Perk> {
   readonly input: string;
-  results: Perk[] = [];
+  readonly results: Perk[];
 
-  constructor(input: string) {
+  constructor(input: string, results: Perk[]) {
     this.input = input;
-  }
 
-  async processResults(results: DestinyInventoryItemDefinition[]) {
-    for (const result of results) {
-      if (result.plug?.plugCategoryHash) {
-        const plugCategoryName = PlugCategory[result.plug?.plugCategoryHash] as
-          | keyof typeof PlugCategory
-          | undefined;
-        if (!plugCategoryName) continue; // runtime check
-        const perk = new Perk(result, plugCategoryName);
-        this.results.push(perk);
-      }
-    }
+    this.results = orderResultsByName(input, results);
   }
 }

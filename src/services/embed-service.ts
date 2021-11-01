@@ -27,6 +27,7 @@ export function createModEmbed(modResult: Mod): MessageEmbed {
     .setTitle(modResult.name)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(modResult.icon);
+
   if (modResult.source)
     embed.addField(
       modResult.overview,

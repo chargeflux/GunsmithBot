@@ -26,7 +26,7 @@ import getPowerCap from "../services/manifest/power-cap-service";
 import { getSocketTypeHash } from "../services/manifest/socket-type-service";
 import { validateWeaponSearch } from "../utils/utils";
 
-const _logger = logger.getChildLogger({ name: "Weapon" });
+const _logger = logger.getChildLogger({ name: "WeaponController" });
 
 export default class WeaponController {
   dbService: ManifestDBService;
@@ -35,24 +35,25 @@ export default class WeaponController {
     this.dbService = dbService ?? new ManifestDBService();
   }
 
-  async processWeaponCommand(
+  async processWeaponQuery(
     input: string,
-    options: Discord.CommandInteractionOptionResolver
+    interactionOptions: Discord.CommandInteractionOptionResolver
   ): Promise<WeaponCommand | undefined> {
     if (input) {
-      const weaponCommand = new WeaponCommand(input, options);
+      const parsedOptions =
+        WeaponCommandOptions.parseDiscordInteractionOptions(interactionOptions);
       const results = await getInventoryItemsByName(this.dbService.db, input);
       const weaponResults: Weapon[] = [];
       for (const weaponData of results) {
         if (!validateWeaponSearch(weaponData)) continue;
-        const newWeapon = await this.createWeapon(
-          weaponData,
-          weaponCommand.options
-        );
+        const newWeapon = await this.createWeapon(weaponData, parsedOptions);
         weaponResults.push(newWeapon);
       }
-
-      weaponCommand.results = weaponResults;
+      const weaponCommand = new WeaponCommand(
+        input,
+        parsedOptions,
+        weaponResults
+      );
       return weaponCommand;
     }
     return;
@@ -66,7 +67,6 @@ export default class WeaponController {
     const powerCapValues = await this.getPowerCapValues(weaponData);
     let newWeapon;
     if (minimal) {
-      _logger.debug("Skipping parsing of sockets and intrinsic");
       newWeapon = new Weapon(weaponData, options, powerCapValues, []);
     } else {
       const [sockets, intrinsic] = await this.processSocketData(

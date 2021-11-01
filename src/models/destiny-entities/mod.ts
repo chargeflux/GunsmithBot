@@ -3,29 +3,26 @@ import {
   DestinySandboxPerkDefinition,
 } from "bungie-api-ts/destiny2";
 import { BaseMetadata } from "../commands/base-metadata";
-import { BUNGIE_URL_ROOT, EnergyType, ModCategory } from "../constants";
+import { BUNGIE_URL_ROOT, EnergyType } from "../constants";
 
 export default class Mod implements BaseMetadata {
   name: string;
-  description = "";
-  source = "";
+  description: string;
+  source: string;
   icon: string;
   hash: number;
-  category: keyof typeof ModCategory;
+  itemTypeDisplayName: string;
   energyCost?: number;
   energyType?: keyof typeof EnergyType;
-  armorLocation?: string;
-  perkHashes: number[];
-  collectibleHash?: number;
 
   constructor(
     rawModData: DestinyInventoryItemDefinition,
-    category: keyof typeof ModCategory,
-    armorLocation?: keyof typeof ModCategory
+    sandboxPerks: DestinySandboxPerkDefinition[],
+    source: string
   ) {
     this.name = rawModData.displayProperties.name;
     this.icon = BUNGIE_URL_ROOT + rawModData.displayProperties.icon;
-    this.category = category;
+    this.itemTypeDisplayName = rawModData.itemTypeDisplayName;
     this.energyCost = rawModData.plug?.energyCost?.energyCost;
     if (rawModData.plug?.energyCost) {
       const energyType = EnergyType[rawModData.plug.energyCost.energyType];
@@ -37,28 +34,24 @@ export default class Mod implements BaseMetadata {
     }
     this.hash = rawModData.hash;
 
-    this.armorLocation = armorLocation;
-    this.perkHashes = rawModData.perks.map((x) => x.perkHash);
-    if (this.perkHashes.length == 0) throw Error("Not a mod: " + this.name);
-    this.collectibleHash = rawModData.collectibleHash;
+    this.description = this.parseDescription(sandboxPerks);
+    if (
+      this.description == "" &&
+      rawModData.displayProperties.description != ""
+    )
+      this.description = rawModData.displayProperties.description;
+    this.source = source;
   }
 
-  setDescription(sandboxPerks: DestinySandboxPerkDefinition[]) {
+  parseDescription(sandboxPerks: DestinySandboxPerkDefinition[]) {
     const description = sandboxPerks
       .map((x) => x.displayProperties.description)
       .filter((x) => (x ? true : false))
       .join("\n• ");
-    if (
-      this.category == ModCategory[ModCategory.Aspect] ||
-      this.category == ModCategory[ModCategory.Fragment]
-    )
+    if (this.itemTypeDisplayName.includes("Stasis"))
       // address "[Stasis] Stasis"
-      this.description = description.replace(/ \[.*?\]/, "");
-    else this.description = description;
-  }
-
-  setSource(source: string) {
-    this.source = source;
+      return description.replace(/ \[.*?\]/, "");
+    else return description;
   }
 
   get overview() {
@@ -67,10 +60,10 @@ export default class Mod implements BaseMetadata {
       if (this.energyType && this.energyType != "Any")
         overview = `${this.energyCost} ${this.energyType} Energy`;
       else overview = `${this.energyCost} Energy`;
-      if (this.armorLocation) overview += ` - ${this.armorLocation}`;
+      if (this.itemTypeDisplayName)
+        overview += ` - ${this.itemTypeDisplayName}`;
     }
-    if (overview == "")
-      return this.category.startsWith("Weapon") ? "Weapon" : "Armor";
+    if (overview == "") return this.itemTypeDisplayName;
     return overview;
   }
 

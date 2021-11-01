@@ -47,7 +47,7 @@ export const WeaponDamageType = [
 
 const ArchetypeQueryCommand = ["type", "class", "rarity", "damage"] as const; // mapped to buildCommands in DeployCommandService
 
-export default class SearchCommand {
+export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
   readonly archetypeToSearch: ArchetypeToSearch;
   input = "";
   perksToSearch: PerksToSearch;

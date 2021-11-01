@@ -39,7 +39,7 @@ export default class SearchController {
     this.weaponDBService = weaponDBService ?? new WeaponDBService();
   }
 
-  async processSearchCommand(
+  async processSearchQuery(
     options: Discord.CommandInteractionOptionResolver
   ): Promise<SearchCommand> {
     const searchCommand = new SearchCommand(options);

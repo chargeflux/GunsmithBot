@@ -48,6 +48,7 @@ export enum WeaponBase {
   "Submachine Gun" = 3954685534,
   "Dummy" = 3109687656,
 }
+
 export enum WeaponTierType {
   // DestinyItemTierTypeDefinition or DestinyInventoryItemDefinition.inventory.tierTypeHash
   "Basic" = 3340296461,
@@ -124,11 +125,6 @@ export enum ModCategory {
   "Mods" = 59,
   "Armor" = 4104513227,
   "WeaponDamage" = 1052191496,
-  "Helmet" = 1362265421,
-  "Gauntlets" = 3872696960,
-  "Chest" = 3723676689,
-  "Legs" = 3607371986,
-  "Class Item" = 3196106184,
   "Aspect" = 962416439,
   "Fragment" = 1635887355,
   "Bonus Mods" = 303512563,

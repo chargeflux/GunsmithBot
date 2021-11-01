@@ -1,5 +1,4 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
-import { logger } from "../../services/logger-service";
 import { BaseMetadata } from "../commands/base-metadata";
 import { WeaponCommandOptions } from "../commands/weapon-command";
 import { BUNGIE_URL_ROOT } from "../constants";
@@ -10,8 +9,6 @@ import {
   WeaponBaseArchetype,
 } from "./weapon-base-archetype";
 import WeaponStats from "./weapon-stats";
-
-const _logger = logger.getChildLogger({ name: "Weapon" });
 
 export class Weapon implements BaseMetadata {
   name: string;
@@ -46,7 +43,6 @@ export class Weapon implements BaseMetadata {
       else throw Error("Stats for weapon are missing: " + this.name);
     }
 
-    _logger.info("Creating Weapon for " + this.name);
     const itemCategoryHashes = rawWeaponData.itemCategoryHashes ?? [];
     const weaponTierTypeHash = rawWeaponData.inventory?.tierTypeHash;
     const weaponDamageTypeId = rawWeaponData.defaultDamageType;

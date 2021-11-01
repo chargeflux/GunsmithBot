@@ -133,7 +133,7 @@ client.on("interactionCreate", async (interaction) => {
     switch (commandName) {
       case "perk": {
         _logger.info(`Searching for '${inputString}'`);
-        const results: Perk[] = await perkController.processPerkCommand(
+        const results: Perk[] = await perkController.processPerkQuery(
           inputString
         );
         if (results.length != 0) {
@@ -146,14 +146,14 @@ client.on("interactionCreate", async (interaction) => {
           _logger.info("Sending perk result");
           interaction.editReply({ embeds: [embed] });
         } else {
-          interaction.editReply("Invalid input. Please try again");
+          interaction.editReply("No results found.");
         }
         return;
       }
       case "weapon": {
         _logger.info(`Searching for '${inputString}'`);
         const weaponCommand: WeaponCommand | undefined =
-          await weaponController.processWeaponCommand(
+          await weaponController.processWeaponQuery(
             inputString,
             interaction.options
           );
@@ -169,7 +169,7 @@ client.on("interactionCreate", async (interaction) => {
             _logger.info("Sending weapon result");
             interaction.editReply({ embeds: [embed] });
           } else {
-            interaction.editReply("No results found. Please try again");
+            interaction.editReply("No results found.");
           }
         } else {
           interaction.editReply("Invalid input. Please try again");
@@ -178,9 +178,7 @@ client.on("interactionCreate", async (interaction) => {
       }
       case "mod": {
         _logger.info(`Searching for '${inputString}'`);
-        const results: Mod[] = await modController.processModCommand(
-          inputString
-        );
+        const results: Mod[] = await modController.processModQuery(inputString);
         if (results.length != 0) {
           _logger.info(
             results.length,
@@ -191,7 +189,7 @@ client.on("interactionCreate", async (interaction) => {
           _logger.info("Sending mod result");
           interaction.editReply({ embeds: [embed] });
         } else {
-          interaction.editReply("Invalid input. Please try again");
+          interaction.editReply("No results found.");
         }
         return;
       }
@@ -207,16 +205,10 @@ client.on("interactionCreate", async (interaction) => {
         }
         _logger.info(`Comparing '${inputA}' and '${inputB}'`);
         const weaponA = (
-          await weaponController.processWeaponCommand(
-            inputA,
-            interaction.options
-          )
+          await weaponController.processWeaponQuery(inputA, interaction.options)
         )?.results[0];
         const weaponB = (
-          await weaponController.processWeaponCommand(
-            inputB,
-            interaction.options
-          )
+          await weaponController.processWeaponQuery(inputB, interaction.options)
         )?.results[0];
         if (weaponA && weaponB) {
           const processedCommand = new CompareCommand(
@@ -238,7 +230,7 @@ client.on("interactionCreate", async (interaction) => {
       }
       case "search": {
         _logger.info("Performing Search");
-        const searchCommand = await searchController.processSearchCommand(
+        const searchCommand = await searchController.processSearchQuery(
           interaction.options
         );
         const cnt = searchCommand.getCount();
@@ -247,7 +239,7 @@ client.on("interactionCreate", async (interaction) => {
           _logger.info("Sending search result");
           interaction.editReply({ embeds: [embed] });
         } else {
-          interaction.editReply("Invalid input. Please try again");
+          interaction.editReply("No results found.");
         }
         return;
       }
