@@ -1,6 +1,6 @@
 import { DestinySocketTypeDefinition } from "bungie-api-ts/destiny2";
 import BetterSqlite3 from "better-sqlite3";
-import { DBTableRecordJSON } from "../../models/db";
+import { ManifestTableRecordJSON } from "../../models/db";
 import { logger } from "../logger-service";
 
 const _logger = logger.getChildLogger({ name: "SocketService" });
@@ -10,7 +10,7 @@ export async function getSocketTypeHash(
   hash: number
 ): Promise<number> {
   try {
-    const result: DBTableRecordJSON = db
+    const result: ManifestTableRecordJSON = db
       .prepare("SELECT json FROM DestinySocketTypeDefinition WHERE hash = ?")
       .get(hash.toString());
     const jsonRes: DestinySocketTypeDefinition = JSON.parse(result.json);

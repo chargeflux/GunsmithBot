@@ -1,9 +1,9 @@
 import BetterSqlite3 from "better-sqlite3";
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import {
-  DBTableRecordJSON,
-  DBTableRecordResult,
-  DBTableRecordResultAllWeaponsParsed,
+  ManifestTableRecordJSON,
+  ManifestTableRecord,
+  DestinyInventoryItemDefinitionRecord,
 } from "../../models/db";
 import { logger } from "../logger-service";
 
@@ -14,7 +14,7 @@ export async function getInventoryItemsByName(
   query: string
 ): Promise<DestinyInventoryItemDefinition[]> {
   try {
-    const inventoryItems: DBTableRecordJSON[] = db
+    const inventoryItems: ManifestTableRecordJSON[] = db
       .prepare(
         "SELECT json FROM DestinyInventoryItemDefinition WHERE name LIKE ?"
       )
@@ -31,7 +31,7 @@ export async function getInventoryItemByHash(
   hash: number
 ): Promise<DestinyInventoryItemDefinition> {
   try {
-    const inventoryItem: DBTableRecordJSON = db
+    const inventoryItem: ManifestTableRecordJSON = db
       .prepare("SELECT json FROM DestinyInventoryItemDefinition WHERE hash = ?")
       .get(hash.toString());
     return JSON.parse(inventoryItem.json);
@@ -46,7 +46,7 @@ export async function getInventoryItemsByHashes(
   hashes: number[]
 ): Promise<DestinyInventoryItemDefinition[]> {
   try {
-    const inventoryItems: DBTableRecordJSON[] = db
+    const inventoryItems: ManifestTableRecordJSON[] = db
       .prepare(
         `SELECT json FROM DestinyInventoryItemDefinition WHERE hash in (${"?,"
           .repeat(hashes.length)
@@ -62,21 +62,21 @@ export async function getInventoryItemsByHashes(
 
 export async function getInventoryItemsWeapons(
   db: BetterSqlite3.Database
-): Promise<DBTableRecordResultAllWeaponsParsed[]> {
+): Promise<DestinyInventoryItemDefinitionRecord[]> {
   try {
-    const inventoryItems: DBTableRecordResult[] = db
+    const inventoryItems: ManifestTableRecord[] = db
       .prepare(
         `SELECT item.hash, item.name, item.json
         FROM DestinyInventoryItemDefinition AS item, json_each(item.json, ?)
         WHERE json_each.value = 1 AND json_extract(item.json, ?) IS NOT null;`
       )
       .all("$.itemCategoryHashes", "$.sockets");
-    const results: DBTableRecordResultAllWeaponsParsed[] = [];
+    const results: DestinyInventoryItemDefinitionRecord[] = [];
     for (const item of inventoryItems) {
       results.push({
         hash: item.hash,
         name: item.name,
-        data: JSON.parse(item.json),
+        data: JSON.parse(item.json as string),
       });
     }
     return results;

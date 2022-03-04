@@ -6,8 +6,8 @@ import SearchCommand, {
 import { WeaponCommandOptions } from "../models/commands/weapon-command";
 import { PlugCategory } from "../models/constants";
 import {
-  DBTableRecordResultAllWeaponsParsed,
-  WeaponDBTableRecord,
+  DestinyInventoryItemDefinitionRecord,
+  PerkWeaponHashMap,
   WeaponDBTables,
 } from "../models/db";
 import Perk from "../models/destiny-entities/perk";
@@ -126,7 +126,7 @@ export default class SearchController {
     else return "";
   }
 
-  async createWeaponTables(weaponItems: DBTableRecordResultAllWeaponsParsed[]) {
+  async createWeaponTables(weaponItems: DestinyInventoryItemDefinitionRecord[]) {
     let weaponDBTables: WeaponDBTables = {
       intrinsics: undefined,
       stocks: undefined,
@@ -198,6 +198,7 @@ export default class SearchController {
     }
     return weaponDBTables;
   }
+
   private createDBTableRecord(
     weaponDBTables: WeaponDBTables,
     tableName: WeaponTable,
@@ -206,7 +207,7 @@ export default class SearchController {
   ) {
     let data = weaponDBTables[tableName];
     if (!data) {
-      const newRecordData: WeaponDBTableRecord = {};
+      const newRecordData: PerkWeaponHashMap = {};
       newRecordData[perk.hash.toString()] = [
         perk.name,
         new Set<string>().add(weaponHash),

@@ -1,7 +1,6 @@
 import BetterSqlite3 from "better-sqlite3";
 import {
-  WeaponDBTableRecordNameResult,
-  WeaponDBTableRecordResult,
+  PerkRecord,
 } from "../../models/db";
 import { WeaponTable } from "../weapon-db-service";
 import { logger } from "../logger-service";
@@ -14,7 +13,7 @@ export async function getFuzzyQueryNames(
   query: string
 ): Promise<string[]> {
   try {
-    const results: WeaponDBTableRecordNameResult[] = db
+    const results: PerkRecord[] = db
       .prepare("SELECT name FROM " + type + " WHERE name LIKE ?")
       .all("%" + query + "%");
     return results.map((x) => x.name);
@@ -30,7 +29,7 @@ export async function getWeaponsByExactName(
   query: string
 ): Promise<number[]> {
   try {
-    const results: WeaponDBTableRecordResult = db
+    const results: PerkRecord = db
       .prepare("SELECT weaponHashIds FROM " + type + " WHERE name is ?")
       .get(query);
     const parsedResults = results.weaponHashIds

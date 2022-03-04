@@ -11,20 +11,10 @@ function logToTransport(logObject: ILogObject) {
   if (!fs.existsSync("logs")) {
     fs.mkdirSync("logs");
   }
-  fs.appendFileSync(defaultLogFilename, JSON.stringify(logObject) + "\n");
-}
-
-export function rotateLog() {
-  logger.info("Rotating log");
-  const date = new Date();
-  const dateString = [
-    date.getDate().toString().padStart(2, "0"),
-    date.getMonth().toString().padStart(2, "0"),
-    date.getFullYear(),
-  ].join("-");
-  if (!fs.existsSync(defaultLogFilename + "." + dateString)) {
-    fs.renameSync(defaultLogFilename, defaultLogFilename + "." + dateString);
-  } else logger.error(defaultLogFilename + "." + dateString + " exists");
+  const message = `${logObject.date.toISOString()} ${logObject.logLevel.toUpperCase()} ` + 
+  `[${logObject.loggerName} ${logObject.filePath}:${logObject.lineNumber}${logObject.functionName !== undefined ? " " + logObject.functionName : ""}]\n` +
+  logObject.argumentsArray.join(" ")
+  fs.appendFileSync(defaultLogFilename, message + "\n");
 }
 
 logger.attachTransport(

@@ -1,7 +1,7 @@
 import BetterSqlite3 from "better-sqlite3";
 import fs from "fs";
 import { ManifestTable } from "../models/bungie-api/partial-destiny-manifest";
-import { DBTableRecord } from "../models/db";
+import { ManifestTableRecord } from "../models/db";
 import { MANIFEST_DATA_LOCATION, TABLES } from "./manifest/manifest-service";
 import { logger } from "./logger-service";
 
@@ -64,7 +64,7 @@ export default class ManifestDBService {
   }
 
   private addRecords(tables: ManifestTable[]) {
-    const createTxn = this.db.transaction((records: DBTableRecord[], stmt) => {
+    const createTxn = this.db.transaction((records: ManifestTableRecord[], stmt) => {
       for (const record of records)
         stmt.run(
           record.hash.toString(),

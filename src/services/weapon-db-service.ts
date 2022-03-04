@@ -1,6 +1,6 @@
 import BetterSqlite3 from "better-sqlite3";
 import fs from "fs";
-import { WeaponDBTables, WeaponDBTableRecord } from "../models/db";
+import { WeaponDBTables, PerkWeaponHashMap } from "../models/db";
 import { stringIs } from "../utils/validator";
 import { MANIFEST_DATA_LOCATION } from "./manifest/manifest-service";
 import { logger } from "./logger-service";
@@ -103,7 +103,7 @@ export default class WeaponDBService {
 
   private addRecords(tables: WeaponDBTables) {
     const createTxn = this.db.transaction(
-      (records: WeaponDBTableRecord, stmt) => {
+      (records: PerkWeaponHashMap, stmt) => {
         for (const hash in records)
           stmt.run(
             hash,

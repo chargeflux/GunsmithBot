@@ -5,10 +5,10 @@ import {
 } from "bungie-api-ts/destiny2";
 import { WeaponTable } from "../services/weapon-db-service";
 
-export class DBTableRecord {
+export class ManifestTableRecord {
   hash: string;
   name?: string;
-  json: DestinyDefinitionFrom<DestinyManifestComponentName>;
+  json: DestinyDefinitionFrom<DestinyManifestComponentName> | string;
 
   constructor(
     hash: string,
@@ -20,35 +20,26 @@ export class DBTableRecord {
   }
 }
 
-export interface DBTableRecordResult {
-  hash: string;
-  name?: string;
+export type ManifestTableRecordJSON = {
   json: string;
-}
+};
 
-export interface DBTableRecordResultAllWeaponsParsed {
+export interface DestinyInventoryItemDefinitionRecord {
   hash: string;
   name?: string;
   data: DestinyInventoryItemDefinition;
 }
 
-export type DBTableRecordJSON = {
-  json: string;
-};
-
 export type WeaponDBTables = Record<
   WeaponTable,
-  WeaponDBTableRecord | undefined
+  PerkWeaponHashMap | undefined
 >;
 
-export type WeaponDBTableRecord = {
+export type PerkWeaponHashMap = {
   [hash: string]: [name: string, weaponHashIds: Set<string>];
 };
 
-export type WeaponDBTableRecordResult = {
-  weaponHashIds: string;
-};
-
-export type WeaponDBTableRecordNameResult = {
+export type PerkRecord = {
   name: string;
+  weaponHashIds: string;
 };

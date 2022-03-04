@@ -2,7 +2,7 @@ import {
   DestinyDefinitionFrom,
   DestinyManifestComponentName,
 } from "bungie-api-ts/destiny2";
-import { DBTableRecord } from "../db";
+import { ManifestTableRecord } from "../db";
 
 export type PartialDestinyManifest = {
   Response: PartialManifestData;
@@ -96,7 +96,7 @@ interface ManifestPayloadPaths {
 
 export class ManifestTable {
   name: DestinyManifestComponentName;
-  data: DBTableRecord[];
+  data: ManifestTableRecord[];
 
   constructor(
     name: DestinyManifestComponentName,
@@ -108,10 +108,10 @@ export class ManifestTable {
 
   private convertToRecords(
     data: DestinyDefinitionFrom<DestinyManifestComponentName>[]
-  ): DBTableRecord[] {
-    const dbTableRecords: DBTableRecord[] = [];
+  ): ManifestTableRecord[] {
+    const dbTableRecords: ManifestTableRecord[] = [];
     for (const k in data) {
-      dbTableRecords.push(new DBTableRecord(data[k].hash.toString(), data[k]));
+      dbTableRecords.push(new ManifestTableRecord(data[k].hash.toString(), data[k]));
     }
     return dbTableRecords;
   }

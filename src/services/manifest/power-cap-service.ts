@@ -1,5 +1,5 @@
 import BetterSqlite3 from "better-sqlite3";
-import { DBTableRecordJSON } from "../../models/db";
+import { ManifestTableRecordJSON } from "../../models/db";
 import { logger } from "../logger-service";
 
 const _logger = logger.getChildLogger({ name: "PowerCapService" });
@@ -9,7 +9,7 @@ export default async function getPowerCap(
   hashes: number[]
 ): Promise<number[]> {
   try {
-    const result: DBTableRecordJSON[] = db
+    const result: ManifestTableRecordJSON[] = db
       .prepare(
         `SELECT json FROM DestinyPowerCapDefinition WHERE hash in (${"?,"
           .repeat(hashes.length)

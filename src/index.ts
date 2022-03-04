@@ -17,7 +17,7 @@ import {
   createSearchEmbed,
   createWeaponEmbed,
 } from "./services/embed-service";
-import { logger, rotateLog } from "./services/logger-service";
+import { logger } from "./services/logger-service";
 import ManifestDBService from "./services/manifest-db-service";
 import { getInventoryItemsWeapons } from "./services/manifest/inventory-item-service";
 import {
@@ -85,7 +85,6 @@ function startCronSchedules() {
     "5 9 * * *",
     async () => {
       _logger.info("Running update");
-      rotateLog();
       tearDownDatabases();
       await initializeControllers();
     },
@@ -96,7 +95,6 @@ function startCronSchedules() {
 }
 
 client.once("ready", async () => {
-  rotateLog();
   await initializeControllers();
   startCronSchedules();
   _logger.info("Ready!");

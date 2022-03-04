@@ -1,6 +1,6 @@
 import { DestinySandboxPerkDefinition } from "bungie-api-ts/destiny2";
 import BetterSqlite3 from "better-sqlite3";
-import { DBTableRecordJSON } from "../../models/db";
+import { ManifestTableRecordJSON } from "../../models/db";
 import { logger } from "../logger-service";
 
 const _logger = logger.getChildLogger({ name: "SandboxPerkService" });
@@ -10,7 +10,7 @@ export async function getSandboxPerksByName(
   query: string
 ): Promise<DestinySandboxPerkDefinition[]> {
   try {
-    const items: DBTableRecordJSON[] = db
+    const items: ManifestTableRecordJSON[] = db
       .prepare(
         "SELECT json FROM DestinySandboxPerkDefinition WHERE name LIKE ?"
       )
@@ -27,7 +27,7 @@ export async function getSandboxPerksByHashes(
   hashes: number[]
 ): Promise<DestinySandboxPerkDefinition[]> {
   try {
-    const items: DBTableRecordJSON[] = db
+    const items: ManifestTableRecordJSON[] = db
       .prepare(
         `SELECT json FROM DestinySandboxPerkDefinition WHERE hash in (${"?,"
           .repeat(hashes.length)

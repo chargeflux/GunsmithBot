@@ -1,6 +1,6 @@
 import { DestinyCollectibleDefinition } from "bungie-api-ts/destiny2";
 import BetterSqlite3 from "better-sqlite3";
-import { DBTableRecordJSON } from "../../models/db";
+import { ManifestTableRecordJSON } from "../../models/db";
 import { logger } from "../logger-service";
 
 const _logger = logger.getChildLogger({ name: "CollectibleService" });
@@ -10,7 +10,7 @@ export async function getCollectibleByHash(
   hash: number
 ): Promise<DestinyCollectibleDefinition> {
   try {
-    const item: DBTableRecordJSON = db
+    const item: ManifestTableRecordJSON = db
       .prepare("SELECT json FROM DestinyCollectibleDefinition WHERE hash=?")
       .get(hash.toString());
     return JSON.parse(item.json);
