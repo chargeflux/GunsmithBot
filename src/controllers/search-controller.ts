@@ -1,8 +1,6 @@
 import Discord from "discord.js";
 import fuzzysort from "fuzzysort";
-import SearchCommand, {
-  ValidTraitsOptions,
-} from "../models/commands/search-command";
+import SearchCommand, { ValidTraitsOptions } from "../models/commands/search-command";
 import { WeaponCommandOptions } from "../models/commands/weapon-command";
 import { PlugCategory } from "../models/constants";
 import {
@@ -14,10 +12,7 @@ import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
 import ManifestDBService from "../services/manifest-db-service";
 import { getInventoryItemsByHashes } from "../services/manifest/inventory-item-service";
-import {
-  getFuzzyQueryNames,
-  getWeaponsByExactName,
-} from "../services/manifest/search-service";
+import { getFuzzyQueryNames, getWeaponsByExactName } from "../services/manifest/search-service";
 import WeaponDBService, {
   WeaponTable,
   WeaponTableHash,
@@ -31,10 +26,7 @@ export default class SearchController {
   dbService: ManifestDBService;
   weaponDBService: WeaponDBService;
 
-  constructor(
-    dbService?: ManifestDBService,
-    weaponDBService?: WeaponDBService
-  ) {
+  constructor(dbService?: ManifestDBService, weaponDBService?: WeaponDBService) {
     this.dbService = dbService ?? new ManifestDBService();
     this.weaponDBService = weaponDBService ?? new WeaponDBService();
   }
@@ -52,11 +44,7 @@ export default class SearchController {
       const exactQuery = await this.narrowFuzzyQuery(perk, query);
       if (!exactQuery) throw Error("Could not narrow query: " + query);
       // Second DB call could be collapsed into first DB call but probably unnecessary
-      const weaponHashIds = await getWeaponsByExactName(
-        this.weaponDBService.db,
-        perk,
-        exactQuery
-      );
+      const weaponHashIds = await getWeaponsByExactName(this.weaponDBService.db, perk, exactQuery);
       if (searchCommand.traitState == ValidTraitsOptions.Traits1AndTraits2) {
         for (const hash of weaponHashIds) traitWeaponIds.add(hash);
       } else if (searchCommand.traitState == ValidTraitsOptions.Traits1) {
@@ -72,9 +60,7 @@ export default class SearchController {
         for (const hash of weaponHashIds) currentSocketWeaponIds.add(hash);
         if (weaponIds.size > 0) {
           if (currentSocketWeaponIds.size > 0) {
-            weaponIds = new Set(
-              Array.from(weaponIds).filter((x) => currentSocketWeaponIds.has(x))
-            );
+            weaponIds = new Set(Array.from(weaponIds).filter((x) => currentSocketWeaponIds.has(x)));
           }
         } else weaponIds = currentSocketWeaponIds;
       }
@@ -93,10 +79,7 @@ export default class SearchController {
         finalIds = Array.from(traitWeaponIds).filter((x) => weaponIds.has(x));
       else finalIds = Array.from(weaponIds);
     } else finalIds = Array.from(traitWeaponIds);
-    const results = await getInventoryItemsByHashes(
-      this.dbService.db,
-      finalIds
-    );
+    const results = await getInventoryItemsByHashes(this.dbService.db, finalIds);
 
     const weaponController = new WeaponController(this.dbService);
     for (const result of results) {
@@ -114,11 +97,7 @@ export default class SearchController {
   }
 
   private async narrowFuzzyQuery(type: WeaponTable, query: string) {
-    const results = await getFuzzyQueryNames(
-      this.weaponDBService.db,
-      type,
-      query
-    );
+    const results = await getFuzzyQueryNames(this.weaponDBService.db, type, query);
     const bestResult = fuzzysort.go(query, results, {
       allowTypo: false,
     })[0];
@@ -152,12 +131,7 @@ export default class SearchController {
         weapon.data.sockets
       );
       sockets.push(
-        new Socket(
-          sockets.length,
-          intrinsic.category,
-          PlugCategory.Intrinsics,
-          [intrinsic]
-        )
+        new Socket(sockets.length, intrinsic.category, PlugCategory.Intrinsics, [intrinsic])
       );
       let traits1Completed = false;
       for (const socket of sockets) {
@@ -198,7 +172,7 @@ export default class SearchController {
     }
     return weaponDBTables;
   }
-  
+
   private createDBTableRecord(
     weaponDBTables: WeaponDBTables,
     tableName: WeaponTable,
@@ -208,20 +182,14 @@ export default class SearchController {
     let data = weaponDBTables[tableName];
     if (!data) {
       const newRecordData: PerkWeaponHashMap = {};
-      newRecordData[perk.hash.toString()] = [
-        perk.name,
-        new Set<string>().add(weaponHash),
-      ];
+      newRecordData[perk.hash.toString()] = [perk.name, new Set<string>().add(weaponHash)];
       data = newRecordData;
     } else if (data[perk.hash.toString()]) {
       const existing = data[perk.hash.toString()];
       existing[1] = existing[1].add(weaponHash);
       data[perk.hash] = existing;
     } else {
-      const newRecordData: [string, Set<string>] = [
-        perk.name,
-        new Set<string>().add(weaponHash),
-      ];
+      const newRecordData: [string, Set<string>] = [perk.name, new Set<string>().add(weaponHash)];
       data[perk.hash.toString()] = newRecordData;
     }
     weaponDBTables[tableName] = data;

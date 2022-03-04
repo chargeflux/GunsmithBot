@@ -4,9 +4,10 @@ import {
 } from "bungie-api-ts/destiny2";
 import { logger } from "../../services/logger-service";
 import { StatOrder, WeaponStat } from "../constants";
+import { BaseDestinyItem } from "./base-metadata";
 const _logger = logger.getChildLogger({ name: "Weapon.Stats" });
 
-export default class WeaponStats {
+export default class WeaponStats implements BaseDestinyItem  {
   name: string;
   stats: WeaponStatBlock[];
 

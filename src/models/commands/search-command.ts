@@ -1,9 +1,6 @@
 import BaseCommand from "./base-command";
 import Discord from "discord.js";
-import {
-  WeaponTableHash,
-  WeaponTables,
-} from "../../services/weapon-db-service";
+import { WeaponTableHash, WeaponTables } from "../../services/weapon-db-service";
 import { WeaponBaseArchetype } from "../destiny-entities/weapon-base-archetype";
 import { stringIs } from "../../utils/validator";
 
@@ -29,21 +26,9 @@ export const WeaponClasses = [
   "Submachine Gun",
 ] as const;
 
-export const WeaponRarity = [
-  "Basic",
-  "Common",
-  "Rare",
-  "Legendary",
-  "Exotic",
-] as const;
+export const WeaponRarity = ["Basic", "Common", "Rare", "Legendary", "Exotic"] as const;
 
-export const WeaponDamageType = [
-  "Kinetic",
-  "Arc",
-  "Solar",
-  "Void",
-  "Stasis",
-] as const;
+export const WeaponDamageType = ["Kinetic", "Arc", "Solar", "Void", "Stasis"] as const;
 
 const ArchetypeQueryCommand = ["type", "class", "rarity", "damage"] as const; // mapped to buildCommands in DeployCommandService
 
@@ -53,10 +38,13 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
   perksToSearch: PerksToSearch;
   results: SearchResult = {};
 
+  get count() {
+    return this.getCount();
+  }
+
   get traitState() {
     return (
-      ((this.perksToSearch?.traits1 ? 1 : 0) << 0) |
-      ((this.perksToSearch?.traits2 ? 1 : 0) << 1)
+      ((this.perksToSearch?.traits1 ? 1 : 0) << 0) | ((this.perksToSearch?.traits2 ? 1 : 0) << 1)
     );
   }
 
@@ -79,9 +67,7 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
             archetypeToSearch.class = value;
           break;
         case "damage":
-          if (
-            stringIs<typeof WeaponDamageType[number]>(value, WeaponDamageType)
-          )
+          if (stringIs<typeof WeaponDamageType[number]>(value, WeaponDamageType))
             archetypeToSearch.damage = value;
           break;
         case "rarity":
@@ -132,9 +118,7 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
   }
 }
 
-export type PerksToSearch = Partial<
-  Record<keyof typeof WeaponTableHash, string>
->;
+export type PerksToSearch = Partial<Record<keyof typeof WeaponTableHash, string>>;
 
 export type ArchetypeToSearch = {
   type?: typeof WeaponTypes[number];

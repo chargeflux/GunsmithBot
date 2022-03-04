@@ -17,10 +17,10 @@ export default class ModController {
     this.dbService = dbService ?? new ManifestDBService();
   }
 
-  async processModQuery(input?: string): Promise<Mod[]> {
+  async processModQuery(input?: string): Promise<ModCommand | undefined> {
+    let modCommand;
     if (input) {
       const results = await getInventoryItemsByName(this.dbService.db, input);
-
       const modResults = [];
       for (const result of results) {
         if (!this.validateMod(result)) continue;
@@ -31,18 +31,14 @@ export default class ModController {
         );
         let source = "";
         if (result.collectibleHash) {
-          const collectible = await getCollectibleByHash(
-            this.dbService.db,
-            result.collectibleHash
-          );
+          const collectible = await getCollectibleByHash(this.dbService.db, result.collectibleHash);
           source = collectible.sourceString;
         }
         modResults.push(new Mod(result, sandboxPerks, source));
       }
-      const modCommand = new ModCommand(input, modResults);
-      return modCommand.results;
+      modCommand = new ModCommand(input, modResults);
     }
-    return [];
+    return modCommand;
   }
 
   validateMod(result: DestinyInventoryItemDefinition) {
@@ -52,8 +48,7 @@ export default class ModController {
     if (result.itemCategoryHashes.includes(ModCategory["Bonus Mods"]))
       // Armor perks from Armor 1.0
       return false;
-    if (result.itemCategoryHashes.includes(ModCategory.WeaponDamage))
-      return true;
+    if (result.itemCategoryHashes.includes(ModCategory.WeaponDamage)) return true;
     else if (result.itemCategoryHashes.includes(ModCategory.Armor)) return true;
     else if (result.traitHashes?.includes(ModCategory.Aspect)) return true;
     else if (result.traitHashes?.includes(ModCategory.Fragment)) return true;

@@ -4,9 +4,7 @@ import {
   DestinyItemSocketEntryDefinition,
 } from "bungie-api-ts/destiny2";
 import Discord from "discord.js";
-import WeaponCommand, {
-  WeaponCommandOptions,
-} from "../models/commands/weapon-command";
+import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weapon-command";
 import { PlugCategory, SocketCategoryHash } from "../models/constants";
 import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
@@ -18,10 +16,7 @@ import {
   getInventoryItemsByHashes,
   getInventoryItemsByName,
 } from "../services/manifest/inventory-item-service";
-import {
-  getPlugItemHash,
-  getPlugItemsByHash,
-} from "../services/manifest/plugset-service";
+import { getPlugItemHash, getPlugItemsByHash } from "../services/manifest/plugset-service";
 import getPowerCap from "../services/manifest/power-cap-service";
 import { getSocketTypeHash } from "../services/manifest/socket-type-service";
 import { validateWeaponSearch } from "../utils/utils";
@@ -39,9 +34,9 @@ export default class WeaponController {
     input: string,
     interactionOptions: Discord.CommandInteractionOptionResolver
   ): Promise<WeaponCommand | undefined> {
+    let weaponCommand;
     if (input) {
-      const parsedOptions =
-        WeaponCommandOptions.parseDiscordInteractionOptions(interactionOptions);
+      const parsedOptions = WeaponCommandOptions.parseDiscordInteractionOptions(interactionOptions);
       const results = await getInventoryItemsByName(this.dbService.db, input);
       const weaponResults: Weapon[] = [];
       for (const weaponData of results) {
@@ -49,14 +44,9 @@ export default class WeaponController {
         const newWeapon = await this.createWeapon(weaponData, parsedOptions);
         weaponResults.push(newWeapon);
       }
-      const weaponCommand = new WeaponCommand(
-        input,
-        parsedOptions,
-        weaponResults
-      );
-      return weaponCommand;
+      weaponCommand = new WeaponCommand(input, parsedOptions, weaponResults);
     }
-    return;
+    return weaponCommand;
   }
 
   async createWeapon(
@@ -74,23 +64,14 @@ export default class WeaponController {
         weaponData.sockets
       );
 
-      newWeapon = new Weapon(
-        weaponData,
-        options,
-        powerCapValues,
-        sockets,
-        intrinsic
-      );
+      newWeapon = new Weapon(weaponData, options, powerCapValues, sockets, intrinsic);
     }
 
     return newWeapon;
   }
 
-  async getPowerCapValues(
-    rawWeaponData: DestinyInventoryItemDefinition
-  ): Promise<number[]> {
-    const powerCapHashes =
-      rawWeaponData.quality?.versions.map((x) => x.powerCapHash) ?? [];
+  async getPowerCapValues(rawWeaponData: DestinyInventoryItemDefinition): Promise<number[]> {
+    const powerCapHashes = rawWeaponData.quality?.versions.map((x) => x.powerCapHash) ?? [];
 
     const powerCapValues = await getPowerCap(this.dbService.db, powerCapHashes);
     return powerCapValues;
@@ -128,28 +109,18 @@ export default class WeaponController {
     socketEntry: DestinyItemSocketEntryDefinition
   ): Promise<Perk | undefined> {
     if (!socketEntry.reusablePlugSetHash) {
-      logger.error(
-        "reusablePlugSetHash not found in socket entry for intrinisic"
-      );
+      logger.error("reusablePlugSetHash not found in socket entry for intrinisic");
       return;
     }
 
-    const plugItemHash = await getPlugItemHash(
-      this.dbService.db,
-      socketEntry.reusablePlugSetHash
-    );
+    const plugItemHash = await getPlugItemHash(this.dbService.db, socketEntry.reusablePlugSetHash);
 
     const item = await getInventoryItemByHash(this.dbService.db, plugItemHash);
     const plugCategoryHash = item.plug?.plugCategoryHash;
     if (plugCategoryHash) {
-      const category = PlugCategory[plugCategoryHash] as
-        | keyof typeof PlugCategory
-        | undefined;
+      const category = PlugCategory[plugCategoryHash] as keyof typeof PlugCategory | undefined;
       if (!category) {
-        _logger.error(
-          "Unknown plug category hash for intrinsic:",
-          plugCategoryHash
-        ); // expect only one valid intrinsic and should be matched accordingly
+        _logger.error("Unknown plug category hash for intrinsic:", plugCategoryHash); // expect only one valid intrinsic and should be matched accordingly
         return;
       }
       return new Perk(item, category, true);
@@ -168,25 +139,15 @@ export default class WeaponController {
       const socket = socketEntries[index];
       const socketTypeHash = socket.socketTypeHash;
 
-      const plugCategoryHash = await getSocketTypeHash(
-        this.dbService.db,
-        socketTypeHash
-      );
-      const plugCategory = PlugCategory[plugCategoryHash] as
-        | keyof typeof PlugCategory
-        | undefined;
+      const plugCategoryHash = await getSocketTypeHash(this.dbService.db, socketTypeHash);
+      const plugCategory = PlugCategory[plugCategoryHash] as keyof typeof PlugCategory | undefined;
       if (!plugCategory) continue;
 
       if (isDefault) {
-        const defaultPlugHashes = socket.reusablePlugItems.map(
-          (x) => x.plugItemHash
-        );
+        const defaultPlugHashes = socket.reusablePlugItems.map((x) => x.plugItemHash);
         defaultPlugHashes.push(socket.singleInitialItemHash);
 
-        const results = await getInventoryItemsByHashes(
-          this.dbService.db,
-          defaultPlugHashes
-        );
+        const results = await getInventoryItemsByHashes(this.dbService.db, defaultPlugHashes);
 
         const defaultPerks: Perk[] = [];
         for (const result of results) {
@@ -205,10 +166,8 @@ export default class WeaponController {
       }
 
       let plugSetHash;
-      if (socket.randomizedPlugSetHash)
-        plugSetHash = socket.randomizedPlugSetHash;
-      else if (socket.reusablePlugItems)
-        plugSetHash = socket.reusablePlugSetHash;
+      if (socket.randomizedPlugSetHash) plugSetHash = socket.randomizedPlugSetHash;
+      else if (socket.reusablePlugItems) plugSetHash = socket.reusablePlugSetHash;
       else {
         _logger.error(
           "randomizedPlugSetHash or reusablePlugSetHash not found in socket entry for weapon perks"
@@ -220,10 +179,7 @@ export default class WeaponController {
         continue;
       }
 
-      const plugItems = await getPlugItemsByHash(
-        this.dbService.db,
-        plugSetHash
-      );
+      const plugItems = await getPlugItemsByHash(this.dbService.db, plugSetHash);
 
       const perks = [];
       const items = await getInventoryItemsByHashes(
@@ -231,16 +187,10 @@ export default class WeaponController {
         plugItems.map((x) => x.plugItemHash)
       );
       for (let i = 0; i < plugItems.length; i++) {
-        const currentItem = items.find(
-          (x) => x.hash == plugItems[i].plugItemHash
-        );
+        const currentItem = items.find((x) => x.hash == plugItems[i].plugItemHash);
         if (currentItem) {
-          perks.push(
-            new Perk(currentItem, plugCategory, plugItems[i].currentlyCanRoll)
-          );
-        }
-          
-        else throw Error("plugset item can not be found");
+          perks.push(new Perk(currentItem, plugCategory, plugItems[i].currentlyCanRoll));
+        } else throw Error("plugset item can not be found");
       }
       sockets.push(new Socket(orderIdx, plugCategory, plugCategoryHash, perks));
     }

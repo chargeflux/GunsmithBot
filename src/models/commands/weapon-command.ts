@@ -1,8 +1,5 @@
 import Discord from "discord.js";
-import {
-  orderResultsByName,
-  orderResultsByRandomOrTierType,
-} from "../../utils/utils";
+import { orderResultsByName, orderResultsByRandomOrTierType } from "../../utils/utils";
 import { Weapon } from "../destiny-entities/weapon";
 import ValidationError from "../errors/ValidationError";
 import BaseCommand from "./base-command";
@@ -10,17 +7,14 @@ import BaseCommand from "./base-command";
 export default class WeaponCommand implements BaseCommand<Weapon> {
   readonly input: string;
   readonly results: Weapon[];
+  readonly count: number;
   options: WeaponCommandOptions;
-  constructor(
-    input: string,
-    options: WeaponCommandOptions,
-    weaponResults: Weapon[]
-  ) {
+  constructor(input: string, options: WeaponCommandOptions, weaponResults: Weapon[]) {
     this.input = input;
     this.options = options;
-
-    const orderedResults = orderResultsByRandomOrTierType(weaponResults);
-    this.results = orderResultsByName(this.input, orderedResults);
+    const orderedResultsName = orderResultsByName(this.input, weaponResults);
+    this.results = orderResultsByRandomOrTierType(orderedResultsName);
+    this.count = this.results.length;
   }
 }
 
@@ -31,9 +25,7 @@ export class WeaponCommandOptions {
 
   get state() {
     return (
-      ((this.stats ? 1 : 0) << 2) |
-      ((this.isDefault ? 1 : 0) << 1) |
-      ((this.full ? 1 : 0) << 0)
+      ((this.stats ? 1 : 0) << 2) | ((this.isDefault ? 1 : 0) << 1) | ((this.full ? 1 : 0) << 0)
     );
   }
   constructor(full = false, isDefault = false, stats = false) {

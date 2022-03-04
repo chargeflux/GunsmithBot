@@ -12,18 +12,18 @@ export default class PerkController {
     this.dbService = dbService ?? new ManifestDBService();
   }
 
-  async processPerkQuery(input?: string): Promise<Perk[]> {
+  async processPerkQuery(input?: string): Promise<PerkCommand | undefined> {
+    let perkCommand = undefined;
+    const perkResults = [];
     if (input) {
       const results = await getInventoryItemsByName(this.dbService.db, input);
-      const perkResults = [];
       for (const result of results) {
         const perk = this.parseResult(result);
         if (perk) perkResults.push(perk);
       }
-      const perkCommand = new PerkCommand(input, perkResults);
-      return perkCommand.results;
+      perkCommand = new PerkCommand(input, perkResults);
     }
-    return [];
+    return perkCommand;
   }
 
   parseResult(result: DestinyInventoryItemDefinition): Perk | undefined {

@@ -1,13 +1,10 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
-import { BaseMetadata } from "../commands/base-metadata";
+import { BaseMetadata } from "./base-metadata";
 import { WeaponCommandOptions } from "../commands/weapon-command";
 import { BUNGIE_URL_ROOT } from "../constants";
 import Perk from "./perk";
 import Socket from "./socket";
-import {
-  WeaponArchetypeData,
-  WeaponBaseArchetype,
-} from "./weapon-base-archetype";
+import { WeaponArchetypeData, WeaponBaseArchetype } from "./weapon-base-archetype";
 import WeaponStats from "./weapon-stats";
 
 export class Weapon implements BaseMetadata {
@@ -38,8 +35,7 @@ export class Weapon implements BaseMetadata {
     this.hash = rawWeaponData.hash;
     this.options = options;
     if (!this.options.isDefault) {
-      if (rawWeaponData.stats)
-        this.stats = new WeaponStats(this.name, rawWeaponData.stats);
+      if (rawWeaponData.stats) this.stats = new WeaponStats(this.name, rawWeaponData.stats);
       else throw Error("Stats for weapon are missing: " + this.name);
     }
 

@@ -6,11 +6,12 @@ import {
   WeaponClass,
   WeaponTierType,
 } from "../constants";
+import { BaseDestinyItem } from "./base-metadata";
 import Perk from "./perk";
 
 const _logger = logger.getChildLogger({ name: "Perk" });
 
-export class WeaponBaseArchetype {
+export class WeaponBaseArchetype implements BaseDestinyItem {
   readonly name: string;
   readonly type: keyof typeof WeaponBase;
   readonly class: keyof typeof WeaponClass;

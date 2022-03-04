@@ -2,7 +2,7 @@ import {
   DestinyInventoryItemDefinition,
   DestinySandboxPerkDefinition,
 } from "bungie-api-ts/destiny2";
-import { BaseMetadata } from "../commands/base-metadata";
+import { BaseMetadata } from "./base-metadata";
 import { BUNGIE_URL_ROOT, EnergyType } from "../constants";
 
 export default class Mod implements BaseMetadata {
@@ -27,18 +27,13 @@ export default class Mod implements BaseMetadata {
     if (rawModData.plug?.energyCost) {
       const energyType = EnergyType[rawModData.plug.energyCost.energyType];
       if (!energyType)
-        throw Error(
-          "Energy Type not known: " + rawModData.plug.energyCost.energyType
-        );
+        throw Error("Energy Type not known: " + rawModData.plug.energyCost.energyType);
       this.energyType = energyType as keyof typeof EnergyType;
     }
     this.hash = rawModData.hash;
 
     this.description = this.parseDescription(sandboxPerks);
-    if (
-      this.description == "" &&
-      rawModData.displayProperties.description != ""
-    )
+    if (this.description == "" && rawModData.displayProperties.description != "")
       this.description = rawModData.displayProperties.description;
     this.source = source;
   }
@@ -60,8 +55,7 @@ export default class Mod implements BaseMetadata {
       if (this.energyType && this.energyType != "Any")
         overview = `${this.energyCost} ${this.energyType} Energy`;
       else overview = `${this.energyCost} Energy`;
-      if (this.itemTypeDisplayName)
-        overview += ` - ${this.itemTypeDisplayName}`;
+      if (this.itemTypeDisplayName) overview += ` - ${this.itemTypeDisplayName}`;
     }
     if (overview == "") return this.itemTypeDisplayName;
     return overview;

@@ -1,6 +1,7 @@
 import Perk from "./perk";
+import { BaseDestinyItem } from "./base-metadata";
 
-export default class Socket {
+export default class Socket implements BaseDestinyItem {
   idx: number;
 
   name: string;

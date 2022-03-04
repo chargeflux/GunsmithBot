@@ -1,194 +1,80 @@
-import Discord from "discord.js";
 import dotenv from "dotenv";
-import cron from "node-cron";
-import ModController from "./controllers/mod-controller";
-import PerkController from "./controllers/perk-controller";
-import SearchController from "./controllers/search-controller";
-import WeaponController from "./controllers/weapon-controller";
 import CompareCommand from "./models/commands/compare-command";
 import WeaponCommand from "./models/commands/weapon-command";
-import Mod from "./models/destiny-entities/mod";
-import Perk from "./models/destiny-entities/perk";
 import PublicError from "./models/errors/PublicError";
-import deployCommands from "./services/deploy-command-service";
-import {
-  createCompareEmbed,
-  createModEmbed,
-  createPerkEmbed,
-  createSearchEmbed,
-  createWeaponEmbed,
-} from "./services/embed-service";
+import createEmbed from "./services/embed-service";
 import { logger } from "./services/logger-service";
-import ManifestDBService from "./services/manifest-db-service";
-import { getInventoryItemsWeapons } from "./services/manifest/inventory-item-service";
-import {
-  getCurrentVersion,
-  updateManifest,
-} from "./services/manifest/manifest-service";
-import WeaponDBService from "./services/weapon-db-service";
+import BaseClient from "./base-client";
+import { QueryType } from "./models/query-type";
+import { BaseDestinyItem } from "./models/destiny-entities/base-metadata";
+import { CommandInteraction, MessageEmbed } from "discord.js";
+
 const _logger = logger;
 dotenv.config();
 
-const client = new Discord.Client({
-  intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES],
-});
+const baseClient = new BaseClient();
+const discordClient = baseClient.client;
 
-let perkController: PerkController;
-let weaponController: WeaponController;
-let modController: ModController;
-let searchController: SearchController;
-
-async function initializeControllers() {
-  const dbService = new ManifestDBService();
-  try {
-    await updateManifest(dbService).then(async (toChange: boolean) => {
-      perkController = new PerkController();
-      weaponController = new WeaponController();
-      modController = new ModController();
-      searchController = new SearchController();
-      if (toChange) {
-        const weaponItems = await getInventoryItemsWeapons(dbService.db);
-        const tables = await searchController.createWeaponTables(weaponItems);
-        try {
-          new WeaponDBService().construct(tables);
-        } catch (e) {
-          _logger.fatal("Failed to construct WeaponDB. Shutting down.");
-          client.destroy();
-          process.exit();
-        }
-        searchController = new SearchController();
-      }
-    });
-  } catch (e) {
-    _logger.error("Failed to check or update manifest", e);
-    if (!(await getCurrentVersion())) {
-      _logger.fatal("Failed to retrieve manifest data. Shutting down.");
-      client.destroy();
-      process.exit();
-    }
-    perkController = new PerkController();
-    weaponController = new WeaponController();
-    modController = new ModController();
-    searchController = new SearchController();
-  }
+function logQueryResults(results: BaseDestinyItem[]) {
+  _logger.info(results.length, "results found!:", results.map((x) => x.name).join(", "));
 }
 
-function tearDownDatabases() {
-  perkController?.dbService.close();
-  weaponController?.dbService.close();
-  modController?.dbService.close();
-  searchController?.dbService.close();
-  searchController?.weaponDBService.close();
+function sendEmbed(interaction: CommandInteraction, embeds: MessageEmbed[], queryType: QueryType) {
+  _logger.info(`Sending ${queryType} result`);
+  interaction.editReply({ embeds: embeds });
 }
 
-function startCronSchedules() {
-  cron.schedule(
-    "5 9 * * *",
-    async () => {
-      _logger.info("Running update");
-      tearDownDatabases();
-      await initializeControllers();
-    },
-    {
-      timezone: "America/Los_Angeles",
-    }
-  );
-}
-
-client.once("ready", async () => {
-  await initializeControllers();
-  startCronSchedules();
-  _logger.info("Ready!");
-});
-
-client.on("messageCreate", async (message) => {
-  if (
-    message.content.toLowerCase() === "!deploy" &&
-    process.env.APPLICATION_AUTHOR_ID == message.author.id
-  )
-    try {
-      deployCommands();
-    } catch (e) {
-      _logger.error("Failed to deploy commands", e);
-      message.reply("Failed to deploy commands");
-    }
-});
-
-client.on("interactionCreate", async (interaction) => {
+discordClient.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
   const commandName = interaction.commandName;
   await interaction.deferReply();
   let inputString = interaction.options.getString("input") ?? "";
   try {
-    if (
-      inputString.length < 3 &&
-      !["search", "compare"].includes(commandName)
-    ) {
+    if (inputString.length < 3 && !["search", "compare"].includes(commandName)) {
       _logger.error(inputString, "is 3 characters or less");
       interaction.editReply("Please enter a query of 3 or more characters!");
       return;
     }
+
     inputString = inputString.replace("’", "'");
+
     switch (commandName) {
       case "perk": {
         _logger.info(`Searching for '${inputString}'`);
-        const results: Perk[] = await perkController.processPerkQuery(
-          inputString
-        );
-        if (results.length != 0) {
-          _logger.info(
-            results.length,
-            "results found!:",
-            results.map((x) => x.name).join(", ")
-          );
-          const embed = createPerkEmbed(results[0]);
-          _logger.info("Sending perk result");
-          interaction.editReply({ embeds: [embed] });
+        const perkCommand = await baseClient.perkController.processPerkQuery(inputString);
+        if (perkCommand && perkCommand.count) {
+          logQueryResults(perkCommand.results);
+          const embed = createEmbed(QueryType.Perk, perkCommand);
+          sendEmbed(interaction, embed, QueryType.Perk);
         } else {
-          interaction.editReply("No results found.");
+          interaction.editReply("No results found");
         }
         return;
       }
       case "weapon": {
         _logger.info(`Searching for '${inputString}'`);
-        const weaponCommand: WeaponCommand | undefined =
-          await weaponController.processWeaponQuery(
-            inputString,
-            interaction.options
-          );
-        if (weaponCommand) {
-          const results = weaponCommand.results;
-          if (results.length != 0) {
-            _logger.info(
-              results.length,
-              "results found!:",
-              results.map((x) => x.name).join(", ")
-            );
-            const embed = createWeaponEmbed(results[0], weaponCommand?.options);
-            _logger.info("Sending weapon result");
-            interaction.editReply({ embeds: [embed] });
-          } else {
-            interaction.editReply("No results found.");
-          }
+        const weaponCommand = await baseClient.weaponController.processWeaponQuery(
+          inputString,
+          interaction.options
+        );
+        if (weaponCommand && weaponCommand.count) {
+          logQueryResults(weaponCommand.results);
+          const embed = createEmbed(QueryType.Weapon, weaponCommand);
+          sendEmbed(interaction, embed, QueryType.Weapon);
         } else {
-          interaction.editReply("Invalid input. Please try again");
+          interaction.editReply("No results found");
         }
         return;
       }
       case "mod": {
         _logger.info(`Searching for '${inputString}'`);
-        const results: Mod[] = await modController.processModQuery(inputString);
-        if (results.length != 0) {
-          _logger.info(
-            results.length,
-            "results found!:",
-            results.map((x) => x.name).join(", ")
-          );
-          const embed = createModEmbed(results[0]);
-          _logger.info("Sending mod result");
-          interaction.editReply({ embeds: [embed] });
+        const modCommand = await baseClient.modController.processModQuery(inputString);
+        if (modCommand && modCommand.count) {
+          logQueryResults(modCommand.results);
+          const embed = createEmbed(QueryType.Mod, modCommand);
+          sendEmbed(interaction, embed, QueryType.Mod);
         } else {
-          interaction.editReply("No results found.");
+          interaction.editReply("No results found");
         }
         return;
       }
@@ -197,46 +83,43 @@ client.on("interactionCreate", async (interaction) => {
         const inputB = interaction.options.getString("input_b") ?? "";
         if (inputA.length < 3 || inputB.length < 3) {
           _logger.error(inputA + " or " + inputB + " is 3 characters or less");
-          interaction.editReply(
-            "Please enter queries that are 3 or more characters!"
-          );
+          interaction.editReply("Please enter queries that are 3 or more characters!");
           return;
         }
+
         _logger.info(`Comparing '${inputA}' and '${inputB}'`);
         const weaponA = (
-          await weaponController.processWeaponQuery(inputA, interaction.options)
+          await baseClient.weaponController.processWeaponQuery(inputA, interaction.options)
         )?.results[0];
         const weaponB = (
-          await weaponController.processWeaponQuery(inputB, interaction.options)
+          await baseClient.weaponController.processWeaponQuery(inputB, interaction.options)
         )?.results[0];
+
         if (weaponA && weaponB) {
-          const processedCommand = new CompareCommand(
-            inputA + ", " + inputB,
-            weaponA,
-            weaponB
-          );
+          const processedCommand = new CompareCommand(inputA + ", " + inputB, weaponA, weaponB);
           if (processedCommand.weaponStatDiff) {
-            const embed = createCompareEmbed(processedCommand);
-            _logger.info("Sending compare result");
-            interaction.editReply({ embeds: [embed] });
+            const embed = createEmbed(QueryType.Compare, processedCommand);
+            sendEmbed(interaction, embed, QueryType.Compare);
           } else {
+            _logger.error("No weapon stat diff found");
             interaction.editReply("Invalid input. Please try again");
           }
         } else {
+          _logger.error(
+            `One of the weapons were invalid: ${weaponA?.name} - ${inputA}, ${weaponB?.name} - ${inputB}`
+          );
           interaction.editReply("Invalid input. Please try again");
         }
         return;
       }
       case "search": {
         _logger.info("Performing Search");
-        const searchCommand = await searchController.processSearchQuery(
+        const searchCommand = await baseClient.searchController.processSearchQuery(
           interaction.options
         );
-        const cnt = searchCommand.getCount();
-        if (cnt != 0) {
-          const embed = createSearchEmbed(searchCommand, cnt);
-          _logger.info("Sending search result");
-          interaction.editReply({ embeds: [embed] });
+        if (searchCommand) {
+          const embed = createEmbed(QueryType.Search, searchCommand);
+          sendEmbed(interaction, embed, QueryType.Search);
         } else {
           interaction.editReply("No results found.");
         }
@@ -246,18 +129,11 @@ client.on("interactionCreate", async (interaction) => {
         interaction.editReply("Command has not been implemented yet.");
     }
   } catch (err) {
-    _logger.error(
-      "Failed to process command '" +
-        commandName +
-        "' with input " +
-        inputString,
-      err
-    );
+    _logger.error("Failed to process command '" + commandName + "' with input " + inputString, err);
 
     if (err instanceof PublicError) {
       interaction.editReply(err.message);
-    }
-    else {
+    } else {
       interaction.editReply(
         "Failed to process command: **" + commandName + "**. Please try again."
       );
@@ -265,11 +141,9 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
-client.login(process.env.DISCORD_BOT_TOKEN);
-
 // https://github.com/JoshuaWise/better-sqlite3/blob/master/docs/api.md#close---this
 process.on("exit", () => {
-  tearDownDatabases();
+  baseClient.tearDown();
 });
 process.on("SIGHUP", () => process.exit(128 + 1));
 process.on("SIGINT", () => process.exit(128 + 2));

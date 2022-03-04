@@ -1,16 +1,60 @@
 import { MessageEmbed } from "discord.js";
+import BaseCommand from "../models/commands/base-command";
 import CompareCommand from "../models/commands/compare-command";
+import ModCommand from "../models/commands/mod-command";
+import PerkCommand from "../models/commands/perk-command";
 import SearchCommand from "../models/commands/search-command";
-import { WeaponCommandOptions } from "../models/commands/weapon-command";
+import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weapon-command";
 import { DISCORD_BG_HEX } from "../models/constants";
+import { BaseDestinyItem } from "../models/destiny-entities/base-metadata";
 import Mod from "../models/destiny-entities/mod";
 import Perk from "../models/destiny-entities/perk";
 import { Weapon } from "../models/destiny-entities/weapon";
+import { QueryType } from "../models/query-type";
 import { logger } from "./logger-service";
 
 const _logger = logger.getChildLogger({ name: "Embed" });
 
-export function createPerkEmbed(perkResult: Perk): MessageEmbed {
+export default function createEmbed(
+  queryType: QueryType,
+  data: BaseCommand<BaseDestinyItem>
+): MessageEmbed[] {
+  switch (queryType) {
+    case QueryType.Perk: {
+      const perkCommand = data as PerkCommand;
+      const results = perkCommand.results;
+      const embed = createPerkEmbed(results[0]);
+      return [embed];
+    }
+    case QueryType.Weapon: {
+      const weaponCommand = data as WeaponCommand;
+      const results = weaponCommand.results;
+      const embed = createWeaponEmbed(results[0], weaponCommand?.options);
+      return [embed];
+    }
+    case QueryType.Mod: {
+      const modCommand = data as ModCommand;
+      const results = modCommand.results;
+      const embed = createModEmbed(results[0]);
+      return [embed];
+    }
+    case QueryType.Compare: {
+      const compareCommand = data as CompareCommand;
+      const embed = createCompareEmbed(compareCommand);
+      return [embed];
+    }
+    case QueryType.Search: {
+      const searchCommand = data as SearchCommand;
+      const embed = createSearchEmbed(searchCommand);
+      return [embed];
+    }
+    default: {
+      throw Error(`Query not supported: ${queryType}`);
+    }
+  }
+}
+
+function createPerkEmbed(perkResult: Perk): MessageEmbed {
   _logger.info("Constructing perk embed");
   const embed = new MessageEmbed()
     .setTitle(perkResult.category)
@@ -21,7 +65,7 @@ export function createPerkEmbed(perkResult: Perk): MessageEmbed {
   return embed;
 }
 
-export function createModEmbed(modResult: Mod): MessageEmbed {
+function createModEmbed(modResult: Mod): MessageEmbed {
   _logger.info("Constructing mod embed");
   const embed = new MessageEmbed()
     .setTitle(modResult.name)
@@ -29,18 +73,13 @@ export function createModEmbed(modResult: Mod): MessageEmbed {
     .setThumbnail(modResult.icon);
 
   if (modResult.source)
-    embed.addField(
-      modResult.overview,
-      "_" + modResult.source + "_\n" + modResult.description
-    );
+    embed.addField(modResult.overview, "_" + modResult.source + "_\n" + modResult.description);
   else embed.addField(modResult.overview, modResult.description);
   _logger.info("Returning embed");
   return embed;
 }
 
-export function createCompareEmbed(
-  processedCommand: CompareCommand
-): MessageEmbed {
+function createCompareEmbed(processedCommand: CompareCommand): MessageEmbed {
   _logger.info("Constructing compare embed");
   const embed = new MessageEmbed().setColor(DISCORD_BG_HEX);
   embed.addField(
@@ -59,19 +98,14 @@ export function createCompareEmbed(
   return embed;
 }
 
-export function createWeaponEmbed(
-  weaponResult: Weapon,
-  options: WeaponCommandOptions
-): MessageEmbed {
+function createWeaponEmbed(weaponResult: Weapon, options: WeaponCommandOptions): MessageEmbed {
   let embed;
   if (options.full) embed = createFullWeaponEmbed(weaponResult);
   else if (options.stats) embed = createStatsWeaponEmbed(weaponResult);
   else {
     _logger.info("Constructing weapon embed");
     const description: string =
-      weaponResult.baseArchetype?.toString() +
-      "\n" +
-      weaponResult.baseArchetype?.intrinsic?.name;
+      weaponResult.baseArchetype?.toString() + "\n" + weaponResult.baseArchetype?.intrinsic?.name;
     embed = new MessageEmbed()
       .setTitle(weaponResult.name)
       .setDescription(description)
@@ -116,8 +150,7 @@ function createFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
     .setDescription(description)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(weaponResult.icon);
-  if (!weaponResult.stats)
-    throw Error("Weapon has no stats. Aborting embed creation");
+  if (!weaponResult.stats) throw Error("Weapon has no stats. Aborting embed creation");
   const STATS = weaponResult.stats.stats.map((x) => x.toString()).join("\n");
   if (weaponResult.sockets.length <= 2) {
     for (const socket of weaponResult.sockets) {
@@ -146,15 +179,15 @@ function createStatsWeaponEmbed(weaponResult: Weapon): MessageEmbed {
     .setTitle(weaponResult.name)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(weaponResult.icon);
-  if (!weaponResult.stats)
-    throw Error("Weapon has no stats. Aborting embed creation");
+  if (!weaponResult.stats) throw Error("Weapon has no stats. Aborting embed creation");
   const STATS = weaponResult.stats.stats.map((x) => x.toString()).join("\n");
   embed.addField("**Stats**", STATS, true);
   return embed;
 }
 
-export function createSearchEmbed(searchCommand: SearchCommand, cnt: number) {
+function createSearchEmbed(searchCommand: SearchCommand) {
   _logger.info("Constructing search embed");
+  const cnt = searchCommand.getCount();
   const embed = new MessageEmbed()
     .setTitle("Weapon Results")
     .setDescription(cnt.toString() + " weapons found")
@@ -175,8 +208,6 @@ export function createSearchEmbed(searchCommand: SearchCommand, cnt: number) {
     );
   }
 
-  embed.fields = embed.fields.sort((a, b) =>
-    a.name > b.name ? 1 : a.name < b.name ? -1 : 0
-  );
+  embed.fields = embed.fields.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0));
   return embed;
 }

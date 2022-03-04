@@ -6,6 +6,7 @@ import BaseCommand from "./base-command";
 export default class CompareCommand implements BaseCommand<WeaponStats> {
   readonly input: string;
   readonly results: WeaponStats[] = [];
+  readonly count: number = 2;
   statNames = "";
   weaponStatDiff?: WeaponStatDiff;
 
@@ -16,7 +17,6 @@ export default class CompareCommand implements BaseCommand<WeaponStats> {
 
     this.results.push(weaponA.stats);
     this.results.push(weaponB.stats);
-
     this.compareStats();
   }
 
@@ -24,12 +24,8 @@ export default class CompareCommand implements BaseCommand<WeaponStats> {
     const set1 = new Set(this.results[0].stats.map((x) => x.stat.statType));
     const set2 = new Set(this.results[1].stats.map((x) => x.stat.statType));
     const commonStats = new Set([...set1].filter((x) => set2.has(x)));
-    let statsW1 = this.results[0].stats.filter((x) =>
-      [...commonStats].includes(x.stat.statType)
-    );
-    let statsW2 = this.results[1].stats.filter((x) =>
-      [...commonStats].includes(x.stat.statType)
-    );
+    let statsW1 = this.results[0].stats.filter((x) => [...commonStats].includes(x.stat.statType));
+    let statsW2 = this.results[1].stats.filter((x) => [...commonStats].includes(x.stat.statType));
     statsW1 = [...statsW1].sort((a, b) =>
       StatOrder[a.stat.statType] > StatOrder[b.stat.statType]
         ? 1
@@ -63,8 +59,7 @@ export default class CompareCommand implements BaseCommand<WeaponStats> {
     if (idx == 0) {
       for (const data of this.weaponStatDiff) {
         const [baseValue, diffValue]: number[] = data;
-        if (diffValue > 0)
-          stats.push("**" + baseValue.toString() + ` (+${diffValue})**`);
+        if (diffValue > 0) stats.push("**" + baseValue.toString() + ` (+${diffValue})**`);
         else stats.push(baseValue.toString());
       }
       return stats.join("\n");
@@ -73,11 +68,7 @@ export default class CompareCommand implements BaseCommand<WeaponStats> {
       for (const data of this.weaponStatDiff) {
         const [baseValue, diffValue]: number[] = data;
         if (diffValue < 0)
-          stats.push(
-            "**" +
-              (baseValue + diffValue * -1).toString() +
-              ` (+${diffValue * -1})**`
-          );
+          stats.push("**" + (baseValue + diffValue * -1).toString() + ` (+${diffValue * -1})**`);
         else if (diffValue > 0) stats.push((baseValue - diffValue).toString());
         else stats.push(baseValue.toString());
       }
@@ -97,7 +88,6 @@ class WeaponStatDiff {
   }
 
   *[Symbol.iterator]() {
-    for (let i = 0; i < this.baseValues.length; i++)
-      yield [this.baseValues[i], this.diffValues[i]];
+    for (let i = 0; i < this.baseValues.length; i++) yield [this.baseValues[i], this.diffValues[i]];
   }
 }

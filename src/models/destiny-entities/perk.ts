@@ -1,6 +1,6 @@
 import { DestinyInventoryItemDefinition, TierType } from "bungie-api-ts/destiny2";
 import { logger } from "../../services/logger-service";
-import { BaseMetadata } from "../commands/base-metadata";
+import { BaseMetadata } from "./base-metadata";
 import { BUNGIE_URL_ROOT, PlugCategory } from "../constants";
 
 const _logger = logger.getChildLogger({ name: "Perk" });
@@ -17,7 +17,7 @@ export default class Perk implements BaseMetadata {
   constructor(
     rawPerkData: DestinyInventoryItemDefinition,
     category: keyof typeof PlugCategory,
-    currentlyCanRoll: boolean,
+    currentlyCanRoll: boolean
   ) {
     this.name = rawPerkData.displayProperties.name;
     this.description = rawPerkData.displayProperties.description;
@@ -28,12 +28,11 @@ export default class Perk implements BaseMetadata {
     this.enhanced = rawPerkData.inventory?.tierType == TierType.Common;
     if (this.enhanced) {
       const beforeLength = this.name.length;
-      this.name = this.name.replace(" Enhanced", "")
+      this.name = this.name.replace(" Enhanced", "");
       if (beforeLength !== this.name.length) {
-        _logger.debug(`Removed 'Enhanced' from: ${this.name}`)
+        _logger.debug(`Removed 'Enhanced' from: ${this.name}`);
       }
     }
-      
   }
 
   toString() {
