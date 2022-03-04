@@ -1,15 +1,19 @@
+import { logger } from "../../services/logger-service";
 import {
   DamageType,
   MAX_POWER_LEVEL,
   WeaponBase,
+  WeaponClass,
   WeaponTierType,
 } from "../constants";
 import Perk from "./perk";
 
+const _logger = logger.getChildLogger({ name: "Perk" });
+
 export class WeaponBaseArchetype {
   readonly name: string;
   readonly type: keyof typeof WeaponBase;
-  readonly class: keyof typeof WeaponBase;
+  readonly class: keyof typeof WeaponClass;
   readonly rarity: keyof typeof WeaponTierType;
   readonly damage: keyof typeof DamageType;
   readonly intrinsic?: Perk;
@@ -27,7 +31,7 @@ export class WeaponBaseArchetype {
   private constructor(
     name: string,
     weaponBase: keyof typeof WeaponBase,
-    weaponClass: keyof typeof WeaponBase,
+    weaponClass: keyof typeof WeaponClass,
     weaponTierType: keyof typeof WeaponTierType,
     weaponDamageType: keyof typeof DamageType,
     isKinetic: boolean,
@@ -47,21 +51,31 @@ export class WeaponBaseArchetype {
     intrinsic?: Perk
   ): WeaponBaseArchetype {
     let weaponBase: keyof typeof WeaponBase | undefined;
-    let weaponClass: keyof typeof WeaponBase | undefined;
+    let weaponClass: keyof typeof WeaponClass | undefined;
     let weaponTierType: keyof typeof WeaponTierType | undefined;
     let isKinetic = false;
     for (const hash of data.itemCategoryHashes.sort().slice(1)) {
       const category = WeaponBase[hash] as keyof typeof WeaponBase | undefined;
       if (category) {
-        // runtime check
-        if (hash < 5) {
-          weaponBase = category;
-          isKinetic = hash <= 2;
-        } else weaponClass = category;
+        weaponBase = category
+        isKinetic = hash == WeaponBase.Kinetic
+      }
+      else {
+        const category = WeaponClass[hash] as keyof typeof WeaponClass | undefined
+        if (category) {
+          weaponClass = category;
+        }
       }
     }
     if (!weaponBase) throw Error("Failed to parse weapon base class"); // also accounts for isEnergy
-    if (!weaponClass) throw Error("Failed to parse weapon class");
+    if (!weaponClass) { 
+      if (data.itemTypeDisplayName == "Glaive") {
+        weaponClass = "Glaive"
+        _logger.warn("Glaive has no item category hash yet");
+      } else {
+        throw Error("Failed to parse weapon class");
+      }
+    }
 
     const tierTypeHash = data.weaponTierTypeHash;
     if (tierTypeHash)
@@ -98,7 +112,7 @@ export class WeaponBaseArchetype {
 
   toString() {
     let stringToConstruct = "";
-    if (!this.isKinetic) stringToConstruct += this.damage + " ";
+    if (!this.isKinetic || this.damage == "Stasis") stringToConstruct += this.damage + " ";
     stringToConstruct += this.type;
     stringToConstruct += " " + this.class;
     if (this.powerCap)
@@ -116,18 +130,21 @@ export class WeaponArchetypeData {
   itemCategoryHashes: number[];
   weaponDamageTypeId: number;
   weaponTierTypeHash?: number;
+  itemTypeDisplayName: string; // FIXME: Glaive has no ItemCategoryHash
 
   constructor(
     name: string,
     powerCapValues: number[],
     itemCategoryHashes: number[],
     weaponDamageTypeId: number,
-    weaponTierTypeHash?: number
+    itemTypeDisplayName: string,
+    weaponTierTypeHash?: number,
   ) {
     this.name = name;
     this.powerCapValues = powerCapValues;
     this.itemCategoryHashes = itemCategoryHashes;
     this.weaponDamageTypeId = weaponDamageTypeId;
     this.weaponTierTypeHash = weaponTierTypeHash;
+    this.itemTypeDisplayName = itemTypeDisplayName;
   }
 }

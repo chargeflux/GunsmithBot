@@ -21,15 +21,19 @@ export enum PlugCategory {
   "Arrows" = 1257608559,
   "Tubes" = 1202604782,
   "Launchers" = 1202604782,
+  "Origin Traits" = 164955586,
   "Default" = -1, // User Defined
 }
 
 export enum WeaponBase {
-  // DestinyItemCategoryDefinition or DestinyInventoryItemDefinition.itemCategoryHashes
   "Weapon" = 1,
   "Kinetic" = 2,
   "Energy" = 3,
   "Power" = 4,
+}
+
+export enum WeaponClass {
+  // DestinyItemCategoryDefinition or DestinyInventoryItemDefinition.itemCategoryHashes
   "Auto Rifle" = 5,
   "Hand Cannon" = 6,
   "Pulse Rifle" = 7,
@@ -46,6 +50,7 @@ export enum WeaponBase {
   "Trace Rifle" = 2489664120,
   "Bow" = 3317538576,
   "Submachine Gun" = 3954685534,
+  "Glaive" = 7777777777,
   "Dummy" = 3109687656,
 }
 

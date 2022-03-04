@@ -152,7 +152,7 @@ export default class WeaponController {
         ); // expect only one valid intrinsic and should be matched accordingly
         return;
       }
-      return new Perk(item, category);
+      return new Perk(item, category, true);
     }
   }
 
@@ -187,9 +187,10 @@ export default class WeaponController {
           this.dbService.db,
           defaultPlugHashes
         );
-        const defaultPerks = [];
+
+        const defaultPerks: Perk[] = [];
         for (const result of results) {
-          defaultPerks.push(new Perk(result, plugCategory));
+          defaultPerks.push(new Perk(result, plugCategory, true));
         }
         defaultSockets.push(
           new Socket(
@@ -233,10 +234,12 @@ export default class WeaponController {
         const currentItem = items.find(
           (x) => x.hash == plugItems[i].plugItemHash
         );
-        if (currentItem)
+        if (currentItem) {
           perks.push(
             new Perk(currentItem, plugCategory, plugItems[i].currentlyCanRoll)
           );
+        }
+          
         else throw Error("plugset item can not be found");
       }
       sockets.push(new Socket(orderIdx, plugCategory, plugCategoryHash, perks));

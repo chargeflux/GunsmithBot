@@ -4,6 +4,7 @@ import {
   orderResultsByRandomOrTierType,
 } from "../../utils/utils";
 import { Weapon } from "../destiny-entities/weapon";
+import ValidationError from "../errors/ValidationError";
 import BaseCommand from "./base-command";
 
 export default class WeaponCommand implements BaseCommand<Weapon> {
@@ -40,7 +41,7 @@ export class WeaponCommandOptions {
     this.isDefault = isDefault;
     this.stats = stats;
 
-    if (!this.validateState()) throw Error("Command options are invalid");
+    if (!this.validateState()) throw new ValidationError("Command options are invalid");
   }
 
   static parseDiscordInteractionOptions(

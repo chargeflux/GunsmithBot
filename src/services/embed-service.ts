@@ -117,7 +117,7 @@ function createFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(weaponResult.icon);
   if (!weaponResult.stats)
-    throw Error("Weapon has no stats. Aborting embed creation.");
+    throw Error("Weapon has no stats. Aborting embed creation");
   const STATS = weaponResult.stats.stats.map((x) => x.toString()).join("\n");
   if (weaponResult.sockets.length <= 2) {
     for (const socket of weaponResult.sockets) {
@@ -147,7 +147,7 @@ function createStatsWeaponEmbed(weaponResult: Weapon): MessageEmbed {
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(weaponResult.icon);
   if (!weaponResult.stats)
-    throw Error("Weapon has no stats. Aborting embed creation.");
+    throw Error("Weapon has no stats. Aborting embed creation");
   const STATS = weaponResult.stats.stats.map((x) => x.toString()).join("\n");
   embed.addField("**Stats**", STATS, true);
   return embed;

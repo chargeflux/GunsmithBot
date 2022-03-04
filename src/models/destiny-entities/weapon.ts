@@ -52,6 +52,7 @@ export class Weapon implements BaseMetadata {
       powerCapValues,
       itemCategoryHashes,
       weaponDamageTypeId,
+      rawWeaponData.itemTypeDisplayName, // FIXME: needed for Glaive
       weaponTierTypeHash
     );
 

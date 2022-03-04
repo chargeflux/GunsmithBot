@@ -198,7 +198,7 @@ export default class SearchController {
     }
     return weaponDBTables;
   }
-
+  
   private createDBTableRecord(
     weaponDBTables: WeaponDBTables,
     tableName: WeaponTable,

@@ -9,6 +9,7 @@ import CompareCommand from "./models/commands/compare-command";
 import WeaponCommand from "./models/commands/weapon-command";
 import Mod from "./models/destiny-entities/mod";
 import Perk from "./models/destiny-entities/perk";
+import PublicError from "./models/errors/PublicError";
 import deployCommands from "./services/deploy-command-service";
 import {
   createCompareEmbed,
@@ -252,9 +253,15 @@ client.on("interactionCreate", async (interaction) => {
         inputString,
       err
     );
-    interaction.editReply(
-      "Failed to process command: **" + commandName + "**. Please try again."
-    );
+
+    if (err instanceof PublicError) {
+      interaction.editReply(err.message);
+    }
+    else {
+      interaction.editReply(
+        "Failed to process command: **" + commandName + "**. Please try again."
+      );
+    }
   }
 });
 

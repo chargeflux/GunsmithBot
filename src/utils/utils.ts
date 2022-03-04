@@ -1,7 +1,7 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import fuzzysort from "fuzzysort";
 import { BaseMetadata } from "../models/commands/base-metadata";
-import { WeaponBase } from "../models/constants";
+import { WeaponBase, WeaponClass } from "../models/constants";
 import { Weapon } from "../models/destiny-entities/weapon";
 
 export function toTitleCase(text: string): string {
@@ -46,7 +46,7 @@ export function validateWeaponSearch(
 ): boolean {
   const categoryHashes = rawWeaponData.itemCategoryHashes ?? [];
   if (!categoryHashes.includes(WeaponBase.Weapon)) return false;
-  if (categoryHashes.includes(WeaponBase.Dummy)) return false;
+  if (categoryHashes.includes(WeaponClass.Dummy)) return false;
   if (!rawWeaponData.sockets) return false;
   return true;
 }

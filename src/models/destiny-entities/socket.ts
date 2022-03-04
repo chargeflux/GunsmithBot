@@ -13,7 +13,24 @@ export default class Socket {
     this.idx = idx;
     this.name = name;
     this.hash = hash;
-    this.perks = perks;
+    this.perks = this.removeEnhancedDuplicatePerks(perks);
+  }
+
+  removeEnhancedDuplicatePerks(perks: Perk[]) {
+    const processedPerks: Perk[] = [];
+    const processed: Map<string, number> = new Map();
+    for (const perk of perks) {
+      if (perk.enhanced)  {
+        const index = processed.get(perk.name) ?? processed.size;
+        processedPerks[index] = perk;
+      }
+      else {
+        const newIndex = processed.size;
+        processed.set(perk.name, newIndex)
+        processedPerks[newIndex] = perk;
+      }
+    }
+    return processedPerks;
   }
 
   toString(canRoll = true) {

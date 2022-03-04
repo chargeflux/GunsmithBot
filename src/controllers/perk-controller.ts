@@ -32,7 +32,7 @@ export default class PerkController {
         | keyof typeof PlugCategory
         | undefined;
       if (!plugCategoryName) return; // runtime check
-      return new Perk(result, plugCategoryName);
+      return new Perk(result, plugCategoryName, true);
     }
   }
 }
