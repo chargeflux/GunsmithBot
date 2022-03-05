@@ -10,6 +10,7 @@ import { getCurrentVersion, updateManifest } from "./services/manifest/manifest-
 import WeaponDBService from "./services/weapon-db-service";
 import deployCommands from "./services/deploy-command-service";
 import { logger } from "./services/logger-service";
+import ArmorController from "./controllers/armor-controller";
 
 const _logger = logger.getChildLogger({ name: "BaseClient" });
 
@@ -18,6 +19,7 @@ export default class BaseClient {
   perkController!: PerkController;
   weaponController!: WeaponController;
   modController!: ModController;
+  armorController!: ArmorController;
   searchController!: SearchController;
 
   constructor() {
@@ -76,6 +78,7 @@ export default class BaseClient {
     this.perkController = new PerkController();
     this.weaponController = new WeaponController();
     this.modController = new ModController();
+    this.armorController = new ArmorController();
     this.searchController = new SearchController();
   }
 

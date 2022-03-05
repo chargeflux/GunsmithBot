@@ -1,4 +1,5 @@
 import { MessageEmbed } from "discord.js";
+import ArmorCommand from "../models/commands/armor-command";
 import BaseCommand from "../models/commands/base-command";
 import CompareCommand from "../models/commands/compare-command";
 import ModCommand from "../models/commands/mod-command";
@@ -6,6 +7,7 @@ import PerkCommand from "../models/commands/perk-command";
 import SearchCommand from "../models/commands/search-command";
 import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weapon-command";
 import { DISCORD_BG_HEX } from "../models/constants";
+import { Armor } from "../models/destiny-entities/armor";
 import { BaseDestinyItem } from "../models/destiny-entities/base-metadata";
 import Mod from "../models/destiny-entities/mod";
 import Perk from "../models/destiny-entities/perk";
@@ -30,6 +32,12 @@ export default function createEmbed(
       const weaponCommand = data as WeaponCommand;
       const results = weaponCommand.results;
       const embed = createWeaponEmbed(results[0], weaponCommand?.options);
+      return [embed];
+    }
+    case QueryType.Armor: {
+      const armorCommand = data as ArmorCommand;
+      const results = armorCommand.results;
+      const embed = createArmorEmbed(results[0]);
       return [embed];
     }
     case QueryType.Mod: {
@@ -76,6 +84,24 @@ function createModEmbed(modResult: Mod): MessageEmbed {
     embed.addField(modResult.overview, "_" + modResult.source + "_\n" + modResult.description);
   else embed.addField(modResult.overview, modResult.description);
   _logger.info("Returning embed");
+  return embed;
+}
+
+function createArmorEmbed(armorResult: Armor): MessageEmbed {
+  _logger.info("Constructing armor embed");
+  const description: string = armorResult.baseArchetype?.toString() + "\n" + armorResult.flavorText;
+  const embed = new MessageEmbed()
+    .setTitle(armorResult.name)
+    .setDescription(description)
+    .setColor(DISCORD_BG_HEX)
+    .setThumbnail(armorResult.icon);
+  _logger.info("Returning embed");
+  if (armorResult.source) embed.addField("Source", armorResult.source);
+  if (armorResult.baseArchetype?.intrinsic)
+    embed.addField(
+      armorResult.baseArchetype.intrinsic.name,
+      armorResult.baseArchetype.intrinsic.description
+    );
   return embed;
 }
 

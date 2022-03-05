@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 import CompareCommand from "./models/commands/compare-command";
-import WeaponCommand from "./models/commands/weapon-command";
 import PublicError from "./models/errors/PublicError";
 import createEmbed from "./services/embed-service";
 import { logger } from "./services/logger-service";
@@ -19,9 +18,13 @@ function logQueryResults(results: BaseDestinyItem[]) {
   _logger.info(results.length, "results found!:", results.map((x) => x.name).join(", "));
 }
 
-function sendEmbed(interaction: CommandInteraction, embeds: MessageEmbed[], queryType: QueryType) {
+async function sendEmbed(
+  interaction: CommandInteraction,
+  embeds: MessageEmbed[],
+  queryType: QueryType
+) {
   _logger.info(`Sending ${queryType} result`);
-  interaction.editReply({ embeds: embeds });
+  await interaction.editReply({ embeds: embeds });
 }
 
 discordClient.on("interactionCreate", async (interaction) => {
@@ -32,7 +35,7 @@ discordClient.on("interactionCreate", async (interaction) => {
   try {
     if (inputString.length < 3 && !["search", "compare"].includes(commandName)) {
       _logger.error(inputString, "is 3 characters or less");
-      interaction.editReply("Please enter a query of 3 or more characters!");
+      await interaction.editReply("Please enter a query of 3 or more characters!");
       return;
     }
 
@@ -45,9 +48,9 @@ discordClient.on("interactionCreate", async (interaction) => {
         if (perkCommand && perkCommand.count) {
           logQueryResults(perkCommand.results);
           const embed = createEmbed(QueryType.Perk, perkCommand);
-          sendEmbed(interaction, embed, QueryType.Perk);
+          await sendEmbed(interaction, embed, QueryType.Perk);
         } else {
-          interaction.editReply("No results found");
+          await interaction.editReply("No results found");
         }
         return;
       }
@@ -60,9 +63,21 @@ discordClient.on("interactionCreate", async (interaction) => {
         if (weaponCommand && weaponCommand.count) {
           logQueryResults(weaponCommand.results);
           const embed = createEmbed(QueryType.Weapon, weaponCommand);
-          sendEmbed(interaction, embed, QueryType.Weapon);
+          await sendEmbed(interaction, embed, QueryType.Weapon);
         } else {
-          interaction.editReply("No results found");
+          await interaction.editReply("No results found");
+        }
+        return;
+      }
+      case "armor": {
+        _logger.info(`Searching for '${inputString}'`);
+        const armorCommand = await baseClient.armorController.processArmorQuery(inputString);
+        if (armorCommand && armorCommand.count) {
+          logQueryResults(armorCommand.results);
+          const embed = createEmbed(QueryType.Armor, armorCommand);
+          sendEmbed(interaction, embed, QueryType.Armor);
+        } else {
+          await interaction.editReply("No results found");
         }
         return;
       }
@@ -74,7 +89,7 @@ discordClient.on("interactionCreate", async (interaction) => {
           const embed = createEmbed(QueryType.Mod, modCommand);
           sendEmbed(interaction, embed, QueryType.Mod);
         } else {
-          interaction.editReply("No results found");
+          await interaction.editReply("No results found");
         }
         return;
       }
@@ -83,7 +98,7 @@ discordClient.on("interactionCreate", async (interaction) => {
         const inputB = interaction.options.getString("input_b") ?? "";
         if (inputA.length < 3 || inputB.length < 3) {
           _logger.error(inputA + " or " + inputB + " is 3 characters or less");
-          interaction.editReply("Please enter queries that are 3 or more characters!");
+          await interaction.editReply("Please enter queries that are 3 or more characters!");
           return;
         }
 
@@ -102,13 +117,13 @@ discordClient.on("interactionCreate", async (interaction) => {
             sendEmbed(interaction, embed, QueryType.Compare);
           } else {
             _logger.error("No weapon stat diff found");
-            interaction.editReply("Invalid input. Please try again");
+            await interaction.editReply("Invalid input. Please try again");
           }
         } else {
           _logger.error(
             `One of the weapons were invalid: ${weaponA?.name} - ${inputA}, ${weaponB?.name} - ${inputB}`
           );
-          interaction.editReply("Invalid input. Please try again");
+          await interaction.editReply("Invalid input. Please try again");
         }
         return;
       }
@@ -121,20 +136,20 @@ discordClient.on("interactionCreate", async (interaction) => {
           const embed = createEmbed(QueryType.Search, searchCommand);
           sendEmbed(interaction, embed, QueryType.Search);
         } else {
-          interaction.editReply("No results found.");
+          await interaction.editReply("No results found.");
         }
         return;
       }
       default:
-        interaction.editReply("Command has not been implemented yet.");
+        await interaction.editReply("Command has not been implemented yet.");
     }
   } catch (err) {
     _logger.error("Failed to process command '" + commandName + "' with input " + inputString, err);
 
     if (err instanceof PublicError) {
-      interaction.editReply(err.message);
+      await interaction.editReply(err.message);
     } else {
-      interaction.editReply(
+      await interaction.editReply(
         "Failed to process command: **" + commandName + "**. Please try again."
       );
     }

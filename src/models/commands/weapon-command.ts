@@ -1,5 +1,5 @@
-import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js";
-import { orderResultsByName, orderResultsByRandomOrTierType } from "../../utils/utils";
+import { CacheType, CommandInteractionOptionResolver } from "discord.js";
+import { orderResultsByName } from "../../utils/utils";
 import { Weapon } from "../destiny-entities/weapon";
 import ValidationError from "../errors/ValidationError";
 import BaseCommand from "./base-command";
@@ -13,8 +13,22 @@ export default class WeaponCommand implements BaseCommand<Weapon> {
     this.input = input;
     this.options = options;
     const orderedResultsName = orderResultsByName(this.input, weaponResults);
-    this.results = orderResultsByRandomOrTierType(orderedResultsName);
+    this.results = this.orderByRandomRollAndTierType(orderedResultsName);
     this.count = this.results.length;
+  }
+
+  orderByRandomRollAndTierType(weaponResults: Weapon[]) {
+    const weapons: Weapon[] = [];
+    const names: string[] = weaponResults.map((x) => x.name);
+    for (const weapon of weaponResults) {
+      if (weapon.baseArchetype) {
+        if (weapon.hasRandomRolls || weapon.baseArchetype.rarity == "Exotic") {
+          const idx: number = names.indexOf(weapon.name);
+          if (idx > -1) weapons.splice(idx, 0, weapon);
+        } else weapons.push(weapon);
+      }
+    }
+    return weapons;
   }
 }
 

@@ -90,6 +90,12 @@ function buildCommands() {
         option.setName("input").setDescription("Name of mod").setRequired(true)
       ),
     new SlashCommandBuilder()
+      .setName("armor")
+      .setDescription("Get information about an armor piece")
+      .addStringOption((option: SlashCommandStringOption) =>
+        option.setName("input").setDescription("Name of armor").setRequired(true)
+      ),
+    new SlashCommandBuilder()
       .setName("perk")
       .setDescription("Get information about a perk")
       .addStringOption((option: SlashCommandStringOption) =>

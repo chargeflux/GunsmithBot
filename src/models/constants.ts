@@ -54,7 +54,7 @@ export enum WeaponClass {
   "Dummy" = 3109687656,
 }
 
-export enum WeaponTierType {
+export enum TierType {
   // DestinyItemTierTypeDefinition or DestinyInventoryItemDefinition.inventory.tierTypeHash
   "Basic" = 3340296461,
   "Common" = 2395677314,
@@ -124,6 +124,7 @@ export enum StatOrder {
 export enum SocketCategoryHash {
   "Intrinsics" = 3956125808,
   "WeaponPerks" = 4241085061,
+  "ArmorPerks" = 3154740035,
 }
 
 export enum ModCategory {
@@ -143,6 +144,21 @@ export enum EnergyType {
   "Ghost" = 4,
   "Subclass" = 5,
   "Stasis" = 6,
+}
+
+export enum GuardianClass {
+  "Warlock" = 21,
+  "Titan" = 22,
+  "Hunter" = 23,
+}
+
+export enum ArmorType {
+  "Armor" = 20,
+  "Helmet" = 45,
+  "Arms" = 46,
+  "Chest" = 47,
+  "Legs" = 48,
+  "Class Item" = 49,
 }
 
 export const MAX_POWER_LEVEL = 999990;

@@ -35,7 +35,7 @@ export default class Mod implements BaseMetadata {
     this.description = this.parseDescription(sandboxPerks);
     if (this.description == "" && rawModData.displayProperties.description != "")
       this.description = rawModData.displayProperties.description;
-    this.source = source;
+    this.source = source.replace("Source: ", "");
   }
 
   parseDescription(sandboxPerks: DestinySandboxPerkDefinition[]) {

@@ -1,15 +1,15 @@
 import { logger } from "../../services/logger-service";
-import { DamageType, MAX_POWER_LEVEL, WeaponBase, WeaponClass, WeaponTierType } from "../constants";
+import { DamageType, MAX_POWER_LEVEL, WeaponBase, WeaponClass, TierType } from "../constants";
 import { BaseDestinyItem } from "./base-metadata";
 import Perk from "./perk";
 
-const _logger = logger.getChildLogger({ name: "Perk" });
+const _logger = logger.getChildLogger({ name: "WeaponBaseArchetype" });
 
 export class WeaponBaseArchetype implements BaseDestinyItem {
   readonly name: string;
   readonly type: keyof typeof WeaponBase;
   readonly class: keyof typeof WeaponClass;
-  readonly rarity: keyof typeof WeaponTierType;
+  readonly rarity: keyof typeof TierType;
   readonly damage: keyof typeof DamageType;
   readonly intrinsic?: Perk;
   readonly isKinetic: boolean;
@@ -27,7 +27,7 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
     name: string,
     weaponBase: keyof typeof WeaponBase,
     weaponClass: keyof typeof WeaponClass,
-    weaponTierType: keyof typeof WeaponTierType,
+    weaponTierType: keyof typeof TierType,
     weaponDamageType: keyof typeof DamageType,
     isKinetic: boolean,
     intrinsic?: Perk
@@ -44,7 +44,7 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
   static create(data: WeaponArchetypeData, intrinsic?: Perk): WeaponBaseArchetype {
     let weaponBase: keyof typeof WeaponBase | undefined;
     let weaponClass: keyof typeof WeaponClass | undefined;
-    let weaponTierType: keyof typeof WeaponTierType | undefined;
+    let weaponTierType: keyof typeof TierType | undefined;
     let isKinetic = false;
     for (const hash of data.itemCategoryHashes.sort().slice(1)) {
       const category = WeaponBase[hash] as keyof typeof WeaponBase | undefined;
@@ -58,7 +58,7 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
         }
       }
     }
-    if (!weaponBase) throw Error("Failed to parse weapon base class"); // also accounts for isEnergy
+    if (!weaponBase) throw Error("Failed to parse weapon base class");
     if (!weaponClass) {
       if (data.itemTypeDisplayName == "Glaive") {
         weaponClass = "Glaive";
@@ -69,8 +69,7 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
     }
 
     const tierTypeHash = data.weaponTierTypeHash;
-    if (tierTypeHash)
-      weaponTierType = WeaponTierType[tierTypeHash] as keyof typeof WeaponTierType | undefined;
+    if (tierTypeHash) weaponTierType = TierType[tierTypeHash] as keyof typeof TierType | undefined;
     else throw Error("Weapon tier type hash is invalid");
     if (!weaponTierType) throw Error(`Failed to parse tier type hash ${tierTypeHash}`);
 

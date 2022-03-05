@@ -3,7 +3,7 @@ import {
   DestinyItemSocketBlockDefinition,
   DestinyItemSocketEntryDefinition,
 } from "bungie-api-ts/destiny2";
-import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js";
+import { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weapon-command";
 import { PlugCategory, SocketCategoryHash } from "../models/constants";
 import Perk from "../models/destiny-entities/perk";
