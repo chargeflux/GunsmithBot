@@ -21,13 +21,12 @@ export default class Socket implements BaseDestinyItem {
     const processedPerks: Perk[] = [];
     const processed: Map<string, number> = new Map();
     for (const perk of perks) {
-      if (perk.enhanced)  {
+      if (perk.enhanced) {
         const index = processed.get(perk.name) ?? processed.size;
         processedPerks[index] = perk;
-      }
-      else {
+      } else {
         const newIndex = processed.size;
-        processed.set(perk.name, newIndex)
+        processed.set(perk.name, newIndex);
         processedPerks[newIndex] = perk;
       }
     }
@@ -39,9 +38,7 @@ export default class Socket implements BaseDestinyItem {
       if (x.currentlyCanRoll == canRoll) return x;
     });
 
-    const uniquePerks = new Map<number, Perk>(
-      filteredPerks.map((x) => [x.hash, x])
-    );
+    const uniquePerks = new Map<number, Perk>(filteredPerks.map((x) => [x.hash, x]));
 
     return Array.from(uniquePerks.values())
       .map((x) => x.toString())

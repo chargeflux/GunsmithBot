@@ -7,7 +7,7 @@ import { StatOrder, WeaponStat } from "../constants";
 import { BaseDestinyItem } from "./base-metadata";
 const _logger = logger.getChildLogger({ name: "Weapon.Stats" });
 
-export default class WeaponStats implements BaseDestinyItem  {
+export default class WeaponStats implements BaseDestinyItem {
   name: string;
   stats: WeaponStatBlock[];
 
@@ -20,11 +20,8 @@ export default class WeaponStats implements BaseDestinyItem  {
     const weaponStats: WeaponStatBlock[] = [];
     let idx = 0;
     for (const statHash in statsData.stats) {
-      const stat: DestinyInventoryItemStatDefinition =
-        statsData.stats[statHash];
-      const statType = WeaponStat[statHash] as
-        | keyof typeof WeaponStat
-        | undefined;
+      const stat: DestinyInventoryItemStatDefinition = statsData.stats[statHash];
+      const statType = WeaponStat[statHash] as keyof typeof WeaponStat | undefined;
       if (!statType) {
         _logger.debug("Failed to match weapon stat hash:", statHash);
         continue;
@@ -34,10 +31,7 @@ export default class WeaponStats implements BaseDestinyItem  {
         _logger.debug(statType, "had a value of 0");
         continue;
       }
-      const weaponStatBlock = new WeaponStatBlock(
-        idx,
-        new WeaponStatData(statType, statValue)
-      );
+      const weaponStatBlock = new WeaponStatBlock(idx, new WeaponStatData(statType, statValue));
       weaponStats.push(weaponStatBlock);
       idx += 1;
     }

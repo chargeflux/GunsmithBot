@@ -1,7 +1,4 @@
-import {
-  DestinyDefinitionFrom,
-  DestinyManifestComponentName,
-} from "bungie-api-ts/destiny2";
+import { DestinyDefinitionFrom, DestinyManifestComponentName } from "bungie-api-ts/destiny2";
 import { ManifestTableRecord } from "../db";
 
 export type PartialDestinyManifest = {

@@ -61,9 +61,7 @@ export default class WeaponDBService {
   private getOrInitialize(): BetterSqlite3.Database {
     if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);
-      _logger.warn(
-        "DB and manifest data location does not exist. Creating folder"
-      );
+      _logger.warn("DB and manifest data location does not exist. Creating folder");
     }
     const db = new BetterSqlite3(MANIFEST_DATA_LOCATION + dbName);
     return db;
@@ -102,23 +100,16 @@ export default class WeaponDBService {
   }
 
   private addRecords(tables: WeaponDBTables) {
-    const createTxn = this.db.transaction(
-      (records: PerkWeaponHashMap, stmt) => {
-        for (const hash in records)
-          stmt.run(
-            hash,
-            records[hash][0],
-            Array.from(records[hash][1]).join(",")
-          );
-      }
-    );
+    const createTxn = this.db.transaction((records: PerkWeaponHashMap, stmt) => {
+      for (const hash in records)
+        stmt.run(hash, records[hash][0], Array.from(records[hash][1]).join(","));
+    });
     for (const table in tables) {
       const stmt = this.db.prepare(
         // Using whitelisted table names
         "INSERT INTO " + table + " (hash, name, weaponHashIds) VALUES (?, ?, ?)"
       );
-      if (stringIs<WeaponTable>(table, WeaponTables))
-        createTxn(tables[table] ?? {}, stmt);
+      if (stringIs<WeaponTable>(table, WeaponTables)) createTxn(tables[table] ?? {}, stmt);
     }
   }
 

@@ -5,10 +5,7 @@ import { logger } from "../logger-service";
 
 const _logger = logger.getChildLogger({ name: "SocketService" });
 
-export async function getSocketTypeHash(
-  db: BetterSqlite3.Database,
-  hash: number
-): Promise<number> {
+export async function getSocketTypeHash(db: BetterSqlite3.Database, hash: number): Promise<number> {
   try {
     const result: ManifestTableRecordJSON = db
       .prepare("SELECT json FROM DestinySocketTypeDefinition WHERE hash = ?")

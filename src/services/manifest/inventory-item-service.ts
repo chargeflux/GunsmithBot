@@ -15,9 +15,7 @@ export async function getInventoryItemsByName(
 ): Promise<DestinyInventoryItemDefinition[]> {
   try {
     const inventoryItems: ManifestTableRecordJSON[] = db
-      .prepare(
-        "SELECT json FROM DestinyInventoryItemDefinition WHERE name LIKE ?"
-      )
+      .prepare("SELECT json FROM DestinyInventoryItemDefinition WHERE name LIKE ?")
       .all("%" + query + "%");
     return inventoryItems.map((x) => JSON.parse(x.json));
   } catch (e) {

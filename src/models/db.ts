@@ -10,10 +10,7 @@ export class ManifestTableRecord {
   name?: string;
   json: DestinyDefinitionFrom<DestinyManifestComponentName> | string;
 
-  constructor(
-    hash: string,
-    json: DestinyDefinitionFrom<DestinyManifestComponentName>
-  ) {
+  constructor(hash: string, json: DestinyDefinitionFrom<DestinyManifestComponentName>) {
     this.hash = hash;
     if ("displayProperties" in json) this.name = json.displayProperties.name;
     this.json = json;
@@ -30,10 +27,7 @@ export interface DestinyInventoryItemDefinitionRecord {
   data: DestinyInventoryItemDefinition;
 }
 
-export type WeaponDBTables = Record<
-  WeaponTable,
-  PerkWeaponHashMap | undefined
->;
+export type WeaponDBTables = Record<WeaponTable, PerkWeaponHashMap | undefined>;
 
 export type PerkWeaponHashMap = {
   [hash: string]: [name: string, weaponHashIds: Set<string>];

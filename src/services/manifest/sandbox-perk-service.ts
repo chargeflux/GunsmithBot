@@ -11,9 +11,7 @@ export async function getSandboxPerksByName(
 ): Promise<DestinySandboxPerkDefinition[]> {
   try {
     const items: ManifestTableRecordJSON[] = db
-      .prepare(
-        "SELECT json FROM DestinySandboxPerkDefinition WHERE name LIKE ?"
-      )
+      .prepare("SELECT json FROM DestinySandboxPerkDefinition WHERE name LIKE ?")
       .all("%" + query + "%");
     return items.map((x) => JSON.parse(x.json));
   } catch (e) {

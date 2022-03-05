@@ -8,10 +8,7 @@ import { logger } from "../logger-service";
 
 const _logger = logger.getChildLogger({ name: "PlugsetService" });
 
-export async function getPlugItemHash(
-  db: BetterSqlite3.Database,
-  hash: number
-): Promise<number> {
+export async function getPlugItemHash(db: BetterSqlite3.Database, hash: number): Promise<number> {
   try {
     const result: ManifestTableRecordJSON = db
       .prepare("SELECT json FROM DestinyPlugSetDefinition WHERE hash = ?")

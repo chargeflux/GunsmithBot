@@ -1,9 +1,9 @@
-import PublicError from "./PublicError"
+import PublicError from "./PublicError";
 
 export default class ValidationError extends PublicError {
   constructor(message: string) {
-    super(message)
+    super(message);
 
-    Error.captureStackTrace(this, this.constructor)
+    Error.captureStackTrace(this, this.constructor);
   }
 }

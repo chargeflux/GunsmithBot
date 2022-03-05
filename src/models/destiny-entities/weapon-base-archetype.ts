@@ -1,11 +1,5 @@
 import { logger } from "../../services/logger-service";
-import {
-  DamageType,
-  MAX_POWER_LEVEL,
-  WeaponBase,
-  WeaponClass,
-  WeaponTierType,
-} from "../constants";
+import { DamageType, MAX_POWER_LEVEL, WeaponBase, WeaponClass, WeaponTierType } from "../constants";
 import { BaseDestinyItem } from "./base-metadata";
 import Perk from "./perk";
 
@@ -47,10 +41,7 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
     this.intrinsic = intrinsic;
   }
 
-  static create(
-    data: WeaponArchetypeData,
-    intrinsic?: Perk
-  ): WeaponBaseArchetype {
+  static create(data: WeaponArchetypeData, intrinsic?: Perk): WeaponBaseArchetype {
     let weaponBase: keyof typeof WeaponBase | undefined;
     let weaponClass: keyof typeof WeaponClass | undefined;
     let weaponTierType: keyof typeof WeaponTierType | undefined;
@@ -58,20 +49,19 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
     for (const hash of data.itemCategoryHashes.sort().slice(1)) {
       const category = WeaponBase[hash] as keyof typeof WeaponBase | undefined;
       if (category) {
-        weaponBase = category
-        isKinetic = hash == WeaponBase.Kinetic
-      }
-      else {
-        const category = WeaponClass[hash] as keyof typeof WeaponClass | undefined
+        weaponBase = category;
+        isKinetic = hash == WeaponBase.Kinetic;
+      } else {
+        const category = WeaponClass[hash] as keyof typeof WeaponClass | undefined;
         if (category) {
           weaponClass = category;
         }
       }
     }
     if (!weaponBase) throw Error("Failed to parse weapon base class"); // also accounts for isEnergy
-    if (!weaponClass) { 
+    if (!weaponClass) {
       if (data.itemTypeDisplayName == "Glaive") {
-        weaponClass = "Glaive"
+        weaponClass = "Glaive";
         _logger.warn("Glaive has no item category hash yet");
       } else {
         throw Error("Failed to parse weapon class");
@@ -80,19 +70,13 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
 
     const tierTypeHash = data.weaponTierTypeHash;
     if (tierTypeHash)
-      weaponTierType = WeaponTierType[tierTypeHash] as
-        | keyof typeof WeaponTierType
-        | undefined;
+      weaponTierType = WeaponTierType[tierTypeHash] as keyof typeof WeaponTierType | undefined;
     else throw Error("Weapon tier type hash is invalid");
-    if (!weaponTierType)
-      throw Error(`Failed to parse tier type hash ${tierTypeHash}`);
+    if (!weaponTierType) throw Error(`Failed to parse tier type hash ${tierTypeHash}`);
 
     const weaponDamageTypeId = data.weaponDamageTypeId;
-    const damageType = DamageType[weaponDamageTypeId] as
-      | keyof typeof DamageType
-      | undefined;
-    if (!damageType)
-      throw Error(`Failed to parse damage type hash ${weaponDamageTypeId}`);
+    const damageType = DamageType[weaponDamageTypeId] as keyof typeof DamageType | undefined;
+    if (!damageType) throw Error(`Failed to parse damage type hash ${weaponDamageTypeId}`);
 
     const baseArchetype = new WeaponBaseArchetype(
       data.name,
@@ -104,8 +88,7 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
       intrinsic
     );
 
-    if (data.powerCapValues)
-      baseArchetype.powerCap = Math.max(...data.powerCapValues);
+    if (data.powerCapValues) baseArchetype.powerCap = Math.max(...data.powerCapValues);
     else throw Error("Failed to set power cap values");
 
     return baseArchetype;
@@ -116,8 +99,7 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
     if (!this.isKinetic || this.damage == "Stasis") stringToConstruct += this.damage + " ";
     stringToConstruct += this.type;
     stringToConstruct += " " + this.class;
-    if (this.powerCap)
-      stringToConstruct += " (" + this.powerCap.toString() + ")";
+    if (this.powerCap) stringToConstruct += " (" + this.powerCap.toString() + ")";
 
     if (stringToConstruct) {
       return "**" + stringToConstruct.trim() + "**";
@@ -139,7 +121,7 @@ export class WeaponArchetypeData {
     itemCategoryHashes: number[],
     weaponDamageTypeId: number,
     itemTypeDisplayName: string,
-    weaponTierTypeHash?: number,
+    weaponTierTypeHash?: number
   ) {
     this.name = name;
     this.powerCapValues = powerCapValues;

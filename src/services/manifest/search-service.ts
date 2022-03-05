@@ -1,7 +1,5 @@
 import BetterSqlite3 from "better-sqlite3";
-import {
-  PerkRecord,
-} from "../../models/db";
+import { PerkRecord } from "../../models/db";
 import { WeaponTable } from "../weapon-db-service";
 import { logger } from "../logger-service";
 
@@ -32,15 +30,10 @@ export async function getWeaponsByExactName(
     const results: PerkRecord = db
       .prepare("SELECT weaponHashIds FROM " + type + " WHERE name is ?")
       .get(query);
-    const parsedResults = results.weaponHashIds
-      .split(",")
-      .map((x) => parseInt(x));
+    const parsedResults = results.weaponHashIds.split(",").map((x) => parseInt(x));
     return parsedResults;
   } catch (e) {
-    _logger.error(
-      `Failed to get weapons in table ${type} by name: ${query}`,
-      e
-    );
+    _logger.error(`Failed to get weapons in table ${type} by name: ${query}`, e);
     return [];
   }
 }

@@ -1,1 +1,1 @@
-export default class PublicError extends Error { }
+export default class PublicError extends Error {}

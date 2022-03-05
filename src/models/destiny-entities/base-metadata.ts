@@ -3,6 +3,6 @@ export interface BaseMetadata extends BaseDestinyItem {
   hash: number;
 }
 
-export interface BaseDestinyItem { 
-  name: string
+export interface BaseDestinyItem {
+  name: string;
 }

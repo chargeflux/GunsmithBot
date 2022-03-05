@@ -1,8 +1,5 @@
 import axios from "axios";
-import {
-  DestinyDefinitionFrom,
-  DestinyManifestComponentName,
-} from "bungie-api-ts/destiny2";
+import { DestinyDefinitionFrom, DestinyManifestComponentName } from "bungie-api-ts/destiny2";
 import fs from "fs";
 import {
   ManifestTable,
@@ -13,8 +10,7 @@ import { logger } from "../logger-service";
 
 const _logger = logger.getChildLogger({ name: "ManifestService" });
 
-const BUNGIE_API_MANIFEST_URL =
-  "https://www.bungie.net/Platform/Destiny2/Manifest/";
+const BUNGIE_API_MANIFEST_URL = "https://www.bungie.net/Platform/Destiny2/Manifest/";
 
 export const MANIFEST_DATA_LOCATION = "data/";
 
@@ -46,12 +42,9 @@ export async function updateManifest(db: ManifestDBService): Promise<boolean> {
 async function getManifest(): Promise<PartialDestinyManifest> {
   let result: PartialDestinyManifest;
   if (process.env.BUNGIE_KEY) {
-    const response = await axios.get<PartialDestinyManifest>(
-      BUNGIE_API_MANIFEST_URL,
-      {
-        headers: { "X-API-Key": process.env.BUNGIE_KEY },
-      }
-    );
+    const response = await axios.get<PartialDestinyManifest>(BUNGIE_API_MANIFEST_URL, {
+      headers: { "X-API-Key": process.env.BUNGIE_KEY },
+    });
     _logger.info("Received manifest");
     result = response.data;
     return result;
@@ -60,18 +53,17 @@ async function getManifest(): Promise<PartialDestinyManifest> {
   }
 }
 
-async function getManifestTables(
-  manifest: PartialDestinyManifest
-): Promise<ManifestTable[]> {
+async function getManifestTables(manifest: PartialDestinyManifest): Promise<ManifestTable[]> {
   const manifestTables: ManifestTable[] = [];
   if (process.env.BUNGIE_KEY) {
     for (const table of TABLES) {
       const url = manifest.Response.jsonWorldComponentContentPaths.en[table];
-      const response = await axios.get<
-        DestinyDefinitionFrom<DestinyManifestComponentName>[]
-      >("https://bungie.net" + url, {
-        headers: { "X-API-Key": process.env.BUNGIE_KEY },
-      });
+      const response = await axios.get<DestinyDefinitionFrom<DestinyManifestComponentName>[]>(
+        "https://bungie.net" + url,
+        {
+          headers: { "X-API-Key": process.env.BUNGIE_KEY },
+        }
+      );
       _logger.info("Received manifest for:", table);
       const manifestTable = new ManifestTable(table, response.data);
       manifestTables.push(manifestTable);
@@ -102,10 +94,7 @@ async function processAndSaveManifestDataJSON(
       );
       _logger.info("Saved table:", table.name);
     }
-    fs.writeFileSync(
-      MANIFEST_DATA_LOCATION + "version",
-      latestManifest.Response.version
-    );
+    fs.writeFileSync(MANIFEST_DATA_LOCATION + "version", latestManifest.Response.version);
     _logger.info("Saved version:", latestManifest.Response.version);
   } catch (err) {
     _logger.info(err);
@@ -115,10 +104,7 @@ async function processAndSaveManifestDataJSON(
 
 export async function getCurrentVersion(): Promise<string> {
   try {
-    const version = fs.readFileSync(
-      MANIFEST_DATA_LOCATION + "version",
-      "utf-8"
-    );
+    const version = fs.readFileSync(MANIFEST_DATA_LOCATION + "version", "utf-8");
     return version;
   } catch {
     _logger.error("Failed to open version in " + MANIFEST_DATA_LOCATION);
