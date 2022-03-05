@@ -12,7 +12,7 @@ export default class Perk implements BaseMetadata {
   hash: number;
   category: keyof typeof PlugCategory;
   currentlyCanRoll: boolean;
-  enhanced: boolean;
+  isEnhanced: boolean;
 
   constructor(
     rawPerkData: DestinyInventoryItemDefinition,
@@ -25,8 +25,8 @@ export default class Perk implements BaseMetadata {
     this.category = category;
     this.currentlyCanRoll = currentlyCanRoll;
     this.hash = rawPerkData.hash;
-    this.enhanced = rawPerkData.inventory?.tierType == TierType.Common;
-    if (this.enhanced) {
+    this.isEnhanced = rawPerkData.inventory?.tierType == TierType.Common;
+    if (this.isEnhanced) {
       const beforeLength = this.name.length;
       this.name = this.name.replace(" Enhanced", "");
       if (beforeLength !== this.name.length) {
@@ -36,7 +36,7 @@ export default class Perk implements BaseMetadata {
   }
 
   toString() {
-    if (this.currentlyCanRoll) return this.name + (this.enhanced == true ? "*" : "");
+    if (this.currentlyCanRoll) return this.name + (this.isEnhanced == true ? "*" : "");
     else return "~~" + this.name + "~~";
   }
 }

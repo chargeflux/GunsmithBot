@@ -44,7 +44,10 @@ discordClient.on("interactionCreate", async (interaction) => {
     switch (commandName) {
       case "perk": {
         _logger.info(`Searching for '${inputString}'`);
-        const perkCommand = await baseClient.perkController.processPerkQuery(inputString);
+        const perkCommand = await baseClient.perkController.processPerkQuery(
+          interaction.options,
+          inputString
+        );
         if (perkCommand && perkCommand.count) {
           logQueryResults(perkCommand.results);
           const embed = createEmbed(QueryType.Perk, perkCommand);

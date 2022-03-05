@@ -68,7 +68,8 @@ function createPerkEmbed(perkResult: Perk): MessageEmbed {
     .setTitle(perkResult.category)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(perkResult.icon);
-  embed.addField(perkResult.name, perkResult.description);
+  const name = perkResult.name + (perkResult.isEnhanced ? " (Enhanced)" : "");
+  embed.addField(name, perkResult.description);
   _logger.info("Returning embed");
   return embed;
 }

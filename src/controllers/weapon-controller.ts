@@ -32,7 +32,10 @@ export default class WeaponController {
 
   async processWeaponQuery(
     input: string,
-    interactionOptions: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">
+    interactionOptions: Omit<
+      CommandInteractionOptionResolver<CacheType>,
+      "getMessage" | "getFocused"
+    >
   ): Promise<WeaponCommand | undefined> {
     let weaponCommand;
     if (input) {

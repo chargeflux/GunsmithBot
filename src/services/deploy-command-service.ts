@@ -100,6 +100,9 @@ function buildCommands() {
       .setDescription("Get information about a perk")
       .addStringOption((option: SlashCommandStringOption) =>
         option.setName("input").setDescription("Name of perk").setRequired(true)
+      )
+      .addBooleanOption((option: SlashCommandBooleanOption) =>
+        option.setName("enhanced").setDescription("Get the enhanced version of the perk")
       ),
   ];
   const searchBuilder = new SlashCommandBuilder()

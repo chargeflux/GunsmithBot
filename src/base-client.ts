@@ -44,9 +44,10 @@ export default class BaseClient {
       )
         try {
           deployCommands();
+          await message.reply("Deployed commands");
         } catch (e) {
           _logger.error("Failed to deploy commands", e);
-          message.reply("Failed to deploy commands");
+          await message.reply("Failed to deploy commands");
         }
     });
   }
