@@ -23,9 +23,7 @@ export default class ManifestDBService {
   private getOrInitialize(): BetterSqlite3.Database {
     if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);
-      _logger.warn(
-        "DB and manifest data location does not exist. Creating folder"
-      );
+      _logger.warn("DB and manifest data location does not exist. Creating folder");
     }
     const db = new BetterSqlite3(MANIFEST_DATA_LOCATION + dbName);
     return db;
@@ -66,11 +64,7 @@ export default class ManifestDBService {
   private addRecords(tables: ManifestTable[]) {
     const createTxn = this.db.transaction((records: ManifestTableRecord[], stmt) => {
       for (const record of records)
-        stmt.run(
-          record.hash.toString(),
-          record.name,
-          JSON.stringify(record.json)
-        );
+        stmt.run(record.hash.toString(), record.name, JSON.stringify(record.json));
     });
     for (const table of tables) {
       const stmt = this.db.prepare(

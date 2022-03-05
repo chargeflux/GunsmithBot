@@ -10,6 +10,7 @@ import {
 } from "../models/db";
 import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
+import PublicError from "../models/errors/PublicError";
 import ManifestDBService from "../services/manifest-db-service";
 import { getInventoryItemsByHashes } from "../services/manifest/inventory-item-service";
 import { getFuzzyQueryNames, getWeaponsByExactName } from "../services/manifest/search-service";
@@ -68,7 +69,7 @@ export default class SearchController {
     }
     if (queryStringComponents.length == 0) {
       // TODO: Implement archetype only search
-      throw Error(
+      throw new PublicError(
         "Querying by archetype only is not implemented. Please specify a perk to narrow results"
       );
     }

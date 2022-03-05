@@ -15,19 +15,15 @@ const _logger = logger.getChildLogger({ name: "BaseClient" });
 
 export default class BaseClient {
   client: Discord.Client;
-  perkController: PerkController;
-  weaponController: WeaponController;
-  modController: ModController;
-  searchController: SearchController;
+  perkController!: PerkController;
+  weaponController!: WeaponController;
+  modController!: ModController;
+  searchController!: SearchController;
 
   constructor() {
     this.client = new Discord.Client({
       intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES],
     });
-    this.perkController = new PerkController();
-    this.weaponController = new WeaponController();
-    this.modController = new ModController();
-    this.searchController = new SearchController();
     this.init();
   }
 
@@ -59,7 +55,7 @@ export default class BaseClient {
       await updateManifest(dbService).then(async (toChange: boolean) => {
         if (toChange) {
           const weaponItems = await getInventoryItemsWeapons(dbService.db);
-          const tables = await this.searchController.createWeaponTables(weaponItems);
+          const tables = await new SearchController().createWeaponTables(weaponItems);
           try {
             new WeaponDBService().construct(tables);
           } catch (e) {
@@ -67,7 +63,6 @@ export default class BaseClient {
             this.client.destroy();
             process.exit();
           }
-          this.searchController = new SearchController();
         }
       });
     } catch (e) {
@@ -78,6 +73,10 @@ export default class BaseClient {
         process.exit();
       }
     }
+    this.perkController = new PerkController();
+    this.weaponController = new WeaponController();
+    this.modController = new ModController();
+    this.searchController = new SearchController();
   }
 
   public tearDown() {
