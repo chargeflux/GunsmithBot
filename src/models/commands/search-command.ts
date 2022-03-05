@@ -1,5 +1,5 @@
 import BaseCommand from "./base-command";
-import Discord from "discord.js";
+import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import { WeaponTableHash, WeaponTables } from "../../services/weapon-db-service";
 import { WeaponBaseArchetype } from "../destiny-entities/weapon-base-archetype";
 import { stringIs } from "../../utils/validator";
@@ -48,7 +48,9 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
     );
   }
 
-  constructor(options: Discord.CommandInteractionOptionResolver) {
+  constructor(
+    options: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">
+  ) {
     const perksToSearchRaw: PerksToSearch = {};
     for (const name of WeaponTables) {
       perksToSearchRaw[name] = options.getString(name) ?? undefined;

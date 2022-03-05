@@ -1,4 +1,4 @@
-import Discord from "discord.js";
+import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import fuzzysort from "fuzzysort";
 import SearchCommand, { ValidTraitsOptions } from "../models/commands/search-command";
 import { WeaponCommandOptions } from "../models/commands/weapon-command";
@@ -33,7 +33,7 @@ export default class SearchController {
   }
 
   async processSearchQuery(
-    options: Discord.CommandInteractionOptionResolver
+    options: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">
   ): Promise<SearchCommand> {
     const searchCommand = new SearchCommand(options);
     const traitWeaponIds = new Set<number>();

@@ -3,7 +3,7 @@ import {
   DestinyItemSocketBlockDefinition,
   DestinyItemSocketEntryDefinition,
 } from "bungie-api-ts/destiny2";
-import Discord from "discord.js";
+import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weapon-command";
 import { PlugCategory, SocketCategoryHash } from "../models/constants";
 import Perk from "../models/destiny-entities/perk";
@@ -32,7 +32,7 @@ export default class WeaponController {
 
   async processWeaponQuery(
     input: string,
-    interactionOptions: Discord.CommandInteractionOptionResolver
+    interactionOptions: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">
   ): Promise<WeaponCommand | undefined> {
     let weaponCommand;
     if (input) {

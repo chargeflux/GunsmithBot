@@ -1,4 +1,4 @@
-import Discord from "discord.js";
+import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import { orderResultsByName, orderResultsByRandomOrTierType } from "../../utils/utils";
 import { Weapon } from "../destiny-entities/weapon";
 import ValidationError from "../errors/ValidationError";
@@ -37,7 +37,7 @@ export class WeaponCommandOptions {
   }
 
   static parseDiscordInteractionOptions(
-    options: Discord.CommandInteractionOptionResolver
+    options: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">
   ): WeaponCommandOptions {
     const full = options.getBoolean("full") ?? false;
     const isDefault = options.getBoolean("default") ?? false;
