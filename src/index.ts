@@ -44,10 +44,8 @@ discordClient.on("interactionCreate", async (interaction) => {
     switch (commandName) {
       case "perk": {
         _logger.info(`Searching for '${inputString}'`);
-        const perkCommand = await baseClient.perkController.processPerkQuery(
-          interaction.options,
-          inputString
-        );
+        const options = baseClient.perkController.processOptions(interaction.options);
+        const perkCommand = await baseClient.perkController.processQuery(inputString, options);
         if (perkCommand && perkCommand.count) {
           logQueryResults(perkCommand.results);
           const embed = createEmbed(QueryType.Perk, perkCommand);
@@ -74,7 +72,7 @@ discordClient.on("interactionCreate", async (interaction) => {
       }
       case "armor": {
         _logger.info(`Searching for '${inputString}'`);
-        const armorCommand = await baseClient.armorController.processArmorQuery(inputString);
+        const armorCommand = await baseClient.armorController.processQuery(inputString);
         if (armorCommand && armorCommand.count) {
           logQueryResults(armorCommand.results);
           const embed = createEmbed(QueryType.Armor, armorCommand);

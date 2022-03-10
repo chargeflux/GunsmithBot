@@ -65,6 +65,20 @@ async function getManifestTables(manifest: PartialDestinyManifest): Promise<Mani
         }
       );
       _logger.info("Received manifest for:", table);
+
+      if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
+        fs.mkdirSync(MANIFEST_DATA_LOCATION);
+        fs.mkdirSync(MANIFEST_DATA_LOCATION + "raw");
+      } else {
+        if (!fs.existsSync(MANIFEST_DATA_LOCATION + "raw")) {
+          fs.mkdirSync(MANIFEST_DATA_LOCATION + "raw");
+        }
+      }
+      fs.writeFileSync(
+        MANIFEST_DATA_LOCATION + "raw/" + table + ".json",
+        JSON.stringify(response.data, null, 2)
+      );
+
       const manifestTable = new ManifestTable(table, response.data);
       manifestTables.push(manifestTable);
     }
