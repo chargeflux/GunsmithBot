@@ -49,14 +49,3 @@ test.each([
   expect(firstResult?.currentlyCanRoll).toBe(true);
   expect(firstResult?.isEnhanced).toBe(true);
 });
-
-test.each([{ query: "Outlaw" }, { query: "Whirlwind Blade" }])(
-  "process invalid enhanced perks - $query",
-  async ({ query }) => {
-    const perkController = new PerkController();
-    const options = new PerkOptions(true);
-    const perkCommand = await perkController.processQuery(query, options);
-    expect(perkCommand).not.toBe(undefined);
-    expect(perkCommand?.count).toBe(0);
-  }
-);
