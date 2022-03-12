@@ -7,23 +7,25 @@ import { getCollectibleByHash } from "../services/manifest/collectible-service";
 import { getInventoryItemsByName } from "../services/manifest/inventory-item-service";
 import { getSandboxPerksByHashes } from "../services/manifest/sandbox-perk-service";
 import { logger } from "../services/logger-service";
+import BaseController from "./base-controller";
+import ModOptions from "../models/command-options/mod-options";
 
 const _logger = logger.getChildLogger({ name: "ModController" });
 
-export default class ModController {
+export default class ModController implements BaseController<ModOptions, ModCommand, Mod> {
   dbService: ManifestDBService;
 
   constructor(dbService?: ManifestDBService) {
     this.dbService = dbService ?? new ManifestDBService();
   }
 
-  async processModQuery(input?: string): Promise<ModCommand | undefined> {
+  async processQuery(input?: string): Promise<ModCommand | undefined> {
     let modCommand;
     if (input) {
       const results = await getInventoryItemsByName(this.dbService.db, input);
       const modResults = [];
       for (const result of results) {
-        if (!this.validateMod(result)) continue;
+        if (!this.validateResult(result)) continue;
 
         const sandboxPerks = await getSandboxPerksByHashes(
           this.dbService.db,
@@ -41,7 +43,7 @@ export default class ModController {
     return modCommand;
   }
 
-  validateMod(result: DestinyInventoryItemDefinition) {
+  validateResult(result: DestinyInventoryItemDefinition) {
     if (!result.itemCategoryHashes) return false;
     if (result.perks.length == 0) return false;
     if (!result.itemCategoryHashes.includes(ModCategory.Mods)) return false;

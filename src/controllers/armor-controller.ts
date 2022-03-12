@@ -3,6 +3,7 @@ import {
   DestinyItemSocketBlockDefinition,
   DestinyItemSocketEntryDefinition,
 } from "bungie-api-ts/destiny2";
+import ArmorOptions from "../models/command-options/armor-options";
 import ArmorCommand from "../models/commands/armor-command";
 import { ArmorType, PlugCategory, SocketCategoryHash } from "../models/constants";
 import { Armor } from "../models/destiny-entities/armor";
@@ -16,23 +17,24 @@ import {
 } from "../services/manifest/inventory-item-service";
 import { getPlugItemHash } from "../services/manifest/plugset-service";
 import getPowerCap from "../services/manifest/power-cap-service";
+import BaseController from "./base-controller";
 
 const _logger = logger.getChildLogger({ name: "WeaponController" });
 
-export default class ArmorController {
+export default class ArmorController implements BaseController<ArmorOptions, ArmorCommand, Armor> {
   dbService: ManifestDBService;
 
   constructor(dbService?: ManifestDBService) {
     this.dbService = dbService ?? new ManifestDBService();
   }
 
-  async processArmorQuery(input: string): Promise<ArmorCommand | undefined> {
+  async processQuery(input: string): Promise<ArmorCommand | undefined> {
     let armorCommand;
     if (input) {
       const results = await getInventoryItemsByName(this.dbService.db, input);
       const armorResults: Armor[] = [];
       for (const result of results) {
-        if (!this.validateArmor(result)) continue;
+        if (!this.validateResult(result)) continue;
         let source = "";
         if (result.collectibleHash) {
           const collectible = await getCollectibleByHash(this.dbService.db, result.collectibleHash);
@@ -44,6 +46,13 @@ export default class ArmorController {
       armorCommand = new ArmorCommand(input, armorResults);
     }
     return armorCommand;
+  }
+
+  validateResult(result: DestinyInventoryItemDefinition) {
+    if (!result.itemCategoryHashes) return false;
+    if (!result.itemCategoryHashes.includes(ArmorType.Armor)) return false;
+    if (!result.collectibleHash) return false;
+    return true;
   }
 
   async createArmor(armorData: DestinyInventoryItemDefinition, source: string) {
@@ -97,12 +106,5 @@ export default class ArmorController {
       }
       return new Perk(item, category, true);
     }
-  }
-
-  validateArmor(result: DestinyInventoryItemDefinition) {
-    if (!result.itemCategoryHashes) return false;
-    if (!result.itemCategoryHashes.includes(ArmorType.Armor)) return false;
-    if (!result.collectibleHash) return false;
-    return true;
   }
 }

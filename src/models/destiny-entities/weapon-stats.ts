@@ -23,7 +23,6 @@ export default class WeaponStats implements BaseDestinyItem {
       const stat: DestinyInventoryItemStatDefinition = statsData.stats[statHash];
       const statType = WeaponStat[statHash] as keyof typeof WeaponStat | undefined;
       if (!statType) {
-        _logger.debug("Failed to match weapon stat hash:", statHash);
         continue;
       }
       const statValue = stat.value;
