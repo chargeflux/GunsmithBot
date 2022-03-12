@@ -84,7 +84,7 @@ discordClient.on("interactionCreate", async (interaction) => {
       }
       case "mod": {
         _logger.info(`Searching for '${inputString}'`);
-        const modCommand = await baseClient.modController.processModQuery(inputString);
+        const modCommand = await baseClient.modController.processQuery(inputString);
         if (modCommand && modCommand.count) {
           logQueryResults(modCommand.results);
           const embed = createEmbed(QueryType.Mod, modCommand);
