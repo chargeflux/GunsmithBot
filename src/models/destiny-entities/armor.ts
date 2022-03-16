@@ -1,8 +1,8 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
-import { BaseMetadata } from "./base-metadata";
+import { BaseMetadata } from "./baseMetadata";
 import { BUNGIE_URL_ROOT } from "../constants";
 import Perk from "./perk";
-import { ArmorArchetypeData, ArmorBaseArchetype } from "./armor-base-archetype";
+import { ArmorArchetypeData, ArmorBaseArchetype } from "./armorBaseArchetype";
 
 export class Armor implements BaseMetadata {
   name: string;

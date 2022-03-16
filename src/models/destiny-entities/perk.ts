@@ -1,6 +1,6 @@
 import { DestinyInventoryItemDefinition, TierType } from "bungie-api-ts/destiny2";
-import { logger } from "../../services/logger-service";
-import { BaseMetadata } from "./base-metadata";
+import { logger } from "../../services/loggerService";
+import { BaseMetadata } from "./baseMetadata";
 import { BUNGIE_URL_ROOT, PlugCategory } from "../constants";
 
 const _logger = logger.getChildLogger({ name: "Perk" });

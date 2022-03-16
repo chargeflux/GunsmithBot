@@ -1,14 +1,14 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
-import ModCommand from "../models/commands/mod-command";
+import ModCommand from "../models/commands/modCommand";
 import { ModCategory } from "../models/constants";
 import Mod from "../models/destiny-entities/mod";
-import ManifestDBService from "../services/manifest-db-service";
-import { getCollectibleByHash } from "../services/manifest/collectible-service";
-import { getInventoryItemsByName } from "../services/manifest/inventory-item-service";
-import { getSandboxPerksByHashes } from "../services/manifest/sandbox-perk-service";
-import { logger } from "../services/logger-service";
-import BaseController from "./base-controller";
-import ModOptions from "../models/command-options/mod-options";
+import ManifestDBService from "../services/manifestDbService";
+import { getCollectibleByHash } from "../services/manifest/collectibleService";
+import { getInventoryItemsByName } from "../services/manifest/inventoryItemService";
+import { getSandboxPerksByHashes } from "../services/manifest/sandboxPerkService";
+import { logger } from "../services/loggerService";
+import BaseController from "./baseController";
+import ModOptions from "../models/command-options/modOptions";
 
 const _logger = logger.getChildLogger({ name: "ModController" });
 

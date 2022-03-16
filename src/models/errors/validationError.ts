@@ -1,4 +1,4 @@
-import PublicError from "./PublicError";
+import PublicError from "./publicError";
 
 export default class ValidationError extends PublicError {
   constructor(message: string) {

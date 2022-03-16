@@ -1,11 +1,11 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
-import { BaseMetadata } from "./base-metadata";
-import { WeaponCommandOptions } from "../commands/weapon-command";
+import { BaseMetadata } from "./baseMetadata";
+import { WeaponCommandOptions } from "../commands/weaponCommand";
 import { BUNGIE_URL_ROOT } from "../constants";
 import Perk from "./perk";
 import Socket from "./socket";
-import { WeaponArchetypeData, WeaponBaseArchetype } from "./weapon-base-archetype";
-import WeaponStats from "./weapon-stats";
+import { WeaponArchetypeData, WeaponBaseArchetype } from "./weaponBaseArchetype";
+import WeaponStats from "./weaponStats";
 
 export class Weapon implements BaseMetadata {
   name: string;

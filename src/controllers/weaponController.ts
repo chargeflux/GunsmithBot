@@ -4,21 +4,21 @@ import {
   DestinyItemSocketEntryDefinition,
 } from "bungie-api-ts/destiny2";
 import { CacheType, CommandInteractionOptionResolver } from "discord.js";
-import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weapon-command";
+import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weaponCommand";
 import { PlugCategory, SocketCategoryHash } from "../models/constants";
 import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
 import { Weapon } from "../models/destiny-entities/weapon";
-import { logger } from "../services/logger-service";
-import ManifestDBService from "../services/manifest-db-service";
+import { logger } from "../services/loggerService";
+import ManifestDBService from "../services/manifestDbService";
 import {
   getInventoryItemByHash,
   getInventoryItemsByHashes,
   getInventoryItemsByName,
-} from "../services/manifest/inventory-item-service";
-import { getPlugItemHash, getPlugItemsByHash } from "../services/manifest/plugset-service";
-import getPowerCap from "../services/manifest/power-cap-service";
-import { getSocketTypeHash } from "../services/manifest/socket-type-service";
+} from "../services/manifest/inventoryItemService";
+import { getPlugItemHash, getPlugItemsByHash } from "../services/manifest/plugsetService";
+import getPowerCap from "../services/manifest/powerCapService";
+import { getSocketTypeHash } from "../services/manifest/socketTypeService";
 import { validateWeaponSearch } from "../utils/utils";
 
 const _logger = logger.getChildLogger({ name: "WeaponController" });

@@ -4,9 +4,9 @@ import fs from "fs";
 import {
   ManifestTable,
   PartialDestinyManifest,
-} from "../../models/bungie-api/partial-destiny-manifest";
-import ManifestDBService from "../manifest-db-service";
-import { logger } from "../logger-service";
+} from "../../models/bungie-api/partialDestinyManifest";
+import ManifestDBService from "../manifestDbService";
+import { logger } from "../loggerService";
 
 const _logger = logger.getChildLogger({ name: "ManifestService" });
 

@@ -1,5 +1,5 @@
-import PerkOptions from "../../models/command-options/perk-options";
-import PerkController from "../perk-controller";
+import PerkOptions from "../../models/command-options/perkOptions";
+import PerkController from "../perkController";
 
 test.each([
   { query: "Rampage", category: "Traits" },

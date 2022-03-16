@@ -1,5 +1,5 @@
 import { ArmorType, GuardianClass, MAX_POWER_LEVEL, TierType } from "../constants";
-import { BaseDestinyItem } from "./base-metadata";
+import { BaseDestinyItem } from "./baseMetadata";
 import Perk from "./perk";
 
 export class ArmorBaseArchetype implements BaseDestinyItem {

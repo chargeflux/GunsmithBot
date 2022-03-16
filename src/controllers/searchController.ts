@@ -1,7 +1,7 @@
 import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import fuzzysort from "fuzzysort";
-import SearchCommand, { ValidTraitsOptions } from "../models/commands/search-command";
-import { WeaponCommandOptions } from "../models/commands/weapon-command";
+import SearchCommand, { ValidTraitsOptions } from "../models/commands/searchCommand";
+import { WeaponCommandOptions } from "../models/commands/weaponCommand";
 import { PlugCategory } from "../models/constants";
 import {
   DestinyInventoryItemDefinitionRecord,
@@ -10,18 +10,18 @@ import {
 } from "../models/db";
 import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
-import PublicError from "../models/errors/PublicError";
-import ManifestDBService from "../services/manifest-db-service";
-import { getInventoryItemsByHashes } from "../services/manifest/inventory-item-service";
-import { getFuzzyQueryNames, getWeaponsByExactName } from "../services/manifest/search-service";
+import PublicError from "../models/errors/publicError";
+import ManifestDBService from "../services/manifestDbService";
+import { getInventoryItemsByHashes } from "../services/manifest/inventoryItemService";
+import { getFuzzyQueryNames, getWeaponsByExactName } from "../services/manifest/searchService";
 import WeaponDBService, {
   WeaponTable,
   WeaponTableHash,
   WeaponTables,
-} from "../services/weapon-db-service";
+} from "../services/weaponDbService";
 import { validateWeaponSearch } from "../utils/utils";
 import { stringIs } from "../utils/validator";
-import WeaponController from "./weapon-controller";
+import WeaponController from "./weaponController";
 
 export default class SearchController {
   dbService: ManifestDBService;

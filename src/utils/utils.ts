@@ -1,7 +1,7 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import fuzzysort from "fuzzysort";
 import { WeaponBase, WeaponClass } from "../models/constants";
-import { BaseMetadata } from "../models/destiny-entities/base-metadata";
+import { BaseMetadata } from "../models/destiny-entities/baseMetadata";
 
 export function toTitleCase(text: string): string {
   return text

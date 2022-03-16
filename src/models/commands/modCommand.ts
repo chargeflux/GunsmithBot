@@ -1,6 +1,6 @@
 import { orderResultsByName } from "../../utils/utils";
 import Mod from "../destiny-entities/mod";
-import BaseCommand from "./base-command";
+import BaseCommand from "./baseCommand";
 
 export default class ModCommand implements BaseCommand<Mod> {
   readonly input: string;

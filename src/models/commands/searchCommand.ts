@@ -1,7 +1,7 @@
-import BaseCommand from "./base-command";
+import BaseCommand from "./baseCommand";
 import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js";
-import { WeaponTableHash, WeaponTables } from "../../services/weapon-db-service";
-import { WeaponBaseArchetype } from "../destiny-entities/weapon-base-archetype";
+import { WeaponTableHash, WeaponTables } from "../../services/weaponDbService";
+import { WeaponBaseArchetype } from "../destiny-entities/weaponBaseArchetype";
 import { stringIs } from "../../utils/validator";
 
 // Following readonly arrays map to available options or choices for search command

@@ -1,4 +1,4 @@
-import BaseOptions from "./base-options";
+import BaseOptions from "./baseOptions";
 
 export default class PerkOptions implements BaseOptions {
   readonly enhanced: boolean;

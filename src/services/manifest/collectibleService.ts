@@ -1,7 +1,7 @@
 import { DestinyCollectibleDefinition } from "bungie-api-ts/destiny2";
 import BetterSqlite3 from "better-sqlite3";
 import { ManifestTableRecordJSON } from "../../models/db";
-import { logger } from "../logger-service";
+import { logger } from "../loggerService";
 
 const _logger = logger.getChildLogger({ name: "CollectibleService" });
 

@@ -1,6 +1,6 @@
-import { logger } from "../../services/logger-service";
+import { logger } from "../../services/loggerService";
 import { DamageType, MAX_POWER_LEVEL, WeaponBase, WeaponClass, TierType } from "../constants";
-import { BaseDestinyItem } from "./base-metadata";
+import { BaseDestinyItem } from "./baseMetadata";
 import Perk from "./perk";
 
 const _logger = logger.getChildLogger({ name: "WeaponBaseArchetype" });

@@ -1,8 +1,8 @@
 import { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import { orderResultsByName } from "../../utils/utils";
 import { Weapon } from "../destiny-entities/weapon";
-import ValidationError from "../errors/ValidationError";
-import BaseCommand from "./base-command";
+import ValidationError from "../errors/validationError";
+import BaseCommand from "./baseCommand";
 
 export default class WeaponCommand implements BaseCommand<Weapon> {
   readonly input: string;

@@ -1,7 +1,7 @@
 import { StatOrder } from "../constants";
 import { Weapon } from "../destiny-entities/weapon";
-import WeaponStats from "../destiny-entities/weapon-stats";
-import BaseCommand from "./base-command";
+import WeaponStats from "../destiny-entities/weaponStats";
+import BaseCommand from "./baseCommand";
 
 export default class CompareCommand implements BaseCommand<WeaponStats> {
   readonly input: string;

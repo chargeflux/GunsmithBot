@@ -1,6 +1,6 @@
 import { orderResultsByName } from "../../utils/utils";
 import { Armor } from "../destiny-entities/armor";
-import BaseCommand from "./base-command";
+import BaseCommand from "./baseCommand";
 
 export default class ArmorCommand implements BaseCommand<Armor> {
   readonly input: string;

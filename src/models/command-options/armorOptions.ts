@@ -1,3 +1,3 @@
-import BaseOptions from "./base-options";
+import BaseOptions from "./baseOptions";
 
 export default class ArmorOptions implements BaseOptions {}

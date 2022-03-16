@@ -1,12 +1,12 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import { CacheType, CommandInteractionOptionResolver } from "discord.js";
-import PerkOptions from "../models/command-options/perk-options";
-import PerkCommand from "../models/commands/perk-command";
+import PerkOptions from "../models/command-options/perkOptions";
+import PerkCommand from "../models/commands/perkCommand";
 import { PlugCategory } from "../models/constants";
 import Perk from "../models/destiny-entities/perk";
-import ManifestDBService from "../services/manifest-db-service";
-import { getInventoryItemsByName } from "../services/manifest/inventory-item-service";
-import BaseController from "./base-controller";
+import ManifestDBService from "../services/manifestDbService";
+import { getInventoryItemsByName } from "../services/manifest/inventoryItemService";
+import BaseController from "./baseController";
 
 export default class PerkController implements BaseController<PerkOptions, PerkCommand, Perk> {
   dbService: ManifestDBService;

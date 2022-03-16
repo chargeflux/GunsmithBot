@@ -1,19 +1,19 @@
 import { MessageEmbed } from "discord.js";
-import ArmorCommand from "../models/commands/armor-command";
-import BaseCommand from "../models/commands/base-command";
-import CompareCommand from "../models/commands/compare-command";
-import ModCommand from "../models/commands/mod-command";
-import PerkCommand from "../models/commands/perk-command";
-import SearchCommand from "../models/commands/search-command";
-import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weapon-command";
+import ArmorCommand from "../models/commands/armorCommand";
+import BaseCommand from "../models/commands/baseCommand";
+import CompareCommand from "../models/commands/compareCommand";
+import ModCommand from "../models/commands/modCommand";
+import PerkCommand from "../models/commands/perkCommand";
+import SearchCommand from "../models/commands/searchCommand";
+import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weaponCommand";
 import { DISCORD_BG_HEX } from "../models/constants";
 import { Armor } from "../models/destiny-entities/armor";
-import { BaseDestinyItem } from "../models/destiny-entities/base-metadata";
+import { BaseDestinyItem } from "../models/destiny-entities/baseMetadata";
 import Mod from "../models/destiny-entities/mod";
 import Perk from "../models/destiny-entities/perk";
 import { Weapon } from "../models/destiny-entities/weapon";
-import { QueryType } from "../models/query-type";
-import { logger } from "./logger-service";
+import { QueryType } from "../models/queryType";
+import { logger } from "./loggerService";
 
 const _logger = logger.getChildLogger({ name: "Embed" });
 

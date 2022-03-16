@@ -3,21 +3,21 @@ import {
   DestinyItemSocketBlockDefinition,
   DestinyItemSocketEntryDefinition,
 } from "bungie-api-ts/destiny2";
-import ArmorOptions from "../models/command-options/armor-options";
-import ArmorCommand from "../models/commands/armor-command";
+import ArmorOptions from "../models/command-options/armorOptions";
+import ArmorCommand from "../models/commands/armorCommand";
 import { ArmorType, PlugCategory, SocketCategoryHash } from "../models/constants";
 import { Armor } from "../models/destiny-entities/armor";
 import Perk from "../models/destiny-entities/perk";
-import { logger } from "../services/logger-service";
-import ManifestDBService from "../services/manifest-db-service";
-import { getCollectibleByHash } from "../services/manifest/collectible-service";
+import { logger } from "../services/loggerService";
+import ManifestDBService from "../services/manifestDbService";
+import { getCollectibleByHash } from "../services/manifest/collectibleService";
 import {
   getInventoryItemByHash,
   getInventoryItemsByName,
-} from "../services/manifest/inventory-item-service";
-import { getPlugItemHash } from "../services/manifest/plugset-service";
-import getPowerCap from "../services/manifest/power-cap-service";
-import BaseController from "./base-controller";
+} from "../services/manifest/inventoryItemService";
+import { getPlugItemHash } from "../services/manifest/plugsetService";
+import getPowerCap from "../services/manifest/powerCapService";
+import BaseController from "./baseController";
 
 const _logger = logger.getChildLogger({ name: "WeaponController" });
 

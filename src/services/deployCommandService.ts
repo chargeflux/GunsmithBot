@@ -10,9 +10,9 @@ import {
   WeaponDamageType,
   WeaponRarity,
   WeaponTypes,
-} from "../models/commands/search-command";
-import { WeaponTables } from "./weapon-db-service";
-import { logger } from "./logger-service";
+} from "../models/commands/searchCommand";
+import { WeaponTables } from "./weaponDbService";
+import { logger } from "./loggerService";
 
 const _logger = logger.getChildLogger({ name: "Deploy" });
 

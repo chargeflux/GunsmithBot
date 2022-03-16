@@ -1,10 +1,10 @@
 import fs from "fs";
-import SearchController from "../controllers/search-controller";
-import { ManifestTable } from "../models/bungie-api/partial-destiny-manifest";
-import ManifestDBService from "../services/manifest-db-service";
-import { getInventoryItemsWeapons } from "../services/manifest/inventory-item-service";
-import { TABLES } from "../services/manifest/manifest-service";
-import WeaponDBService from "../services/weapon-db-service";
+import SearchController from "../controllers/searchController";
+import { ManifestTable } from "../models/bungie-api/partialDestinyManifest";
+import ManifestDBService from "../services/manifestDbService";
+import { getInventoryItemsWeapons } from "../services/manifest/inventoryItemService";
+import { TABLES } from "../services/manifest/manifestService";
+import WeaponDBService from "../services/weaponDbService";
 import path from "path";
 
 test.skip("build database from json", async () => {

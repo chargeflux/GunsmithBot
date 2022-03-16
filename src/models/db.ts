@@ -3,7 +3,7 @@ import {
   DestinyInventoryItemDefinition,
   DestinyManifestComponentName,
 } from "bungie-api-ts/destiny2";
-import { WeaponTable } from "../services/weapon-db-service";
+import { WeaponTable } from "../services/weaponDbService";
 
 export class ManifestTableRecord {
   hash: string;

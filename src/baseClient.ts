@@ -1,16 +1,16 @@
 import Discord from "discord.js";
 import cron from "node-cron";
-import ModController from "./controllers/mod-controller";
-import PerkController from "./controllers/perk-controller";
-import SearchController from "./controllers/search-controller";
-import WeaponController from "./controllers/weapon-controller";
-import ManifestDBService from "./services/manifest-db-service";
-import { getInventoryItemsWeapons } from "./services/manifest/inventory-item-service";
-import { getCurrentVersion, updateManifest } from "./services/manifest/manifest-service";
-import WeaponDBService from "./services/weapon-db-service";
-import deployCommands from "./services/deploy-command-service";
-import { logger } from "./services/logger-service";
-import ArmorController from "./controllers/armor-controller";
+import ModController from "./controllers/modController";
+import PerkController from "./controllers/perkController";
+import SearchController from "./controllers/searchController";
+import WeaponController from "./controllers/weaponController";
+import ManifestDBService from "./services/manifestDbService";
+import { getInventoryItemsWeapons } from "./services/manifest/inventoryItemService";
+import { getCurrentVersion, updateManifest } from "./services/manifest/manifestService";
+import WeaponDBService from "./services/weaponDbService";
+import deployCommands from "./services/deployCommandService";
+import { logger } from "./services/loggerService";
+import ArmorController from "./controllers/armorController";
 
 const _logger = logger.getChildLogger({ name: "BaseClient" });
 

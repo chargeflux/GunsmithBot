@@ -1,6 +1,6 @@
 import { orderResultsByName } from "../../utils/utils";
 import Perk from "../destiny-entities/perk";
-import BaseCommand from "./base-command";
+import BaseCommand from "./baseCommand";
 
 export default class PerkCommand implements BaseCommand<Perk> {
   readonly input: string;

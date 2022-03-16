@@ -2,7 +2,7 @@ import {
   DestinyInventoryItemDefinition,
   DestinySandboxPerkDefinition,
 } from "bungie-api-ts/destiny2";
-import { BaseMetadata } from "./base-metadata";
+import { BaseMetadata } from "./baseMetadata";
 import { BUNGIE_URL_ROOT, EnergyType } from "../constants";
 
 export default class Mod implements BaseMetadata {

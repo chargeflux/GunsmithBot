@@ -1,7 +1,7 @@
 import BetterSqlite3 from "better-sqlite3";
 import { PerkRecord } from "../../models/db";
-import { WeaponTable } from "../weapon-db-service";
-import { logger } from "../logger-service";
+import { WeaponTable } from "../weaponDbService";
+import { logger } from "../loggerService";
 
 const _logger = logger.getChildLogger({ name: "SearchService" });
 

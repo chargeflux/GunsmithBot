@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
-import CompareCommand from "./models/commands/compare-command";
-import PublicError from "./models/errors/PublicError";
-import createEmbed from "./services/embed-service";
-import { logger } from "./services/logger-service";
-import BaseClient from "./base-client";
-import { QueryType } from "./models/query-type";
-import { BaseDestinyItem } from "./models/destiny-entities/base-metadata";
+import CompareCommand from "./models/commands/compareCommand";
+import PublicError from "./models/errors/publicError";
+import createEmbed from "./services/embedService";
+import { logger } from "./services/loggerService";
+import BaseClient from "./baseClient";
+import { QueryType } from "./models/queryType";
+import { BaseDestinyItem } from "./models/destiny-entities/baseMetadata";
 import { CommandInteraction, MessageEmbed } from "discord.js";
 
 const _logger = logger;

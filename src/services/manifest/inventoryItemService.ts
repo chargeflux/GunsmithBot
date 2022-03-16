@@ -5,7 +5,7 @@ import {
   ManifestTableRecord,
   DestinyInventoryItemDefinitionRecord,
 } from "../../models/db";
-import { logger } from "../logger-service";
+import { logger } from "../loggerService";
 
 const _logger = logger.getChildLogger({ name: "InventoryItemService" });
 
