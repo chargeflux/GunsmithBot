@@ -2,8 +2,8 @@ import fs from "fs";
 import SearchController from "../controllers/searchController";
 import { ManifestTable } from "../models/database/manifestTable";
 import ManifestDBService from "../services/manifestDbService";
-import { getInventoryItemsWeapons } from "../services/manifest/inventoryItemService";
-import { TABLES } from "../services/manifest/manifestService";
+import { getInventoryItemsWeapons } from "../services/dbQuery/inventoryItem";
+import { TABLES } from "../services/manifestService";
 import WeaponDBService from "../services/weaponDbService";
 import path from "path";
 

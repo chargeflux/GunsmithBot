@@ -10,13 +10,13 @@ import { Armor } from "../models/destiny-entities/armor";
 import Perk from "../models/destiny-entities/perk";
 import { logger } from "../logger";
 import ManifestDBService from "../services/manifestDbService";
-import { getCollectibleByHash } from "../services/manifest/collectibleService";
+import { getCollectibleByHash } from "../services/dbQuery/collectible";
 import {
   getInventoryItemByHash,
   getInventoryItemsByName,
-} from "../services/manifest/inventoryItemService";
-import { getPlugItemHash } from "../services/manifest/plugsetService";
-import getPowerCap from "../services/manifest/powerCapService";
+} from "../services/dbQuery/inventoryItem";
+import { getPlugItemHash } from "../services/dbQuery/plugset";
+import getPowerCap from "../services/dbQuery/powerCap";
 import BaseController from "./baseController";
 
 const _logger = logger.getChildLogger({ name: "WeaponController" });

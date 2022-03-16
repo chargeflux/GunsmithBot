@@ -12,8 +12,8 @@ import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
 import PublicError from "../models/errors/publicError";
 import ManifestDBService from "../services/manifestDbService";
-import { getInventoryItemsByHashes } from "../services/manifest/inventoryItemService";
-import { getFuzzyQueryNames, getWeaponsByExactName } from "../services/manifest/searchService";
+import { getInventoryItemsByHashes } from "../services/dbQuery/inventoryItem";
+import { getFuzzyQueryNames, getWeaponsByExactName } from "../services/dbQuery/search";
 import WeaponDBService, {
   WeaponTable,
   WeaponTableHash,

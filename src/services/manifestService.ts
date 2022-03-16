@@ -3,10 +3,10 @@ import { DestinyDefinitionFrom, DestinyManifestComponentName } from "bungie-api-
 import fs from "fs";
 import {
   PartialDestinyManifest,
-} from "../../models/bungie-api/partialDestinyManifest";
-import { ManifestTable } from "../../models/database/manifestTable";
-import ManifestDBService from "../manifestDbService";
-import { logger } from "../../logger";
+} from "../models/bungie-api/partialDestinyManifest";
+import { ManifestTable } from "../models/database/manifestTable";
+import ManifestDBService from "./manifestDbService";
+import { logger } from "../logger";
 
 const _logger = logger.getChildLogger({ name: "ManifestService" });
 

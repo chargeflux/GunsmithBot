@@ -1,7 +1,7 @@
 import BetterSqlite3 from "better-sqlite3";
 import fs from "fs";
 import { ManifestTable, ManifestTableRecord } from "../models/database/manifestTable";
-import { MANIFEST_DATA_LOCATION, TABLES } from "./manifest/manifestService";
+import { MANIFEST_DATA_LOCATION, TABLES } from "./manifestService";
 import { logger } from "../logger";
 
 const _logger = logger.getChildLogger({ name: "ManifestDB" });

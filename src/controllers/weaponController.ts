@@ -15,10 +15,10 @@ import {
   getInventoryItemByHash,
   getInventoryItemsByHashes,
   getInventoryItemsByName,
-} from "../services/manifest/inventoryItemService";
-import { getPlugItemHash, getPlugItemsByHash } from "../services/manifest/plugsetService";
-import getPowerCap from "../services/manifest/powerCapService";
-import { getSocketTypeHash } from "../services/manifest/socketTypeService";
+} from "../services/dbQuery/inventoryItem";
+import { getPlugItemHash, getPlugItemsByHash } from "../services/dbQuery/plugset";
+import getPowerCap from "../services/dbQuery/powerCap";
+import { getSocketTypeHash } from "../services/dbQuery/socketType";
 import { validateWeaponSearch } from "../utils/utils";
 
 const _logger = logger.getChildLogger({ name: "WeaponController" });
