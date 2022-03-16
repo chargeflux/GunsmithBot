@@ -1,7 +1,7 @@
 import { DestinySocketTypeDefinition } from "bungie-api-ts/destiny2";
 import BetterSqlite3 from "better-sqlite3";
-import { ManifestTableRecordJSON } from "../../models/db";
-import { logger } from "../loggerService";
+import { logger } from "../../logger";
+import { ManifestTableRecordJSON } from "../../models/database/manifestTable";
 
 const _logger = logger.getChildLogger({ name: "SocketService" });
 

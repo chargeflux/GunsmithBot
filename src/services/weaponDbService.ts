@@ -1,9 +1,9 @@
 import BetterSqlite3 from "better-sqlite3";
 import fs from "fs";
-import { WeaponDBTables, PerkWeaponHashMap } from "../models/db";
+import { WeaponDBTables, PerkWeaponHashMap } from "../models/database/weaponTable";
 import { stringIs } from "../utils/validator";
 import { MANIFEST_DATA_LOCATION } from "./manifest/manifestService";
-import { logger } from "./loggerService";
+import { logger } from "../logger";
 
 const _logger = logger.getChildLogger({ name: "WeaponDB" });
 

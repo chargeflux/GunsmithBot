@@ -2,6 +2,15 @@ export const DISCORD_BG_HEX = 0x2f3136;
 
 export const BUNGIE_URL_ROOT = "https://www.bungie.net";
 
+export enum QueryType {
+  "Perk" = "perk",
+  "Weapon" = "weapon",
+  "Armor" = "armor",
+  "Mod" = "mod",
+  "Compare" = "compare",
+  "Search" = "search",
+}
+
 export enum PlugCategory {
   // socketCategoryHash=4241085061 (WEAPON_PERKS) in DestinySocketTypeDefinition or DestinyInventoryItemDefinition.plug.plugCategoryHash
   "Intrinsics" = 1744546145,

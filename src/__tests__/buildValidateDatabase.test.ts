@@ -1,6 +1,6 @@
 import fs from "fs";
 import SearchController from "../controllers/searchController";
-import { ManifestTable } from "../models/bungie-api/partialDestinyManifest";
+import { ManifestTable } from "../models/database/manifestTable";
 import ManifestDBService from "../services/manifestDbService";
 import { getInventoryItemsWeapons } from "../services/manifest/inventoryItemService";
 import { TABLES } from "../services/manifest/manifestService";

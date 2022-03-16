@@ -1,11 +1,8 @@
 import BetterSqlite3 from "better-sqlite3";
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
-import {
-  ManifestTableRecordJSON,
-  ManifestTableRecord,
-  DestinyInventoryItemDefinitionRecord,
-} from "../../models/db";
-import { logger } from "../loggerService";
+import { ManifestTableRecord, ManifestTableRecordJSON } from "../../models/database/manifestTable";
+import { DestinyInventoryItemDefinitionRecord } from "../../models/database/weaponTable";
+import { logger } from "../../logger";
 
 const _logger = logger.getChildLogger({ name: "InventoryItemService" });
 

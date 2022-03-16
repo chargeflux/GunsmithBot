@@ -2,7 +2,7 @@ import {
   DestinyInventoryItemStatDefinition,
   DestinyItemStatBlockDefinition,
 } from "bungie-api-ts/destiny2";
-import { logger } from "../../services/loggerService";
+import { logger } from "../../logger";
 import { StatOrder, WeaponStat } from "../constants";
 import { BaseDestinyItem } from "./baseMetadata";
 const _logger = logger.getChildLogger({ name: "Weapon.Stats" });

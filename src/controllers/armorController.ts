@@ -8,7 +8,7 @@ import ArmorCommand from "../models/commands/armorCommand";
 import { ArmorType, PlugCategory, SocketCategoryHash } from "../models/constants";
 import { Armor } from "../models/destiny-entities/armor";
 import Perk from "../models/destiny-entities/perk";
-import { logger } from "../services/loggerService";
+import { logger } from "../logger";
 import ManifestDBService from "../services/manifestDbService";
 import { getCollectibleByHash } from "../services/manifest/collectibleService";
 import {

@@ -6,7 +6,7 @@ import ManifestDBService from "../services/manifestDbService";
 import { getCollectibleByHash } from "../services/manifest/collectibleService";
 import { getInventoryItemsByName } from "../services/manifest/inventoryItemService";
 import { getSandboxPerksByHashes } from "../services/manifest/sandboxPerkService";
-import { logger } from "../services/loggerService";
+import { logger } from "../logger";
 import BaseController from "./baseController";
 import ModOptions from "../models/command-options/modOptions";
 

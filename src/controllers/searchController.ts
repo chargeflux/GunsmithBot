@@ -7,7 +7,7 @@ import {
   DestinyInventoryItemDefinitionRecord,
   PerkWeaponHashMap,
   WeaponDBTables,
-} from "../models/db";
+} from "../models/database/weaponTable";
 import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
 import PublicError from "../models/errors/publicError";

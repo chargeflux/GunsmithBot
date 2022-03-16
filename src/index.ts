@@ -1,12 +1,12 @@
 import dotenv from "dotenv";
 import CompareCommand from "./models/commands/compareCommand";
 import PublicError from "./models/errors/publicError";
-import createEmbed from "./services/embedService";
-import { logger } from "./services/loggerService";
-import BaseClient from "./baseClient";
-import { QueryType } from "./models/queryType";
+import createEmbed from "./discord/createEmbed";
+import { logger } from "./logger";
+import BaseClient from "./discord/baseClient";
 import { BaseDestinyItem } from "./models/destiny-entities/baseMetadata";
 import { CommandInteraction, MessageEmbed } from "discord.js";
+import { QueryType } from "./models/constants";
 
 const _logger = logger;
 dotenv.config();

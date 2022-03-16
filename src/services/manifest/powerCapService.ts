@@ -1,6 +1,6 @@
 import BetterSqlite3 from "better-sqlite3";
-import { ManifestTableRecordJSON } from "../../models/db";
-import { logger } from "../loggerService";
+import { ManifestTableRecordJSON } from "../../models/database/manifestTable";
+import { logger } from "../../logger";
 
 const _logger = logger.getChildLogger({ name: "PowerCapService" });
 

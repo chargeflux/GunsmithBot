@@ -1,5 +1,5 @@
 import { DestinyInventoryItemDefinition, TierType } from "bungie-api-ts/destiny2";
-import { logger } from "../../services/loggerService";
+import { logger } from "../../logger";
 import { BaseMetadata } from "./baseMetadata";
 import { BUNGIE_URL_ROOT, PlugCategory } from "../constants";
 

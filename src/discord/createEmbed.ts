@@ -6,14 +6,13 @@ import ModCommand from "../models/commands/modCommand";
 import PerkCommand from "../models/commands/perkCommand";
 import SearchCommand from "../models/commands/searchCommand";
 import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weaponCommand";
-import { DISCORD_BG_HEX } from "../models/constants";
+import { DISCORD_BG_HEX, QueryType } from "../models/constants";
 import { Armor } from "../models/destiny-entities/armor";
 import { BaseDestinyItem } from "../models/destiny-entities/baseMetadata";
 import Mod from "../models/destiny-entities/mod";
 import Perk from "../models/destiny-entities/perk";
 import { Weapon } from "../models/destiny-entities/weapon";
-import { QueryType } from "../models/queryType";
-import { logger } from "./loggerService";
+import { logger } from "../logger";
 
 const _logger = logger.getChildLogger({ name: "Embed" });
 

@@ -2,11 +2,11 @@ import axios from "axios";
 import { DestinyDefinitionFrom, DestinyManifestComponentName } from "bungie-api-ts/destiny2";
 import fs from "fs";
 import {
-  ManifestTable,
   PartialDestinyManifest,
 } from "../../models/bungie-api/partialDestinyManifest";
+import { ManifestTable } from "../../models/database/manifestTable";
 import ManifestDBService from "../manifestDbService";
-import { logger } from "../loggerService";
+import { logger } from "../../logger";
 
 const _logger = logger.getChildLogger({ name: "ManifestService" });
 

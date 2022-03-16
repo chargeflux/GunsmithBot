@@ -11,8 +11,8 @@ import {
   WeaponRarity,
   WeaponTypes,
 } from "../models/commands/searchCommand";
-import { WeaponTables } from "./weaponDbService";
-import { logger } from "./loggerService";
+import { WeaponTables } from "../services/weaponDbService";
+import { logger } from "../logger";
 
 const _logger = logger.getChildLogger({ name: "Deploy" });
 

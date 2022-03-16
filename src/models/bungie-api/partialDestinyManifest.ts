@@ -1,20 +1,18 @@
-import { DestinyDefinitionFrom, DestinyManifestComponentName } from "bungie-api-ts/destiny2";
-import { ManifestTableRecord } from "../db";
 
 export type PartialDestinyManifest = {
   Response: PartialManifestData;
 };
 
 type PartialManifestData = {
-  jsonWorldComponentContentPaths: PartialLanguageManifest;
+  jsonWorldComponentContentPaths: partialLanguageManifest;
   version: string;
 };
 
-type PartialLanguageManifest = {
-  en: ManifestPayloadPaths;
+type partialLanguageManifest = {
+  en: manifestPayloadPaths;
 };
 
-interface ManifestPayloadPaths {
+interface manifestPayloadPaths {
   [index: string]: string;
   DestinyAchievementDefinition: string;
   DestinyActivityDefinition: string;
@@ -91,25 +89,4 @@ interface ManifestPayloadPaths {
   DestinyVendorGroupDefinition: string;
 }
 
-export class ManifestTable {
-  name: DestinyManifestComponentName;
-  data: ManifestTableRecord[];
 
-  constructor(
-    name: DestinyManifestComponentName,
-    input: DestinyDefinitionFrom<DestinyManifestComponentName>[]
-  ) {
-    this.name = name;
-    this.data = this.convertToRecords(input);
-  }
-
-  private convertToRecords(
-    data: DestinyDefinitionFrom<DestinyManifestComponentName>[]
-  ): ManifestTableRecord[] {
-    const dbTableRecords: ManifestTableRecord[] = [];
-    for (const k in data) {
-      dbTableRecords.push(new ManifestTableRecord(data[k].hash.toString(), data[k]));
-    }
-    return dbTableRecords;
-  }
-}

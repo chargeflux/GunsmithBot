@@ -9,7 +9,7 @@ import { PlugCategory, SocketCategoryHash } from "../models/constants";
 import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
 import { Weapon } from "../models/destiny-entities/weapon";
-import { logger } from "../services/loggerService";
+import { logger } from "../logger";
 import ManifestDBService from "../services/manifestDbService";
 import {
   getInventoryItemByHash,

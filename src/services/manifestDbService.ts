@@ -1,9 +1,8 @@
 import BetterSqlite3 from "better-sqlite3";
 import fs from "fs";
-import { ManifestTable } from "../models/bungie-api/partialDestinyManifest";
-import { ManifestTableRecord } from "../models/db";
+import { ManifestTable, ManifestTableRecord } from "../models/database/manifestTable";
 import { MANIFEST_DATA_LOCATION, TABLES } from "./manifest/manifestService";
-import { logger } from "./loggerService";
+import { logger } from "../logger";
 
 const _logger = logger.getChildLogger({ name: "ManifestDB" });
 

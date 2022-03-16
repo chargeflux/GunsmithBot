@@ -1,4 +1,4 @@
-import { logger } from "../../services/loggerService";
+import { logger } from "../../logger";
 import { DamageType, MAX_POWER_LEVEL, WeaponBase, WeaponClass, TierType } from "../constants";
 import { BaseDestinyItem } from "./baseMetadata";
 import Perk from "./perk";
