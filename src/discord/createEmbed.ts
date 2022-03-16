@@ -80,9 +80,15 @@ function createModEmbed(modResult: Mod): MessageEmbed {
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(modResult.icon);
 
-  if (modResult.source)
-    embed.addField(modResult.overview, "_" + modResult.source + "_\n" + modResult.description);
-  else embed.addField(modResult.overview, modResult.description);
+  if (modResult.source) embed.addField("Source", "_" + modResult.source + "_\n");
+  const sections = modResult.sections;
+  for (const sectionKey of modResult.getSortedSectionKeys()) {
+    if (sectionKey == modResult.name) {
+      embed.addField(modResult.overview, sections.get(sectionKey)?.join("\n") ?? "");
+    } else {
+      embed.addField(sectionKey, sections.get(sectionKey)?.join("\n") ?? "");
+    }
+  }
   _logger.info("Returning embed");
   return embed;
 }
