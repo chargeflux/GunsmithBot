@@ -75,7 +75,7 @@ jobs:
         shell: pwsh
         run: |
           $name = "gunsmithbot"
-          echo "::set-output name=container_version::${name}:${version}"
+          echo "::set-output name=container_version::${name}:${{ needs.version.outputs.version }}"
 
       - name: Build and push container image to registry
         uses: docker/build-push-action@v2
