@@ -39,6 +39,7 @@ jobs:
           cd src
           AssemblyInfoVersion=$(nbgv get-version -v AssemblyInformationalVersion)
           echo "::set-output name=version::${AssemblyInfoVersion/+/-}"
+          echo "Version:" ${AssemblyInfoVersion/+/-}
 
   ci:
     runs-on: ubuntu-latest
