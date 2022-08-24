@@ -1,9 +1,7 @@
 import axios from "axios";
 import { DestinyDefinitionFrom, DestinyManifestComponentName } from "bungie-api-ts/destiny2";
 import fs from "fs";
-import {
-  PartialDestinyManifest,
-} from "../models/bungie-api/partialDestinyManifest";
+import { PartialDestinyManifest } from "../models/bungie-api/partialDestinyManifest";
 import { ManifestTable } from "../models/database/manifestTable";
 import ManifestDBService from "./manifestDbService";
 import { logger } from "../logger";
@@ -65,20 +63,18 @@ async function getManifestTables(manifest: PartialDestinyManifest): Promise<Mani
         }
       );
       _logger.info("Received manifest for:", table);
-
       if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
         fs.mkdirSync(MANIFEST_DATA_LOCATION);
-        fs.mkdirSync(MANIFEST_DATA_LOCATION + "raw");
-      } else {
+      }
+      if (process.env.DUMP_RAW_DATA == "true") {
         if (!fs.existsSync(MANIFEST_DATA_LOCATION + "raw")) {
           fs.mkdirSync(MANIFEST_DATA_LOCATION + "raw");
         }
+        fs.writeFileSync(
+          MANIFEST_DATA_LOCATION + "raw/" + table + ".json",
+          JSON.stringify(response.data, null, 2)
+        );
       }
-      fs.writeFileSync(
-        MANIFEST_DATA_LOCATION + "raw/" + table + ".json",
-        JSON.stringify(response.data, null, 2)
-      );
-
       const manifestTable = new ManifestTable(table, response.data);
       manifestTables.push(manifestTable);
     }
@@ -102,11 +98,13 @@ async function processAndSaveManifestDataJSON(
     );
     _logger.info("Saved latest manifest");
     for (const table of manifestTables) {
-      fs.writeFileSync(
-        MANIFEST_DATA_LOCATION + table.name + "Table.json",
-        JSON.stringify(table.data, null, 2)
-      );
-      _logger.info("Saved table:", table.name);
+      if (process.env.DUMP_RAW_DATA == "true") {
+        fs.writeFileSync(
+          MANIFEST_DATA_LOCATION + table.name + "Table.json",
+          JSON.stringify(table.data, null, 2)
+        );
+        _logger.info("Saved table:", table.name);
+      }
     }
     fs.writeFileSync(MANIFEST_DATA_LOCATION + "version", latestManifest.Response.version);
     _logger.info("Saved version:", latestManifest.Response.version);
