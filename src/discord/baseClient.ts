@@ -33,7 +33,9 @@ export default class BaseClient {
     this.client.login(process.env.DISCORD_BOT_TOKEN);
     this.client.once("ready", async () => {
       await this.initializeControllers();
-      this.startCronSchedules();
+      if (process.env.AUTOMATIC_MANIFEST_UPDATE == "true") {
+        this.startCronSchedules();
+      }
       _logger.info("Ready!");
     });
 
