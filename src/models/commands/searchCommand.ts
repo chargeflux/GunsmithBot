@@ -37,6 +37,8 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
   input = "";
   perksToSearch: PerksToSearch;
   results: SearchResult = {};
+  statement = "";
+  queries: string[] = [];
 
   get count() {
     return this.getCount();
@@ -44,16 +46,20 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
 
   get traitState() {
     return (
-      ((this.perksToSearch?.traits1 ? 1 : 0) << 0) | ((this.perksToSearch?.traits2 ? 1 : 0) << 1)
+      ((this.perksToSearch.get("traits1") ? 1 : 0) << 0) |
+      ((this.perksToSearch.get("traits2") ? 1 : 0) << 1)
     );
   }
 
   constructor(
     options: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">
   ) {
-    const perksToSearchRaw: PerksToSearch = {};
+    const perksToSearchRaw: PerksToSearch = new Map();
     for (const name of WeaponTables) {
-      perksToSearchRaw[name] = options.getString(name) ?? undefined;
+      const value = options.getString(name);
+      if (value) {
+        perksToSearchRaw.set(name, value);
+      }
     }
 
     const archetypeToSearch: ArchetypeToSearch = {};
@@ -91,8 +97,12 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
     if (!this.validateState()) throw Error("Invalid traits combination");
   }
 
-  setInput(input: string) {
-    this.input = input;
+  setStatement(input: string) {
+    input = input.replace(/^.*?(?=SELECT)/, "");
+    if (!input.includes("(")) {
+      input = input.replace(");", ";");
+    }
+    this.statement = input;
   }
 
   validateAndAddResult(resultArchetype: WeaponBaseArchetype) {
@@ -120,7 +130,7 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
   }
 }
 
-export type PerksToSearch = Partial<Record<keyof typeof WeaponTableHash, string>>;
+export type PerksToSearch = Map<keyof typeof WeaponTableHash, string>;
 
 export type ArchetypeToSearch = {
   type?: typeof WeaponTypes[number];

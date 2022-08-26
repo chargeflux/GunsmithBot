@@ -44,6 +44,7 @@ export const WeaponTables = [
 ] as const;
 
 export type WeaponTable = typeof WeaponTables[number];
+export type PerkType = typeof WeaponTables[number];
 
 const dbName = "weapon-db.sqlite3";
 
@@ -94,7 +95,7 @@ export default class WeaponDBService {
       this.db.exec(
         "CREATE TABLE IF NOT EXISTS " +
           table +
-          " (hash TEXT PRIMARY KEY NOT NULL, name TEXT, weaponHashIds TEXT)"
+          " (id INTEGER PRIMARY KEY, hash TEXT, name TEXT, weaponHash TEXT)"
       );
     }
   }
@@ -102,12 +103,14 @@ export default class WeaponDBService {
   private addRecords(tables: WeaponDBTables) {
     const createTxn = this.db.transaction((records: PerkWeaponHashMap, stmt) => {
       for (const hash in records)
-        stmt.run(hash, records[hash][0], Array.from(records[hash][1]).join(","));
+        for (const item of Array.from(records[hash][1])) {
+          stmt.run(hash, records[hash][0], item);
+        }
     });
     for (const table in tables) {
       const stmt = this.db.prepare(
         // Using whitelisted table names
-        "INSERT INTO " + table + " (hash, name, weaponHashIds) VALUES (?, ?, ?)"
+        "INSERT INTO " + table + " (hash, name, weaponHash) VALUES (?, ?, ?)"
       );
       if (stringIs<WeaponTable>(table, WeaponTables)) createTxn(tables[table] ?? {}, stmt);
     }

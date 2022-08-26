@@ -27,13 +27,28 @@ export async function getWeaponsByExactName(
   query: string
 ): Promise<number[]> {
   try {
-    const results: PerkRecord = db
-      .prepare("SELECT weaponHashIds FROM " + type + " WHERE name is ?")
-      .get(query);
-    const parsedResults = results.weaponHashIds.split(",").map((x) => parseInt(x));
+    const results: PerkRecord[] = db
+      .prepare("SELECT weaponHash FROM " + type + " WHERE name is ?")
+      .all(query);
+    const parsedResults = results.map((x) => parseInt(x.weaponHash));
     return parsedResults;
   } catch (e) {
     _logger.error(`Failed to get weapons in table ${type} by name: ${query}`, e);
     return [];
+  }
+}
+
+export async function executeSearchQuery(
+  db: BetterSqlite3.Database,
+  stmt: string,
+  queries: string[]
+): Promise<number[]> {
+  try {
+    const results: PerkRecord[] = db.prepare(stmt).all(queries);
+    const parsedResults = results.map((x) => parseInt(x.weaponHash));
+    return parsedResults;
+  } catch (e) {
+    _logger.error(`Failed to execute statement '${stmt}'`, e);
+    throw e;
   }
 }

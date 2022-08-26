@@ -1,6 +1,6 @@
 import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import fuzzysort from "fuzzysort";
-import SearchCommand, { ValidTraitsOptions } from "../models/commands/searchCommand";
+import SearchCommand, { PerksToSearch, ValidTraitsOptions } from "../models/commands/searchCommand";
 import { WeaponCommandOptions } from "../models/commands/weaponCommand";
 import { PlugCategory } from "../models/constants";
 import {
@@ -13,9 +13,9 @@ import Socket from "../models/destiny-entities/socket";
 import PublicError from "../models/errors/publicError";
 import ManifestDBService from "../services/manifestDbService";
 import { getInventoryItemsByHashes } from "../services/dbQuery/inventoryItem";
-import { getFuzzyQueryNames, getWeaponsByExactName } from "../services/dbQuery/search";
+import { executeSearchQuery, getFuzzyQueryNames } from "../services/dbQuery/search";
 import WeaponDBService, {
-  WeaponTable,
+  PerkType,
   WeaponTableHash,
   WeaponTables,
 } from "../services/weaponDbService";
@@ -32,56 +32,77 @@ export default class SearchController {
     this.weaponDBService = weaponDBService ?? new WeaponDBService();
   }
 
+  buildQuerySockets(perkTypes: PerkType[]) {
+    const parts: string[] = [];
+    for (let i = 0; i < perkTypes.length; i++) {
+      if (!perkTypes[i].includes("trait")) {
+        parts.push(`SELECT weaponHash FROM ${perkTypes[i]} WHERE name is ?`);
+      }
+    }
+    return parts.join(" INTERSECT ");
+  }
+
+  buildQueryTraits(traitState: number) {
+    if (traitState == ValidTraitsOptions.Traits1AndTraits2) {
+      return ` INTERSECT SELECT weaponHash FROM traits1 where name is ? INTERSECT SELECT weaponHash FROM traits2 where name is ? UNION SELECT weaponHash FROM (SELECT weaponHash FROM traits2 where name is ? INTERSECT SELECT weaponHash FROM traits1 where name is ?);`;
+    } else if (traitState == ValidTraitsOptions.Traits1) {
+      return ` INTERSECT SELECT weaponHash FROM traits1 where name is ? UNION SELECT weaponHash FROM traits2 where name is ?;`;
+    }
+    return "";
+  }
+
+  async parseSearchQuery(searchCommand: SearchCommand) {
+    const perksToSearch = searchCommand.perksToSearch;
+    const inputParts: string[] = [];
+    let queries: string[] = [];
+    const perkTypes = Array.from(perksToSearch.keys()) as PerkType[];
+    let stmt = this.buildQuerySockets(perkTypes);
+    for (const perkType of perkTypes) {
+      if (!perkType.includes("trait")) {
+        const exactQuery = await this.narrowFuzzyQuery(perkType, perksToSearch.get(perkType));
+        queries.push(exactQuery);
+        inputParts.push(perkType + ": " + exactQuery);
+      }
+    }
+    if (searchCommand.traitState != ValidTraitsOptions.None) {
+      stmt += this.buildQueryTraits(searchCommand.traitState);
+      const traits1Query = await this.narrowFuzzyQuery("traits1", perksToSearch.get("traits1"));
+      queries.push(traits1Query);
+      inputParts.push("traits1" + ": " + traits1Query);
+      if (searchCommand.traitState == ValidTraitsOptions.Traits1AndTraits2) {
+        const traits2Query = await this.narrowFuzzyQuery("traits2", perksToSearch.get("traits2"));
+        queries = queries.concat([traits2Query, traits1Query, traits2Query]);
+        inputParts.push("traits2" + ": " + traits2Query);
+      } else {
+        queries.push(traits1Query);
+      }
+    }
+
+    searchCommand.setStatement(stmt);
+    searchCommand.input = inputParts.join(", ");
+    searchCommand.queries = queries;
+
+    return searchCommand;
+  }
+
   async processSearchQuery(
     options: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">
   ): Promise<SearchCommand> {
-    const searchCommand = new SearchCommand(options);
-    const traitWeaponIds = new Set<number>();
-    let weaponIds = new Set<number>();
-    const queryStringComponents: string[] = [];
-    for (const perk of WeaponTables) {
-      const query = searchCommand.perksToSearch[perk];
-      if (!query) continue;
-      const exactQuery = await this.narrowFuzzyQuery(perk, query);
-      if (!exactQuery) throw Error("Could not narrow query: " + query);
-      // Second DB call could be collapsed into first DB call but probably unnecessary
-      const weaponHashIds = await getWeaponsByExactName(this.weaponDBService.db, perk, exactQuery);
-      if (searchCommand.traitState == ValidTraitsOptions.Traits1AndTraits2) {
-        for (const hash of weaponHashIds) traitWeaponIds.add(hash);
-      } else if (searchCommand.traitState == ValidTraitsOptions.Traits1) {
-        const weaponHashIds2 = await getWeaponsByExactName(
-          this.weaponDBService.db,
-          "traits2",
-          exactQuery
-        );
-        for (const hash of weaponHashIds) traitWeaponIds.add(hash);
-        for (const hash of weaponHashIds2) traitWeaponIds.add(hash);
-      } else {
-        const currentSocketWeaponIds = new Set<number>();
-        for (const hash of weaponHashIds) currentSocketWeaponIds.add(hash);
-        if (weaponIds.size > 0) {
-          if (currentSocketWeaponIds.size > 0) {
-            weaponIds = new Set(Array.from(weaponIds).filter((x) => currentSocketWeaponIds.has(x)));
-          }
-        } else weaponIds = currentSocketWeaponIds;
-      }
-      queryStringComponents.push(perk + ": " + exactQuery);
-    }
-    if (queryStringComponents.length == 0) {
-      // TODO: Implement archetype only search
+    let searchCommand = new SearchCommand(options);
+    searchCommand = await this.parseSearchQuery(searchCommand);
+
+    if (!searchCommand.statement) {
       throw new PublicError(
         "Querying by archetype only is not implemented. Please specify a perk to narrow results"
       );
     }
-    searchCommand.setInput(queryStringComponents.join(", "));
-    let finalIds;
-    if (weaponIds.size > 0) {
-      if (traitWeaponIds.size > 0)
-        finalIds = Array.from(traitWeaponIds).filter((x) => weaponIds.has(x));
-      else finalIds = Array.from(weaponIds);
-    } else finalIds = Array.from(traitWeaponIds);
-    const results = await getInventoryItemsByHashes(this.dbService.db, finalIds);
 
+    const weaponIds = await executeSearchQuery(
+      this.weaponDBService.db,
+      searchCommand.statement,
+      searchCommand.queries
+    );
+    const results = await getInventoryItemsByHashes(this.dbService.db, weaponIds);
     const weaponController = new WeaponController(this.dbService);
     for (const result of results) {
       const newWeapon = await weaponController.createWeapon(
@@ -97,13 +118,14 @@ export default class SearchController {
     return searchCommand;
   }
 
-  private async narrowFuzzyQuery(type: WeaponTable, query: string) {
+  private async narrowFuzzyQuery(type: PerkType, query: string | undefined) {
+    if (!query) throw Error("Query for perk " + type + " is empty");
     const results = await getFuzzyQueryNames(this.weaponDBService.db, type, query);
     const bestResult = fuzzysort.go(query, results, {
       allowTypo: false,
     })[0];
     if (bestResult) return bestResult.target;
-    else return "";
+    else throw new PublicError("Could not narrow query: " + query);
   }
 
   async createWeaponTables(weaponItems: DestinyInventoryItemDefinitionRecord[]) {
@@ -160,7 +182,7 @@ export default class SearchController {
         } else {
           for (const perk of socket.perks) {
             const socketTypeName = WeaponTableHash[socket.hash];
-            if (stringIs<WeaponTable>(socketTypeName, WeaponTables))
+            if (stringIs<PerkType>(socketTypeName, WeaponTables))
               weaponDBTables = this.createDBTableRecord(
                 weaponDBTables,
                 socketTypeName,
@@ -176,7 +198,7 @@ export default class SearchController {
 
   private createDBTableRecord(
     weaponDBTables: WeaponDBTables,
-    tableName: WeaponTable,
+    tableName: PerkType,
     weaponHash: string,
     perk: Perk
   ) {

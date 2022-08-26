@@ -223,7 +223,7 @@ function createSearchEmbed(searchCommand: SearchCommand) {
   const embed = new MessageEmbed()
     .setTitle("Weapon Results")
     .setDescription(cnt.toString() + " weapons found")
-    .setFooter(searchCommand.input)
+    .setFooter({ text: searchCommand.input })
     .setColor(DISCORD_BG_HEX);
 
   for (const weaponClass in searchCommand.results) {
