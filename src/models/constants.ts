@@ -59,7 +59,7 @@ export enum WeaponClass {
   "Trace Rifle" = 2489664120,
   "Bow" = 3317538576,
   "Submachine Gun" = 3954685534,
-  "Glaive" = 7777777777, // Inspired by DIM
+  "Glaive" = 3871742104,
   "Dummy" = 3109687656,
 }
 

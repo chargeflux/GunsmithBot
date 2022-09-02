@@ -60,12 +60,7 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
     }
     if (!weaponBase) throw Error("Failed to parse weapon base class");
     if (!weaponClass) {
-      if (data.itemTypeDisplayName == "Glaive") {
-        weaponClass = "Glaive";
-        _logger.warn("Glaive has no item category hash yet");
-      } else {
-        throw Error("Failed to parse weapon class");
-      }
+      throw Error("Failed to parse weapon class");
     }
 
     const tierTypeHash = data.weaponTierTypeHash;
@@ -112,7 +107,7 @@ export class WeaponArchetypeData {
   itemCategoryHashes: number[];
   weaponDamageTypeId: number;
   weaponTierTypeHash?: number;
-  itemTypeDisplayName: string; // FIXME: Glaive has no ItemCategoryHash
+  itemTypeDisplayName: string;
 
   constructor(
     name: string,
