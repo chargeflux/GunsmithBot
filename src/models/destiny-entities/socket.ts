@@ -22,8 +22,15 @@ export default class Socket implements BaseDestinyItem {
     const processed: Map<string, number> = new Map();
     for (const perk of perks) {
       if (perk.isEnhanced) {
-        const index = processed.get(perk.name) ?? processed.size;
-        processedPerks[index] = perk;
+        const index = processed.get(perk.name);
+        if (index === undefined) {
+          processedPerks.push(perk);
+        } else {
+          const originalPerk = processedPerks[index];
+          if (perk.currentlyCanRoll && originalPerk.currentlyCanRoll) {
+            processedPerks[index] = perk;
+          }
+        }
       } else {
         const newIndex = processed.size;
         processed.set(perk.name, newIndex);
