@@ -1,6 +1,9 @@
 import { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import fuzzysort from "fuzzysort";
-import SearchCommand, { ValidTraitsOptions } from "../models/commands/searchCommand";
+import SearchCommand, {
+  ArchetypeQueryCommand,
+  ValidTraitsOptions,
+} from "../models/commands/searchCommand";
 import { WeaponCommandOptions } from "../models/commands/weaponCommand";
 import { PlugCategory } from "../models/constants";
 import {
@@ -79,7 +82,7 @@ export default class SearchController {
     }
 
     searchCommand.setStatement(stmt);
-    searchCommand.input = inputParts.join(", ");
+    searchCommand.setInput(inputParts);
     searchCommand.queries = queries;
 
     return searchCommand;
@@ -115,6 +118,7 @@ export default class SearchController {
         searchCommand.validateAndAddResult(newWeapon.baseArchetype);
       }
     }
+
     return searchCommand;
   }
 
