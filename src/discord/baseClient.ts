@@ -57,8 +57,9 @@ export default class BaseClient {
   async initializeControllers() {
     const dbService = new ManifestDBService();
     try {
-      await updateManifest(dbService).then(async (toChange: boolean) => {
-        if (toChange) {
+      await updateManifest(dbService).then(async (reinitialize: boolean) => {
+        if (reinitialize || !WeaponDBService.exists()) {
+          _logger.info("Reinitializing Weapon DB");
           const weaponItems = await getInventoryItemsWeapons(dbService.db);
           const tables = await new SearchController().createWeaponTables(weaponItems);
           try {

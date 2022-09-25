@@ -59,6 +59,10 @@ export default class WeaponDBService {
     }
   }
 
+  static exists() {
+    return fs.existsSync(MANIFEST_DATA_LOCATION + dbName);
+  }
+
   private getOrInitialize(): BetterSqlite3.Database {
     if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);

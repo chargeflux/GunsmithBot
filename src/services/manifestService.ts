@@ -5,6 +5,7 @@ import { PartialDestinyManifest } from "../models/bungie-api/partialDestinyManif
 import { ManifestTable } from "../models/database/manifestTable";
 import ManifestDBService from "./manifestDbService";
 import { logger } from "../logger";
+import WeaponDBService from "./weaponDbService";
 
 const _logger = logger.getChildLogger({ name: "ManifestService" });
 
@@ -24,7 +25,7 @@ export const TABLES = [
 export async function updateManifest(db: ManifestDBService): Promise<boolean> {
   const manifest = await getManifest();
   _logger.info("Checking if manifest is up to date");
-  if (manifest.Response.version != (await getCurrentVersion())) {
+  if (manifest.Response.version != (await getCurrentVersion()) || !ManifestDBService.exists()) {
     _logger.info("Version is outdated. Updating manifest");
     const tables = await getManifestTables(manifest);
     processAndSaveManifestDataJSON(manifest, tables);
