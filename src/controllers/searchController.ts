@@ -1,6 +1,6 @@
-import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js";
+import { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import fuzzysort from "fuzzysort";
-import SearchCommand, { PerksToSearch, ValidTraitsOptions } from "../models/commands/searchCommand";
+import SearchCommand, { ValidTraitsOptions } from "../models/commands/searchCommand";
 import { WeaponCommandOptions } from "../models/commands/weaponCommand";
 import { PlugCategory } from "../models/constants";
 import {
@@ -66,13 +66,13 @@ export default class SearchController {
     }
     if (searchCommand.traitState != ValidTraitsOptions.None) {
       stmt += this.buildQueryTraits(searchCommand.traitState);
-      const traits1Query = await this.narrowFuzzyQuery("traits1", perksToSearch.get("traits1"));
+      const traits1Query = await this.narrowFuzzyQueryTraits(perksToSearch.get("traits1"));
       queries.push(traits1Query);
-      inputParts.push("traits1" + ": " + traits1Query);
+      inputParts.push("traits" + ": " + traits1Query);
       if (searchCommand.traitState == ValidTraitsOptions.Traits1AndTraits2) {
-        const traits2Query = await this.narrowFuzzyQuery("traits2", perksToSearch.get("traits2"));
+        const traits2Query = await this.narrowFuzzyQueryTraits(perksToSearch.get("traits2"));
         queries = queries.concat([traits2Query, traits1Query, traits2Query]);
-        inputParts.push("traits2" + ": " + traits2Query);
+        inputParts.push("traits" + ": " + traits2Query);
       } else {
         queries.push(traits1Query);
       }
@@ -125,6 +125,20 @@ export default class SearchController {
       allowTypo: false,
     })[0];
     if (bestResult) return bestResult.target;
+    else throw new PublicError("Could not narrow query: " + query);
+  }
+
+  private async narrowFuzzyQueryTraits(query: string | undefined) {
+    if (!query) throw Error("Query for trait perks is empty");
+    const results = await getFuzzyQueryNames(this.weaponDBService.db, "traits1", query);
+    const results2 = await getFuzzyQueryNames(this.weaponDBService.db, "traits2", query);
+    const bestResult = fuzzysort.go(query, results, {
+      allowTypo: false,
+    })[0];
+    const bestResult2 = fuzzysort.go(query, results2, {
+      allowTypo: false,
+    })[0];
+    if (bestResult || bestResult2) return bestResult?.target || bestResult2?.target;
     else throw new PublicError("Could not narrow query: " + query);
   }
 

@@ -3,6 +3,7 @@ import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js
 import { WeaponTableHash, WeaponTables } from "../../services/weaponDbService";
 import { WeaponBaseArchetype } from "../destiny-entities/weaponBaseArchetype";
 import { stringIs } from "../../utils/validator";
+import PublicError from "../errors/publicError";
 
 // Following readonly arrays map to available options or choices for search command
 export const WeaponTypes = ["Kinetic", "Energy", "Power"] as const;
@@ -94,7 +95,10 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
 
     this.archetypeToSearch = archetypeToSearch;
     this.perksToSearch = perksToSearchRaw;
-    if (!this.validateState()) throw Error("Invalid traits combination");
+    if (!this.validateState())
+      throw new PublicError(
+        "Please check your traits syntax: Valid combinations are 'traits1: value' or 'traits1: value traits2: value'"
+      );
   }
 
   setStatement(input: string) {
