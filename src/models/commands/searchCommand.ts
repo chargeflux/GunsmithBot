@@ -3,6 +3,7 @@ import Discord, { CacheType, CommandInteractionOptionResolver } from "discord.js
 import { WeaponTableHash, WeaponTables } from "../../services/weaponDbService";
 import { WeaponBaseArchetype } from "../destiny-entities/weaponBaseArchetype";
 import { stringIs } from "../../utils/validator";
+import PublicError from "../errors/publicError";
 
 // Following readonly arrays map to available options or choices for search command
 export const WeaponTypes = ["Kinetic", "Energy", "Power"] as const;
@@ -37,6 +38,8 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
   input = "";
   perksToSearch: PerksToSearch;
   results: SearchResult = {};
+  statement = "";
+  queries: string[] = [];
 
   get count() {
     return this.getCount();
@@ -44,16 +47,20 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
 
   get traitState() {
     return (
-      ((this.perksToSearch?.traits1 ? 1 : 0) << 0) | ((this.perksToSearch?.traits2 ? 1 : 0) << 1)
+      ((this.perksToSearch.get("traits1") ? 1 : 0) << 0) |
+      ((this.perksToSearch.get("traits2") ? 1 : 0) << 1)
     );
   }
 
   constructor(
     options: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">
   ) {
-    const perksToSearchRaw: PerksToSearch = {};
+    const perksToSearchRaw: PerksToSearch = new Map();
     for (const name of WeaponTables) {
-      perksToSearchRaw[name] = options.getString(name) ?? undefined;
+      const value = options.getString(name);
+      if (value) {
+        perksToSearchRaw.set(name, value);
+      }
     }
 
     const archetypeToSearch: ArchetypeToSearch = {};
@@ -88,11 +95,18 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
 
     this.archetypeToSearch = archetypeToSearch;
     this.perksToSearch = perksToSearchRaw;
-    if (!this.validateState()) throw Error("Invalid traits combination");
+    if (!this.validateState())
+      throw new PublicError(
+        "Please check your traits syntax: Valid combinations are 'traits1: value' or 'traits1: value traits2: value'"
+      );
   }
 
-  setInput(input: string) {
-    this.input = input;
+  setStatement(input: string) {
+    input = input.replace(/^.*?(?=SELECT)/, "");
+    if (!input.includes("(")) {
+      input = input.replace(");", ";");
+    }
+    this.statement = input;
   }
 
   validateAndAddResult(resultArchetype: WeaponBaseArchetype) {
@@ -120,7 +134,7 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
   }
 }
 
-export type PerksToSearch = Partial<Record<keyof typeof WeaponTableHash, string>>;
+export type PerksToSearch = Map<keyof typeof WeaponTableHash, string>;
 
 export type ArchetypeToSearch = {
   type?: typeof WeaponTypes[number];

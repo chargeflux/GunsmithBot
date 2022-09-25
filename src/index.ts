@@ -134,6 +134,7 @@ discordClient.on("interactionCreate", async (interaction) => {
           interaction.options
         );
         if (searchCommand) {
+          _logger.info("Search query -", searchCommand.input);
           const embed = createEmbed(QueryType.Search, searchCommand);
           sendEmbed(interaction, embed, QueryType.Search);
         } else {

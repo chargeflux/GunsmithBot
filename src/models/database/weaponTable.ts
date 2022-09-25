@@ -10,10 +10,10 @@ export interface DestinyInventoryItemDefinitionRecord {
 export type WeaponDBTables = Record<WeaponTable, PerkWeaponHashMap | undefined>;
 
 export type PerkWeaponHashMap = {
-  [hash: string]: [name: string, weaponHashIds: Set<string>];
+  [hash: string]: [name: string, weaponHashes: Set<string>];
 };
 
 export type PerkRecord = {
   name: string;
-  weaponHashIds: string;
+  weaponHash: string;
 };
