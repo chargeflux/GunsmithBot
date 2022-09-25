@@ -9,7 +9,7 @@ import {
   WeaponClasses,
   WeaponDamageType,
   WeaponRarity,
-  WeaponTypes,
+  WeaponSlots,
 } from "../models/commands/searchCommand";
 import { WeaponTables } from "../services/weaponDbService";
 import { logger } from "../logger";
@@ -114,8 +114,8 @@ function buildCommands() {
     return option;
   });
   searchBuilder.addStringOption((option: SlashCommandStringOption) => {
-    option.setName("type").setDescription("Search by weapon type: Kinetic, Energy, Power");
-    for (const weaponType of WeaponTypes) option.addChoice(weaponType, weaponType);
+    option.setName("slot").setDescription("Search by weapon slot");
+    for (const weaponSlot of WeaponSlots) option.addChoice(weaponSlot, weaponSlot);
     return option;
   });
   searchBuilder.addStringOption((option: SlashCommandStringOption) => {

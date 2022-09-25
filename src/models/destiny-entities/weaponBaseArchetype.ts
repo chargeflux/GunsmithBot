@@ -7,7 +7,7 @@ const _logger = logger.getChildLogger({ name: "WeaponBaseArchetype" });
 
 export class WeaponBaseArchetype implements BaseDestinyItem {
   readonly name: string;
-  readonly type: keyof typeof WeaponBase;
+  readonly slot: keyof typeof WeaponBase;
   readonly class: keyof typeof WeaponClass;
   readonly rarity: keyof typeof TierType;
   readonly damage: keyof typeof DamageType;
@@ -33,7 +33,7 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
     intrinsic?: Perk
   ) {
     this.name = name;
-    this.type = weaponBase;
+    this.slot = weaponBase;
     this.class = weaponClass;
     this.rarity = weaponTierType;
     this.damage = weaponDamageType;
@@ -91,7 +91,7 @@ export class WeaponBaseArchetype implements BaseDestinyItem {
   toString() {
     let stringToConstruct = "";
     if (!this.isKinetic || this.damage == "Stasis") stringToConstruct += this.damage + " ";
-    stringToConstruct += this.type;
+    stringToConstruct += this.slot;
     stringToConstruct += " " + this.class;
     if (this.powerCap) stringToConstruct += " (" + this.powerCap.toString() + ")";
 
