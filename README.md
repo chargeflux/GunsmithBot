@@ -10,8 +10,6 @@ cp .env.sample .env
 
 Fill out the `.env` file with the appropriate values.
 
-Depending on the value of `NUM_GUILDS`, add entries of `GUILD_ID_n` where n is incremented until `NUM_GUILDS` starting from 1. For example, if `NUM_GUILDS` = 2, then there should be an entry in `.env` for `GUILD_ID_1` and for `GUILD_ID_2`, each containing the id of 2 different Discord servers. This bot was designed to be used in a few servers but this limit can be removed.
-
 ## Installation
 
 Node.js v16 is recommended.

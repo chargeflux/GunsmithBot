@@ -6,6 +6,7 @@ import { ManifestTable } from "../models/database/manifestTable";
 import ManifestDBService from "./manifestDbService";
 import { logger } from "../logger";
 import WeaponDBService from "./weaponDbService";
+import ConfigurationError from "../models/errors/configurationError";
 
 const _logger = logger.getChildLogger({ name: "ManifestService" });
 
@@ -48,7 +49,7 @@ async function getManifest(): Promise<PartialDestinyManifest> {
     result = response.data;
     return result;
   } else {
-    throw new Error("Configuration is invalid. Check BUNGIE_KEY");
+    throw new ConfigurationError("Check BUNGIE_KEY");
   }
 }
 
@@ -80,7 +81,7 @@ async function getManifestTables(manifest: PartialDestinyManifest): Promise<Mani
       manifestTables.push(manifestTable);
     }
   } else {
-    throw new Error("Configuration is invalid. Check BUNGIE_KEY");
+    throw new ConfigurationError("Check BUNGIE_KEY");
   }
   return manifestTables;
 }

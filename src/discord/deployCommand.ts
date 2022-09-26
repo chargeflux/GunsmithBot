@@ -13,6 +13,7 @@ import {
 } from "../models/commands/searchCommand";
 import { WeaponTables } from "../services/weaponDbService";
 import { logger } from "../logger";
+import ConfigurationError from "../models/errors/configurationError";
 
 const _logger = logger.getChildLogger({ name: "Deploy" });
 
@@ -32,29 +33,20 @@ export default function deployCommands() {
         });
     }
   } else {
-    throw Error("Configuration is not valid. Check DISCORD_BOT_TOKEN and DISCORD_BOT_CLIENT_ID");
+    throw new ConfigurationError("Check DISCORD_BOT_TOKEN and DISCORD_BOT_CLIENT_ID");
   }
 }
 
 function loadGuilds(): string[] {
-  let guildCount = 0;
-  if (process.env.NUM_GUILDS != null) {
-    guildCount = parseInt(process.env.NUM_GUILDS);
-  } else {
-    throw Error("Configuration is not valid. Check NUM_GUILDS");
-  }
-
-  const guildIds: string[] = [];
-  for (let i = 1; i < guildCount + 1; i++) {
-    const id = process.env["GUILD_ID_" + i.toString()];
-    if (id) {
-      guildIds.push(id);
-    } else {
-      throw Error(`Configuration is not valid. Check ${"GUILD_ID_" + i.toString()}`);
+  if (process.env.GUILD_IDS != null) {
+    const guilds = JSON.parse(process.env.GUILD_IDS);
+    if (guilds.length === 0) {
+      throw new ConfigurationError("GUILD_IDS must have at least one id");
     }
+    return guilds;
+  } else {
+    throw new ConfigurationError("Check GUILD_IDS");
   }
-
-  return guildIds;
 }
 
 function buildCommands() {
