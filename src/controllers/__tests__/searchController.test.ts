@@ -1,6 +1,10 @@
 import { ValidTraitsOptions } from "../../models/commands/searchCommand";
-import { PerkType } from "../../services/weaponDbService";
+import WeaponDBService, { PerkType } from "../../services/weaponDbService";
+import ManifestDBService from "../../services/manifestDbService";
 import SearchController from "../searchController";
+
+jest.mock("../../services/manifestDbService");
+jest.mock("../../services/weaponDbService");
 
 test.each([
   {
@@ -22,7 +26,7 @@ test.each([
     expected: "",
   },
 ])("Build socket query", async ({ sockets, expected }) => {
-  const searchController = new SearchController();
+  const searchController = new SearchController(new ManifestDBService(), new WeaponDBService());
   const stmt = searchController.buildQuerySockets(sockets as PerkType[]);
   expect(stmt).toBe(expected);
 });
@@ -43,7 +47,7 @@ test.each([
     expected: "",
   },
 ])("Build trait query", async ({ traitState, expected }) => {
-  const searchController = new SearchController();
+  const searchController = new SearchController(new ManifestDBService(), new WeaponDBService());
   const stmt = searchController.buildQueryTraits(traitState);
   expect(stmt).toBe(expected);
 });

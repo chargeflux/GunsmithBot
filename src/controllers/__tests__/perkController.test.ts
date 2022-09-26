@@ -5,17 +5,10 @@ import { getInventoryItemsByName } from "../../services/dbQuery/inventoryItem";
 import ManifestDBService from "../../services/manifestDbService";
 import PerkController from "../perkController";
 
+jest.mock("../../services/manifestDbService");
+
 jest.mock("../../services/dbQuery/inventoryItem", () => ({
   getInventoryItemsByName: jest.fn(),
-}));
-
-jest.mock("../../services/manifestDbService", () => ({
-  __esModule: true,
-  default: jest.fn().mockImplementation(() => {
-    return {
-      db: jest.fn(),
-    };
-  }),
 }));
 
 describe("search perks", () => {
