@@ -5,7 +5,6 @@ import { PartialDestinyManifest } from "../models/bungie-api/partialDestinyManif
 import { ManifestTable } from "../models/database/manifestTable";
 import ManifestDBService from "./manifestDbService";
 import { logger } from "../logger";
-import WeaponDBService from "./weaponDbService";
 import ConfigurationError from "../models/errors/configurationError";
 
 const _logger = logger.getChildLogger({ name: "ManifestService" });

@@ -1,12 +1,12 @@
 import { DestinySandboxPerkDefinition } from "bungie-api-ts/destiny2";
-import BetterSqlite3 from "better-sqlite3";
 import { logger } from "../../logger";
 import { ManifestTableRecordJSON } from "../../models/database/manifestTable";
+import { ManifestDB } from "../manifestDbService";
 
 const _logger = logger.getChildLogger({ name: "SandboxPerkService" });
 
 export async function getSandboxPerksByName(
-  db: BetterSqlite3.Database,
+  db: ManifestDB,
   query: string
 ): Promise<DestinySandboxPerkDefinition[]> {
   try {
@@ -21,7 +21,7 @@ export async function getSandboxPerksByName(
 }
 
 export async function getSandboxPerksByHashes(
-  db: BetterSqlite3.Database,
+  db: ManifestDB,
   hashes: number[]
 ): Promise<DestinySandboxPerkDefinition[]> {
   try {
