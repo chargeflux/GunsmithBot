@@ -11,10 +11,7 @@ import Perk from "../models/destiny-entities/perk";
 import { logger } from "../logger";
 import ManifestDBService from "../services/manifestDbService";
 import { getCollectibleByHash } from "../services/dbQuery/collectible";
-import {
-  getInventoryItemByHash,
-  getInventoryItemsByName,
-} from "../services/dbQuery/inventoryItem";
+import { getInventoryItemByHash, getInventoryItemsByName } from "../services/dbQuery/inventoryItem";
 import { getPlugItemHash } from "../services/dbQuery/plugset";
 import getPowerCap from "../services/dbQuery/powerCap";
 import BaseController from "./baseController";

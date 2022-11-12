@@ -24,7 +24,7 @@ export default class BaseClient {
 
   constructor() {
     this.client = new Discord.Client({
-      intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES],
+      intents: [Discord.GatewayIntentBits.Guilds, Discord.GatewayIntentBits.GuildMessages],
     });
     this.init();
   }
