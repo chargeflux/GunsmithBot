@@ -1,10 +1,10 @@
 import {
+  REST,
+  Routes,
   SlashCommandBooleanOption,
   SlashCommandBuilder,
   SlashCommandStringOption,
-} from "@discordjs/builders";
-import { REST } from "@discordjs/rest";
-import { Routes } from "discord-api-types/v9";
+} from "discord.js";
 import {
   WeaponClasses,
   WeaponDamageType,
@@ -102,22 +102,24 @@ function buildCommands() {
     .setDescription("Search for weapons with specific perks");
   searchBuilder.addStringOption((option: SlashCommandStringOption) => {
     option.setName("class").setDescription("Search by weapon class");
-    for (const weaponType of WeaponClasses) option.addChoice(weaponType, weaponType);
+    for (const weaponType of WeaponClasses)
+      option.addChoices({ name: weaponType, value: weaponType });
     return option;
   });
   searchBuilder.addStringOption((option: SlashCommandStringOption) => {
     option.setName("slot").setDescription("Search by weapon slot");
-    for (const weaponSlot of WeaponSlots) option.addChoice(weaponSlot, weaponSlot);
+    for (const weaponSlot of WeaponSlots)
+      option.addChoices({ name: weaponSlot, value: weaponSlot });
     return option;
   });
   searchBuilder.addStringOption((option: SlashCommandStringOption) => {
     option.setName("rarity").setDescription("Search by weapon rarity");
-    for (const rarity of WeaponRarity) option.addChoice(rarity, rarity);
+    for (const rarity of WeaponRarity) option.addChoices({ name: rarity, value: rarity });
     return option;
   });
   searchBuilder.addStringOption((option: SlashCommandStringOption) => {
     option.setName("damage").setDescription("Search by weapon damage type");
-    for (const damage of WeaponDamageType) option.addChoice(damage, damage);
+    for (const damage of WeaponDamageType) option.addChoices({ name: damage, value: damage });
     return option;
   });
 

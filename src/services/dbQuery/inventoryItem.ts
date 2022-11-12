@@ -1,13 +1,13 @@
-import BetterSqlite3 from "better-sqlite3";
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import { ManifestTableRecord, ManifestTableRecordJSON } from "../../models/database/manifestTable";
 import { DestinyInventoryItemDefinitionRecord } from "../../models/database/weaponTable";
 import { logger } from "../../logger";
+import { ManifestDB } from "../manifestDbService";
 
 const _logger = logger.getChildLogger({ name: "InventoryItemService" });
 
 export async function getInventoryItemsByName(
-  db: BetterSqlite3.Database,
+  db: ManifestDB,
   query: string
 ): Promise<DestinyInventoryItemDefinition[]> {
   try {
@@ -22,7 +22,7 @@ export async function getInventoryItemsByName(
 }
 
 export async function getInventoryItemByHash(
-  db: BetterSqlite3.Database,
+  db: ManifestDB,
   hash: number
 ): Promise<DestinyInventoryItemDefinition> {
   try {
@@ -37,7 +37,7 @@ export async function getInventoryItemByHash(
 }
 
 export async function getInventoryItemsByHashes(
-  db: BetterSqlite3.Database,
+  db: ManifestDB,
   hashes: number[]
 ): Promise<DestinyInventoryItemDefinition[]> {
   try {
@@ -56,7 +56,7 @@ export async function getInventoryItemsByHashes(
 }
 
 export async function getInventoryItemsWeapons(
-  db: BetterSqlite3.Database
+  db: ManifestDB
 ): Promise<DestinyInventoryItemDefinitionRecord[]> {
   try {
     const inventoryItems: ManifestTableRecord[] = db

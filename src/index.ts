@@ -5,7 +5,7 @@ import createEmbed from "./discord/createEmbed";
 import { logger } from "./logger";
 import BaseClient from "./discord/baseClient";
 import { BaseDestinyItem } from "./models/destiny-entities/baseMetadata";
-import { CommandInteraction, MessageEmbed } from "discord.js";
+import { CommandInteraction, EmbedBuilder, Events } from "discord.js";
 import { QueryType } from "./models/constants";
 
 const _logger = logger;
@@ -20,15 +20,16 @@ function logQueryResults(results: BaseDestinyItem[]) {
 
 async function sendEmbed(
   interaction: CommandInteraction,
-  embeds: MessageEmbed[],
+  embeds: EmbedBuilder[],
   queryType: QueryType
 ) {
   _logger.info(`Sending ${queryType} result`);
   await interaction.editReply({ embeds: embeds });
 }
 
-discordClient.on("interactionCreate", async (interaction) => {
+discordClient.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isCommand()) return;
+  if (!interaction.isChatInputCommand()) return;
   const commandName = interaction.commandName;
   await interaction.deferReply();
   let inputString = interaction.options.getString("input") ?? "";

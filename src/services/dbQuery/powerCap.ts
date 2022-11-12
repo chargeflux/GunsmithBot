@@ -1,13 +1,10 @@
-import BetterSqlite3 from "better-sqlite3";
 import { ManifestTableRecordJSON } from "../../models/database/manifestTable";
 import { logger } from "../../logger";
+import { ManifestDB } from "../manifestDbService";
 
 const _logger = logger.getChildLogger({ name: "PowerCapService" });
 
-export default async function getPowerCap(
-  db: BetterSqlite3.Database,
-  hashes: number[]
-): Promise<number[]> {
+export default async function getPowerCap(db: ManifestDB, hashes: number[]): Promise<number[]> {
   try {
     const result: ManifestTableRecordJSON[] = db
       .prepare(

@@ -1,12 +1,11 @@
-import BetterSqlite3 from "better-sqlite3";
 import { PerkRecord } from "../../models/database/weaponTable";
-import { WeaponTable } from "../weaponDbService";
+import { WeaponDB, WeaponTable } from "../weaponDbService";
 import { logger } from "../../logger";
 
 const _logger = logger.getChildLogger({ name: "SearchService" });
 
 export async function getFuzzyQueryNames(
-  db: BetterSqlite3.Database,
+  db: WeaponDB,
   type: WeaponTable,
   query: string
 ): Promise<string[]> {
@@ -22,7 +21,7 @@ export async function getFuzzyQueryNames(
 }
 
 export async function getWeaponsByExactName(
-  db: BetterSqlite3.Database,
+  db: WeaponDB,
   type: WeaponTable,
   query: string
 ): Promise<number[]> {
@@ -39,7 +38,7 @@ export async function getWeaponsByExactName(
 }
 
 export async function executeSearchQuery(
-  db: BetterSqlite3.Database,
+  db: WeaponDB,
   stmt: string,
   queries: string[]
 ): Promise<number[]> {

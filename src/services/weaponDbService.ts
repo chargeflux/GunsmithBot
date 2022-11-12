@@ -46,10 +46,12 @@ export const WeaponTables = [
 export type WeaponTable = typeof WeaponTables[number];
 export type PerkType = typeof WeaponTables[number];
 
+export type WeaponDB = BetterSqlite3.Database;
+
 const dbName = "weapon-db.sqlite3";
 
 export default class WeaponDBService {
-  db: BetterSqlite3.Database;
+  db: WeaponDB;
 
   constructor(db?: BetterSqlite3.Database) {
     if (db) {
@@ -63,7 +65,7 @@ export default class WeaponDBService {
     return fs.existsSync(MANIFEST_DATA_LOCATION + dbName);
   }
 
-  private getOrInitialize(): BetterSqlite3.Database {
+  private getOrInitialize(): WeaponDB {
     if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);
       _logger.warn("DB and manifest data location does not exist. Creating folder");

@@ -8,8 +8,10 @@ const _logger = logger.getChildLogger({ name: "ManifestDB" });
 
 const dbName = "manifest-db.sqlite3";
 
+export type ManifestDB = BetterSqlite3.Database;
+
 export default class ManifestDBService {
-  db: BetterSqlite3.Database;
+  db: ManifestDB;
 
   constructor(db?: BetterSqlite3.Database) {
     if (db) {
@@ -23,7 +25,7 @@ export default class ManifestDBService {
     return fs.existsSync(MANIFEST_DATA_LOCATION + dbName);
   }
 
-  private getOrInitialize(): BetterSqlite3.Database {
+  private getOrInitialize(): ManifestDB {
     if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);
       _logger.warn("DB and manifest data location does not exist. Creating folder");

@@ -1,4 +1,4 @@
-import { MessageEmbed } from "discord.js";
+import { APIEmbedField, EmbedBuilder, RestOrArray } from "discord.js";
 import ArmorCommand from "../models/commands/armorCommand";
 import BaseCommand from "../models/commands/baseCommand";
 import CompareCommand from "../models/commands/compareCommand";
@@ -19,7 +19,7 @@ const _logger = logger.getChildLogger({ name: "Embed" });
 export default function createEmbed(
   queryType: QueryType,
   data: BaseCommand<BaseDestinyItem>
-): MessageEmbed[] {
+): EmbedBuilder[] {
   switch (queryType) {
     case QueryType.Perk: {
       const perkCommand = data as PerkCommand;
@@ -61,76 +61,81 @@ export default function createEmbed(
   }
 }
 
-function createPerkEmbed(perkResult: Perk): MessageEmbed {
+function createPerkEmbed(perkResult: Perk): EmbedBuilder {
   _logger.info("Constructing perk embed");
-  const embed = new MessageEmbed()
+  const embed = new EmbedBuilder()
     .setTitle(perkResult.category)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(perkResult.icon);
   const name = perkResult.name + (perkResult.isEnhanced ? " (Enhanced)" : "");
-  embed.addField(name, perkResult.description);
+  embed.addFields({ name: name, value: perkResult.description });
   _logger.info("Returning embed");
   return embed;
 }
 
-function createModEmbed(modResult: Mod): MessageEmbed {
+function createModEmbed(modResult: Mod): EmbedBuilder {
   _logger.info("Constructing mod embed");
-  const embed = new MessageEmbed()
+  const embed = new EmbedBuilder()
     .setTitle(modResult.name)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(modResult.icon);
 
-  if (modResult.source) embed.addField("Source", "_" + modResult.source + "_\n");
+  if (modResult.source) embed.addFields({ name: "Source", value: "_" + modResult.source + "_\n" });
   const sections = modResult.sections;
   for (const sectionKey of modResult.getSortedSectionKeys()) {
     if (sectionKey == modResult.name) {
-      embed.addField(modResult.overview, sections.get(sectionKey)?.join("\n") ?? "");
+      embed.addFields({
+        name: modResult.overview,
+        value: sections.get(sectionKey)?.join("\n") ?? "",
+      });
     } else {
-      embed.addField(sectionKey, sections.get(sectionKey)?.join("\n") ?? "");
+      embed.addFields({ name: sectionKey, value: sections.get(sectionKey)?.join("\n") ?? "" });
     }
   }
   _logger.info("Returning embed");
   return embed;
 }
 
-function createArmorEmbed(armorResult: Armor): MessageEmbed {
+function createArmorEmbed(armorResult: Armor): EmbedBuilder {
   _logger.info("Constructing armor embed");
   const description: string = armorResult.baseArchetype?.toString() + "\n" + armorResult.flavorText;
-  const embed = new MessageEmbed()
+  const embed = new EmbedBuilder()
     .setTitle(armorResult.name)
     .setDescription(description)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(armorResult.icon);
   _logger.info("Returning embed");
-  if (armorResult.source) embed.addField("Source", armorResult.source);
+  if (armorResult.source) embed.addFields({ name: "Source", value: armorResult.source });
   if (armorResult.baseArchetype?.intrinsic)
-    embed.addField(
-      armorResult.baseArchetype.intrinsic.name,
-      armorResult.baseArchetype.intrinsic.description
-    );
+    embed.addFields({
+      name: armorResult.baseArchetype.intrinsic.name,
+      value: armorResult.baseArchetype.intrinsic.description,
+    });
   return embed;
 }
 
-function createCompareEmbed(processedCommand: CompareCommand): MessageEmbed {
+function createCompareEmbed(processedCommand: CompareCommand): EmbedBuilder {
   _logger.info("Constructing compare embed");
-  const embed = new MessageEmbed().setColor(DISCORD_BG_HEX);
-  embed.addField(
-    processedCommand.results[0].name,
-    processedCommand.generateStatDiffString(0),
-    true
-  );
-  embed.addField("Stats", processedCommand.statNames, true);
-  embed.addField(
-    processedCommand.results[1].name,
-    processedCommand.generateStatDiffString(1),
-    true
-  );
+  const embed = new EmbedBuilder().setColor(DISCORD_BG_HEX);
+  embed.addFields({
+    name: processedCommand.results[0].name,
+    value: processedCommand.generateStatDiffString(0),
+    inline: true,
+  });
+  embed.addFields([
+    { name: "Stats", value: processedCommand.statNames, inline: true },
+    {
+      name: processedCommand.results[1].name,
+      value: processedCommand.generateStatDiffString(1),
+      inline: true,
+    },
+  ]);
 
   _logger.info("Returning embed");
   return embed;
 }
 
-function createWeaponEmbed(weaponResult: Weapon, options: WeaponCommandOptions): MessageEmbed {
+function createWeaponEmbed(weaponResult: Weapon, options: WeaponCommandOptions): EmbedBuilder {
   let embed;
   if (options.full) embed = createFullWeaponEmbed(weaponResult);
   else if (options.stats) embed = createStatsWeaponEmbed(weaponResult);
@@ -138,7 +143,7 @@ function createWeaponEmbed(weaponResult: Weapon, options: WeaponCommandOptions):
     _logger.info("Constructing weapon embed");
     const description: string =
       weaponResult.baseArchetype?.toString() + "\n" + weaponResult.baseArchetype?.intrinsic?.name;
-    embed = new MessageEmbed()
+    embed = new EmbedBuilder()
       .setTitle(weaponResult.name)
       .setDescription(description)
       .setColor(DISCORD_BG_HEX)
@@ -146,12 +151,20 @@ function createWeaponEmbed(weaponResult: Weapon, options: WeaponCommandOptions):
 
     if (weaponResult.sockets.length <= 2 || options.isDefault) {
       for (const socket of weaponResult.sockets) {
-        embed.addField("**" + socket.name + "**", socket.toString(), true);
+        embed.addFields({
+          name: "**" + socket.name + "**",
+          value: socket.toString(),
+          inline: true,
+        });
       }
     } else {
       for (const socket of weaponResult.sockets) {
         if (socket.name == "Traits") {
-          embed.addField("**" + socket.name + "**", socket.toString(), true);
+          embed.addFields({
+            name: "**" + socket.name + "**",
+            value: socket.toString(),
+            inline: true,
+          });
         }
       }
     }
@@ -163,13 +176,13 @@ function createWeaponEmbed(weaponResult: Weapon, options: WeaponCommandOptions):
     `[light.gg](${lightGGURL})`,
   ];
   const endingText = endingTextComponents.join(" • ");
-  embed.addField("\u200b", endingText, false);
+  embed.addFields({ name: "\u200b", value: endingText, inline: false });
   _logger.info("Returning embed");
 
   return embed;
 }
 
-function createFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
+function createFullWeaponEmbed(weaponResult: Weapon): EmbedBuilder {
   _logger.info("Constructing full weapon embed");
   const description: string =
     weaponResult.baseArchetype?.toString() +
@@ -177,7 +190,7 @@ function createFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
     weaponResult.baseArchetype?.intrinsic?.name +
     "\n" +
     weaponResult.flavorText;
-  const embed = new MessageEmbed()
+  const embed = new EmbedBuilder()
     .setTitle(weaponResult.name)
     .setDescription(description)
     .setColor(DISCORD_BG_HEX)
@@ -186,60 +199,59 @@ function createFullWeaponEmbed(weaponResult: Weapon): MessageEmbed {
   const STATS = weaponResult.stats.stats.map((x) => x.toString()).join("\n");
   if (weaponResult.sockets.length <= 2) {
     for (const socket of weaponResult.sockets) {
-      embed.addField("**" + socket.name + "**", socket.toString(), true);
+      embed.addFields({ name: "**" + socket.name + "**", value: socket.toString(), inline: true });
     }
-    embed.addField("**Stats**", STATS, true);
+    embed.addFields({ name: "**Stats**", value: STATS, inline: true });
   } else {
     let fieldIdx = 0;
     for (const socket of weaponResult.sockets) {
       if ((fieldIdx + 1) % 3 == 0) {
-        if (fieldIdx + 1 == 3) embed.addField("**Stats**", STATS, true);
-        else embed.addField("\u200b", "\u200b", true);
+        if (fieldIdx + 1 == 3) embed.addFields({ name: "**Stats**", value: STATS, inline: true });
+        else embed.addFields({ name: "\u200b", value: "\u200b", inline: true });
         fieldIdx += 1;
       }
-      embed.addField("**" + socket.name + "**", socket.toString(), true);
+      embed.addFields({ name: "**" + socket.name + "**", value: socket.toString(), inline: true });
       fieldIdx += 1;
     }
-    embed.addField("\u200b", "\u200b", true);
+    embed.addFields({ name: "\u200b", value: "\u200b", inline: true });
   }
   return embed;
 }
 
-function createStatsWeaponEmbed(weaponResult: Weapon): MessageEmbed {
+function createStatsWeaponEmbed(weaponResult: Weapon): EmbedBuilder {
   _logger.info("Constructing stats of weapon embed");
-  const embed = new MessageEmbed()
+  const embed = new EmbedBuilder()
     .setTitle(weaponResult.name)
     .setColor(DISCORD_BG_HEX)
     .setThumbnail(weaponResult.icon);
   if (!weaponResult.stats) throw Error("Weapon has no stats. Aborting embed creation");
   const STATS = weaponResult.stats.stats.map((x) => x.toString()).join("\n");
-  embed.addField("**Stats**", STATS, true);
+  embed.addFields({ name: "**Stats**", value: STATS, inline: true });
   return embed;
 }
 
 function createSearchEmbed(searchCommand: SearchCommand) {
   _logger.info("Constructing search embed");
   const cnt = searchCommand.getCount();
-  const embed = new MessageEmbed()
+  const embed = new EmbedBuilder()
     .setTitle("Weapon Results")
     .setDescription(cnt.toString() + " weapons found")
     .setFooter({ text: searchCommand.input })
     .setColor(DISCORD_BG_HEX);
-
+  const fields: APIEmbedField[] = [];
   for (const weaponClass in searchCommand.results) {
-    embed.addField(
-      weaponClass,
-      searchCommand.results[weaponClass]
+    fields.push({
+      name: weaponClass,
+      value: searchCommand.results[weaponClass]
         .sort()
         .map((x) => {
           if (x.powerCap) return "~~" + x.name + "~~";
           else return x.name;
         })
         .join("\n"),
-      true
-    );
+      inline: true,
+    });
   }
-
-  embed.fields = embed.fields.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0));
+  embed.addFields(fields.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0)));
   return embed;
 }

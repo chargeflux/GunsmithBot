@@ -1,9 +1,6 @@
 import { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import fuzzysort from "fuzzysort";
-import SearchCommand, {
-  ArchetypeQueryCommand,
-  ValidTraitsOptions,
-} from "../models/commands/searchCommand";
+import SearchCommand, { ValidTraitsOptions } from "../models/commands/searchCommand";
 import { WeaponCommandOptions } from "../models/commands/weaponCommand";
 import { PlugCategory } from "../models/constants";
 import {
