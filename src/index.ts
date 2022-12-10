@@ -31,7 +31,13 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isCommand()) return;
   if (!interaction.isChatInputCommand()) return;
   const commandName = interaction.commandName;
-  await interaction.deferReply();
+  try {
+    await interaction.deferReply();
+  } catch (err) {
+    _logger.error("Failed to defer reply for interaction", err);
+    return;
+  }
+
   let inputString = interaction.options.getString("input") ?? "";
   try {
     if (inputString.length < 3 && !["search", "compare"].includes(commandName)) {

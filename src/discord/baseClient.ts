@@ -98,7 +98,7 @@ export default class BaseClient {
   runGC() {
     if (global.gc) {
       global.gc();
-      _logger.info("Current memory after GC: {memory}", process.memoryUsage());
+      _logger.info("Cleared memory");
     }
   }
 
