@@ -37,7 +37,6 @@ export default class BaseClient {
         this.startCronSchedules();
       }
       _logger.info("Ready!");
-      this.runGC();
     });
 
     this.client.on("messageCreate", async (message) => {
@@ -95,13 +94,6 @@ export default class BaseClient {
     this.searchController?.weaponDBService.close();
   }
 
-  runGC() {
-    if (global.gc) {
-      global.gc();
-      _logger.info("Cleared memory");
-    }
-  }
-
   startCronSchedules() {
     cron.schedule(
       "5 9 * * *",
@@ -109,7 +101,6 @@ export default class BaseClient {
         _logger.info("Running update");
         this.tearDown();
         await this.initializeControllers();
-        this.runGC();
       },
       {
         timezone: "America/Los_Angeles",
