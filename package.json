@@ -33,6 +33,7 @@
     "dotenv": "^10.0.0",
     "fuzzysort": "^1.1.4",
     "node-cron": "^3.0.0",
+    "stream-json": "^1.7.5",
     "tslog": "^3.2.2"
   }
 }
