@@ -91,9 +91,9 @@ export default class WeaponController {
     let sockets: Socket[] = [];
     for (const category of socketData.socketCategories) {
       if (category.socketCategoryHash == SocketCategoryHash.Intrinsics) {
-        const index = category.socketIndexes[0]; // assume only one intrinisic
+        const index = category.socketIndexes[0]; // assume only one intrinisic socket
         const socket = socketData.socketEntries[index];
-        intrinsic = await this.processSocketIntrinisic(socket);
+        intrinsic = await this.processSocketIntrinisic(socket); // FIXME: Revision Zero has multiple intrinsics in reusablePlugItems
       }
       if (category.socketCategoryHash == SocketCategoryHash.WeaponPerks) {
         sockets = await this.processSocketPerks(
@@ -111,14 +111,14 @@ export default class WeaponController {
   private async processSocketIntrinisic(
     socketEntry: DestinyItemSocketEntryDefinition
   ): Promise<Perk | undefined> {
-    if (!socketEntry.reusablePlugSetHash) {
-      logger.error("reusablePlugSetHash not found in socket entry for intrinisic");
-      return;
+    let itemHash: number;
+    if (socketEntry.reusablePlugSetHash) {
+      itemHash = await getPlugItemHash(this.dbService.db, socketEntry.reusablePlugSetHash);
+    } else {
+      itemHash = socketEntry.singleInitialItemHash;
     }
 
-    const plugItemHash = await getPlugItemHash(this.dbService.db, socketEntry.reusablePlugSetHash);
-
-    const item = await getInventoryItemByHash(this.dbService.db, plugItemHash);
+    const item = await getInventoryItemByHash(this.dbService.db, itemHash);
     const plugCategoryHash = item.plug?.plugCategoryHash;
     if (plugCategoryHash) {
       const category = PlugCategory[plugCategoryHash] as keyof typeof PlugCategory | undefined;
