@@ -2,7 +2,7 @@ import axios from "axios";
 import { DestinyDefinitionFrom, DestinyManifestComponentName } from "bungie-api-ts/destiny2";
 import fs from "fs";
 import { PartialDestinyManifest } from "../models/bungie-api/partialDestinyManifest";
-import { ManifestTable } from "../models/database/manifestTable";
+import { ManifestTable, ManifestTableRecord } from "../models/database/manifestTable";
 import ManifestDBService from "./manifestDbService";
 import { logger } from "../logger";
 import ConfigurationError from "../models/errors/configurationError";
@@ -28,9 +28,9 @@ export async function updateManifest(db: ManifestDBService): Promise<boolean> {
   if (manifest.Response.version != (await getCurrentVersion()) || !ManifestDBService.exists()) {
     _logger.info("Version is outdated. Updating manifest");
     const tables = await getManifestTables(manifest);
-    processAndSaveManifestDataJSON(manifest, tables);
+    saveManifest(manifest);
     _logger.info("Saved new processed manifest tables to JSON");
-    db.construct(tables);
+    await db.construct(tables);
     _logger.info("Saved new processed manifest tables to DB");
     return true;
   }
@@ -67,17 +67,20 @@ async function getManifestTables(manifest: PartialDestinyManifest): Promise<Mani
       if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
         fs.mkdirSync(MANIFEST_DATA_LOCATION);
       }
-      if (process.env.DUMP_RAW_DATA == "true") {
-        if (!fs.existsSync(MANIFEST_DATA_LOCATION + "raw")) {
-          fs.mkdirSync(MANIFEST_DATA_LOCATION + "raw");
+      if (process.env.STREAM_MANIFEST_DATA == "true") {
+        if (process.env.DUMP_RAW_DATA == "true") {
+          if (!fs.existsSync(MANIFEST_DATA_LOCATION + "raw")) {
+            fs.mkdirSync(MANIFEST_DATA_LOCATION + "raw");
+          }
+          fs.writeFileSync(
+            MANIFEST_DATA_LOCATION + "raw/" + table + ".json",
+            JSON.stringify(response.data, null, 2)
+          );
         }
-        fs.writeFileSync(
-          MANIFEST_DATA_LOCATION + "raw/" + table + ".json",
-          JSON.stringify(response.data, null, 2)
-        );
+      } else {
+        const manifestTable = new ManifestTable(table, response.data);
+        manifestTables.push(manifestTable);
       }
-      const manifestTable = new ManifestTable(table, response.data);
-      manifestTables.push(manifestTable);
     }
   } else {
     throw new ConfigurationError("Check BUNGIE_KEY");
@@ -85,10 +88,7 @@ async function getManifestTables(manifest: PartialDestinyManifest): Promise<Mani
   return manifestTables;
 }
 
-async function processAndSaveManifestDataJSON(
-  latestManifest: PartialDestinyManifest,
-  manifestTables: ManifestTable[]
-) {
+async function saveManifest(latestManifest: PartialDestinyManifest) {
   try {
     if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);
@@ -98,15 +98,6 @@ async function processAndSaveManifestDataJSON(
       JSON.stringify(latestManifest, null, 2)
     );
     _logger.info("Saved latest manifest");
-    for (const table of manifestTables) {
-      if (process.env.DUMP_RAW_DATA == "true") {
-        fs.writeFileSync(
-          MANIFEST_DATA_LOCATION + table.name + "Table.json",
-          JSON.stringify(table.data, null, 2)
-        );
-        _logger.info("Saved table:", table.name);
-      }
-    }
     fs.writeFileSync(MANIFEST_DATA_LOCATION + "version", latestManifest.Response.version);
     _logger.info("Saved version:", latestManifest.Response.version);
   } catch (err) {

@@ -15,6 +15,8 @@
     "@types/jest": "^27.4.1",
     "@types/node": "^16.11.0",
     "@types/node-cron": "^3.0.0",
+    "@types/stream-chain": "^2.0.1",
+    "@types/stream-json": "^1.7.3",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
     "eslint": "^8.0.1",

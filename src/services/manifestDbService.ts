@@ -46,12 +46,12 @@ export default class ManifestDBService {
     }
   }
 
-  construct(tables: ManifestTable[]) {
+  async construct(tables: ManifestTable[]) {
     this.reinitialize();
     _logger.info("Reinitialized DB");
     this.createTables();
     _logger.info("Created tables in DB");
-    this.addRecords(tables);
+    await this.addRecords(tables);
     _logger.info("Added data to DB");
   }
 
@@ -66,17 +66,24 @@ export default class ManifestDBService {
     }
   }
 
-  private addRecords(tables: ManifestTable[]) {
+  private async addRecords(tables: ManifestTable[]) {
     const createTxn = this.db.transaction((records: ManifestTableRecord[], stmt) => {
-      for (const record of records)
+      for (const record of records) {
         stmt.run(record.hash.toString(), record.name, JSON.stringify(record.json));
+      }
     });
     for (const table of tables) {
       const stmt = this.db.prepare(
         // Using whitelisted table names
         "INSERT INTO " + table.name + " (hash, name, json) VALUES (?, ?, ?)"
       );
-      createTxn(table.data, stmt);
+
+      if (table.lazy) {
+        await table.LoadData((data: ManifestTableRecord[]) => createTxn(data, stmt));
+      } else {
+        createTxn(table.GetData(), stmt);
+      }
+      logger.debug(`Created ${table.name}`);
     }
   }
 

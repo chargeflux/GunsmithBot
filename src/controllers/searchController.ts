@@ -22,6 +22,9 @@ import WeaponDBService, {
 import { validateWeaponSearch } from "../utils/utils";
 import { stringIs } from "../utils/validator";
 import WeaponController from "./weaponController";
+import { logger } from "../logger";
+
+const _logger = logger.getChildLogger({ name: "ManifestDB" });
 
 export default class SearchController {
   dbService: ManifestDBService;
@@ -144,6 +147,7 @@ export default class SearchController {
   }
 
   async createWeaponTables(weaponItems: DestinyInventoryItemDefinitionRecord[]) {
+    _logger.warn("'Enhanced' is removed from perk names");
     let weaponDBTables: WeaponDBTables = {
       intrinsics: undefined,
       stocks: undefined,
