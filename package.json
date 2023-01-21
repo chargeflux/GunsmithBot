@@ -28,11 +28,11 @@
     "axios": "^0.23.0",
     "better-sqlite3": "^7.4.3",
     "bungie-api-ts": "^4.11.0",
+    "croner": "^5.4.0",
     "discord-api-types": "^0.37.17",
     "discord.js": "^14.6.0",
     "dotenv": "^10.0.0",
     "fuzzysort": "^1.1.4",
-    "node-cron": "^3.0.0",
     "tslog": "^3.2.2"
   }
 }

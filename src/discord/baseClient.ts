@@ -1,5 +1,5 @@
 import Discord from "discord.js";
-import cron from "node-cron";
+import cron from "croner";
 import ModController from "../controllers/modController";
 import PerkController from "../controllers/perkController";
 import SearchController from "../controllers/searchController";
@@ -95,16 +95,16 @@ export default class BaseClient {
   }
 
   startCronSchedules() {
-    cron.schedule(
+    cron(
       "5 9 * * *",
+      {
+        timezone: "America/Los_Angeles",
+      },
       async () => {
         _logger.info("Running update");
         this.tearDown();
         await this.initializeControllers();
       },
-      {
-        timezone: "America/Los_Angeles",
-      }
     );
   }
 }
