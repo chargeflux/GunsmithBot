@@ -68,7 +68,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Log in to GitHub container registry
-        uses: docker/login-action@v1.10.0
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -78,7 +78,7 @@ jobs:
         run: echo "container_version=gunsmithbot:${{ needs.version.outputs.version }}" >> $GITHUB_ENV
 
       - name: Build and push container image to registry
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ghcr.io/chargeflux/gunsmithbot/${{ env.container_version }}
