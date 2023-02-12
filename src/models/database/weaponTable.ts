@@ -1,5 +1,6 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
-import { WeaponTable } from "../../services/weaponDbService";
+import { PerkTable } from "../../services/weaponDbService";
+import { WeaponArchetype } from "../destiny-entities/weaponArchetype";
 
 export interface DestinyInventoryItemDefinitionRecord {
   hash: string;
@@ -7,13 +8,17 @@ export interface DestinyInventoryItemDefinitionRecord {
   data: DestinyInventoryItemDefinition;
 }
 
-export type WeaponDBTables = Record<WeaponTable, PerkWeaponHashMap | undefined>;
+export type PerkDBTables = Record<PerkTable, PerkWeaponMapping | undefined>;
 
-export type PerkWeaponHashMap = {
+export type PerkWeaponMapping = {
   [hash: string]: [name: string, weaponHashes: Set<string>];
 };
 
 export type PerkRecord = {
   name: string;
   weaponHash: string;
+};
+
+export type ArchetypeWeaponMapping = {
+  [hash: string]: WeaponArchetype;
 };

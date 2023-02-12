@@ -1,13 +1,17 @@
 import BetterSqlite3 from "better-sqlite3";
 import fs from "fs";
-import { WeaponDBTables, PerkWeaponHashMap } from "../models/database/weaponTable";
+import {
+  PerkDBTables,
+  PerkWeaponMapping,
+  ArchetypeWeaponMapping,
+} from "../models/database/weaponTable";
 import { stringIs } from "../utils/validator";
 import { MANIFEST_DATA_LOCATION } from "./manifestService";
 import { logger } from "../logger";
 
 const _logger = logger.getChildLogger({ name: "WeaponDB" });
 
-export enum WeaponTableHash {
+export enum PerkTableHash {
   "arrows" = 1257608559,
   "barrels" = 2833605196,
   "batteries" = 1757026848,
@@ -25,7 +29,7 @@ export enum WeaponTableHash {
   "traits2" = 7906839,
 }
 
-export const WeaponTables = [
+export const PerkTables = [
   "arrows",
   "barrels",
   "batteries",
@@ -43,8 +47,8 @@ export const WeaponTables = [
   "traits2",
 ] as const;
 
-export type WeaponTable = typeof WeaponTables[number];
-export type PerkType = typeof WeaponTables[number];
+export type PerkTable = typeof PerkTables[number];
+export type PerkType = typeof PerkTables[number];
 
 export type WeaponDB = BetterSqlite3.Database;
 
@@ -86,17 +90,17 @@ export default class WeaponDBService {
     }
   }
 
-  construct(tables: WeaponDBTables) {
+  construct(tables: PerkDBTables, archetypes: ArchetypeWeaponMapping) {
     this.reinitialize();
     _logger.info("Reinitialized DB");
     this.createTables();
     _logger.info("Created tables in DB");
-    this.addRecords(tables);
+    this.addRecords(tables, archetypes);
     _logger.info("Added data to DB");
   }
 
   private createTables() {
-    for (const table of WeaponTables) {
+    for (const table of PerkTables) {
       // Using whitelisted table names
       this.db.exec(
         "CREATE TABLE IF NOT EXISTS " +
@@ -104,10 +108,15 @@ export default class WeaponDBService {
           " (id INTEGER PRIMARY KEY, hash TEXT, name TEXT, weaponHash TEXT)"
       );
     }
+    this.db.exec(
+      "CREATE TABLE IF NOT EXISTS " +
+        "archetypes" +
+        " (id INTEGER PRIMARY KEY, weaponHash TEXT, name TEXT, slot TEXT, class TEXT, rarity TEXT, damage TEXT, powerCap TEXT)"
+    );
   }
 
-  private addRecords(tables: WeaponDBTables) {
-    const createTxn = this.db.transaction((records: PerkWeaponHashMap, stmt) => {
+  private addRecords(tables: PerkDBTables, archetypes: ArchetypeWeaponMapping) {
+    const createTxn = this.db.transaction((records: PerkWeaponMapping, stmt) => {
       for (const hash in records)
         for (const item of Array.from(records[hash][1])) {
           stmt.run(hash, records[hash][0], item);
@@ -118,8 +127,27 @@ export default class WeaponDBService {
         // Using whitelisted table names
         "INSERT INTO " + table + " (hash, name, weaponHash) VALUES (?, ?, ?)"
       );
-      if (stringIs<WeaponTable>(table, WeaponTables)) createTxn(tables[table] ?? {}, stmt);
+      if (stringIs<PerkTable>(table, PerkTables)) createTxn(tables[table] ?? {}, stmt);
     }
+
+    const createArchetypesTxn = this.db.transaction((archetypes: ArchetypeWeaponMapping) => {
+      const stmt = this.db.prepare(
+        "INSERT INTO archetypes (weaponHash, name, slot, class, rarity, damage, powerCap) VALUES (?, ?, ?, ?, ?, ?, ?)"
+      );
+      for (const hash in archetypes) {
+        const archetype = archetypes[hash];
+        stmt.run(
+          hash,
+          archetype.name,
+          archetype.slot,
+          archetype.class,
+          archetype.rarity,
+          archetype.damage,
+          archetype.powerCap == 0 ? null : archetype.powerCap
+        );
+      }
+    });
+    createArchetypesTxn(archetypes);
   }
 
   close(): void {

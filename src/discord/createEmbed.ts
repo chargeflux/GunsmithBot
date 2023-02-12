@@ -98,7 +98,7 @@ function createModEmbed(modResult: Mod): EmbedBuilder {
 
 function createArmorEmbed(armorResult: Armor): EmbedBuilder {
   _logger.info("Constructing armor embed");
-  const description: string = armorResult.baseArchetype?.toString() + "\n" + armorResult.flavorText;
+  const description: string = armorResult.archetype?.toString() + "\n" + armorResult.flavorText;
   const embed = new EmbedBuilder()
     .setTitle(armorResult.name)
     .setDescription(description)
@@ -106,10 +106,10 @@ function createArmorEmbed(armorResult: Armor): EmbedBuilder {
     .setThumbnail(armorResult.icon);
   _logger.info("Returning embed");
   if (armorResult.source) embed.addFields({ name: "Source", value: armorResult.source });
-  if (armorResult.baseArchetype?.intrinsic)
+  if (armorResult.archetype?.intrinsic)
     embed.addFields({
-      name: armorResult.baseArchetype.intrinsic.name,
-      value: armorResult.baseArchetype.intrinsic.description,
+      name: armorResult.archetype.intrinsic.name,
+      value: armorResult.archetype.intrinsic.description,
     });
   return embed;
 }
@@ -142,7 +142,7 @@ function createWeaponEmbed(weaponResult: Weapon, options: WeaponCommandOptions):
   else {
     _logger.info("Constructing weapon embed");
     const description: string =
-      weaponResult.baseArchetype?.toString() + "\n" + weaponResult.baseArchetype?.intrinsic?.name;
+      weaponResult.archetype?.toString() + "\n" + weaponResult.archetype?.intrinsic?.name;
     embed = new EmbedBuilder()
       .setTitle(weaponResult.name)
       .setDescription(description)
@@ -185,9 +185,9 @@ function createWeaponEmbed(weaponResult: Weapon, options: WeaponCommandOptions):
 function createFullWeaponEmbed(weaponResult: Weapon): EmbedBuilder {
   _logger.info("Constructing full weapon embed");
   const description: string =
-    weaponResult.baseArchetype?.toString() +
+    weaponResult.archetype?.toString() +
     "\n" +
-    weaponResult.baseArchetype?.intrinsic?.name +
+    weaponResult.archetype?.intrinsic?.name +
     "\n" +
     weaponResult.flavorText;
   const embed = new EmbedBuilder()

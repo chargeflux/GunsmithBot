@@ -11,7 +11,7 @@ import {
   WeaponRarity,
   WeaponSlots,
 } from "../models/commands/searchCommand";
-import { WeaponTables } from "../services/weaponDbService";
+import { PerkTables } from "../services/weaponDbService";
 import { logger } from "../logger";
 import ConfigurationError from "../models/errors/configurationError";
 
@@ -123,7 +123,7 @@ function buildCommands() {
     return option;
   });
 
-  for (const tableName of WeaponTables) {
+  for (const tableName of PerkTables) {
     searchBuilder.addStringOption((option: SlashCommandStringOption) =>
       option.setName(tableName).setDescription("Search by " + tableName)
     );

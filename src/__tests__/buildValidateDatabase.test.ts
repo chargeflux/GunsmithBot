@@ -20,8 +20,8 @@ test.skip("build database from json", async () => {
   }
   dbService.construct(manifestTables);
   const weaponItems = await getInventoryItemsWeapons(dbService.db);
-  const tables = await new SearchController().createWeaponTables(weaponItems);
-  new WeaponDBService().construct(tables);
+  const { perkDBTables, archetypes } = await new SearchController().createWeaponTables(weaponItems);
+  new WeaponDBService().construct(perkDBTables, archetypes);
 });
 
 test.skip("validate columns", () => {

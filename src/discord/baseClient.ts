@@ -61,11 +61,13 @@ export default class BaseClient {
         if (reinitialize || !WeaponDBService.exists()) {
           _logger.info("Reinitializing Weapon DB");
           const weaponItems = await getInventoryItemsWeapons(dbService.db);
-          const tables = await new SearchController().createWeaponTables(weaponItems);
+          const { perkDBTables, archetypes } = await new SearchController().createWeaponTables(
+            weaponItems
+          );
           try {
-            new WeaponDBService().construct(tables);
+            new WeaponDBService().construct(perkDBTables, archetypes);
           } catch (e) {
-            _logger.fatal("Failed to construct WeaponDB. Shutting down.");
+            _logger.fatal(e, "Failed to construct WeaponDB. Shutting down.");
             this.client.destroy();
             process.exit();
           }
@@ -104,7 +106,7 @@ export default class BaseClient {
         _logger.info("Running update");
         this.tearDown();
         await this.initializeControllers();
-      },
+      }
     );
   }
 }
