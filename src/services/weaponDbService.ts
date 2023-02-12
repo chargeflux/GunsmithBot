@@ -9,7 +9,7 @@ import { stringIs } from "../utils/validator";
 import { MANIFEST_DATA_LOCATION } from "./manifestService";
 import { logger } from "../logger";
 
-const _logger = logger.getChildLogger({ name: "WeaponDB" });
+const _logger = logger.getSubLogger({ name: "WeaponDB" });
 
 export enum PerkTableHash {
   "arrows" = 1257608559,

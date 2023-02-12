@@ -12,7 +12,7 @@ import deployCommands from "./deployCommand";
 import { logger } from "../logger";
 import ArmorController from "../controllers/armorController";
 
-const _logger = logger.getChildLogger({ name: "BaseClient" });
+const _logger = logger.getSubLogger({ name: "BaseClient" });
 
 export default class BaseClient {
   client: Discord.Client;
@@ -67,7 +67,7 @@ export default class BaseClient {
           try {
             new WeaponDBService().construct(perkDBTables, archetypes);
           } catch (e) {
-            _logger.fatal(e, "Failed to construct WeaponDB. Shutting down.");
+            _logger.fatal("Failed to construct WeaponDB. Shutting down.", e);
             this.client.destroy();
             process.exit();
           }

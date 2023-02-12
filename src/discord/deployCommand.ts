@@ -15,7 +15,7 @@ import { PerkTables } from "../services/weaponDbService";
 import { logger } from "../logger";
 import ConfigurationError from "../models/errors/configurationError";
 
-const _logger = logger.getChildLogger({ name: "Deploy" });
+const _logger = logger.getSubLogger({ name: "Deploy" });
 
 export default function deployCommands() {
   if (process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_BOT_CLIENT_ID) {

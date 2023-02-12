@@ -14,7 +14,7 @@ import Perk from "../models/destiny-entities/perk";
 import { Weapon } from "../models/destiny-entities/weapon";
 import { logger } from "../logger";
 
-const _logger = logger.getChildLogger({ name: "Embed" });
+const _logger = logger.getSubLogger({ name: "Embed" });
 
 export default function createEmbed(
   queryType: QueryType,

@@ -4,7 +4,7 @@ import { ManifestTable, ManifestTableRecord } from "../models/database/manifestT
 import { MANIFEST_DATA_LOCATION, TABLES } from "./manifestService";
 import { logger } from "../logger";
 
-const _logger = logger.getChildLogger({ name: "ManifestDB" });
+const _logger = logger.getSubLogger({ name: "ManifestDB" });
 
 const dbName = "manifest-db.sqlite3";
 

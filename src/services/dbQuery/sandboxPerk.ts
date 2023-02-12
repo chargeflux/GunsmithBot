@@ -3,7 +3,7 @@ import { logger } from "../../logger";
 import { ManifestTableRecordJSON } from "../../models/database/manifestTable";
 import { ManifestDB } from "../manifestDbService";
 
-const _logger = logger.getChildLogger({ name: "SandboxPerkService" });
+const _logger = logger.getSubLogger({ name: "SandboxPerkService" });
 
 export async function getSandboxPerksByName(
   db: ManifestDB,

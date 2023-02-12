@@ -16,7 +16,7 @@ import { getPlugItemHash } from "../services/dbQuery/plugset";
 import getPowerCap from "../services/dbQuery/powerCap";
 import BaseController from "./baseController";
 
-const _logger = logger.getChildLogger({ name: "WeaponController" });
+const _logger = logger.getSubLogger({ name: "WeaponController" });
 
 export default class ArmorController implements BaseController<ArmorOptions, ArmorCommand, Armor> {
   dbService: ManifestDBService;

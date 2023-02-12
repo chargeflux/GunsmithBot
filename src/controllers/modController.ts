@@ -10,7 +10,7 @@ import { logger } from "../logger";
 import BaseController from "./baseController";
 import ModOptions from "../models/command-options/modOptions";
 
-const _logger = logger.getChildLogger({ name: "ModController" });
+const _logger = logger.getSubLogger({ name: "ModController" });
 
 export default class ModController implements BaseController<ModOptions, ModCommand, Mod> {
   dbService: ManifestDBService;

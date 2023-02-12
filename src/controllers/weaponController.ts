@@ -21,7 +21,7 @@ import getPowerCap from "../services/dbQuery/powerCap";
 import { getSocketTypeHash } from "../services/dbQuery/socketType";
 import { validateWeaponSearch } from "../utils/utils";
 
-const _logger = logger.getChildLogger({ name: "WeaponController" });
+const _logger = logger.getSubLogger({ name: "WeaponController" });
 
 export default class WeaponController {
   dbService: ManifestDBService;

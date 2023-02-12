@@ -4,7 +4,7 @@ import { DestinyInventoryItemDefinitionRecord } from "../../models/database/weap
 import { logger } from "../../logger";
 import { ManifestDB } from "../manifestDbService";
 
-const _logger = logger.getChildLogger({ name: "InventoryItemService" });
+const _logger = logger.getSubLogger({ name: "InventoryItemService" });
 
 export async function getInventoryItemsByName(
   db: ManifestDB,

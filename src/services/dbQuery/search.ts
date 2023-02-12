@@ -3,7 +3,7 @@ import { WeaponDB, PerkTable } from "../weaponDbService";
 import { logger } from "../../logger";
 import { WeaponArchetype } from "../../models/destiny-entities/weaponArchetype";
 
-const _logger = logger.getChildLogger({ name: "SearchService" });
+const _logger = logger.getSubLogger({ name: "SearchService" });
 
 export async function getFuzzyQueryNames(
   db: WeaponDB,
