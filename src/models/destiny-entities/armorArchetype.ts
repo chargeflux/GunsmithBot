@@ -2,7 +2,7 @@ import { ArmorType, GuardianClass, MAX_POWER_LEVEL, TierType } from "../constant
 import { BaseDestinyItem } from "./baseMetadata";
 import Perk from "./perk";
 
-export class ArmorBaseArchetype implements BaseDestinyItem {
+export class ArmorArchetype implements BaseDestinyItem {
   readonly name: string;
   readonly guardianClass: keyof typeof GuardianClass;
   readonly type: keyof typeof ArmorType;
@@ -32,7 +32,7 @@ export class ArmorBaseArchetype implements BaseDestinyItem {
     this.intrinsic = intrinsic;
   }
 
-  static create(data: ArmorArchetypeData, intrinsic?: Perk): ArmorBaseArchetype {
+  static create(data: ArmorArchetypeData, intrinsic?: Perk): ArmorArchetype {
     let guardianClass: keyof typeof GuardianClass | undefined;
     let armorType: keyof typeof ArmorType | undefined;
     let armorTierType: keyof typeof TierType | undefined;
@@ -55,7 +55,7 @@ export class ArmorBaseArchetype implements BaseDestinyItem {
     else throw Error("Tier type hash is invalid");
     if (!armorTierType) throw Error(`Failed to parse tier type hash ${tierTypeHash}`);
 
-    const baseArchetype = new ArmorBaseArchetype(
+    const archetype = new ArmorArchetype(
       data.name,
       guardianClass,
       armorType,
@@ -63,10 +63,10 @@ export class ArmorBaseArchetype implements BaseDestinyItem {
       intrinsic
     );
 
-    if (data.powerCapValues) baseArchetype.powerCap = Math.max(...data.powerCapValues);
+    if (data.powerCapValues) archetype.powerCap = Math.max(...data.powerCapValues);
     else throw Error("Failed to set power cap values");
 
-    return baseArchetype;
+    return archetype;
   }
 
   toString() {

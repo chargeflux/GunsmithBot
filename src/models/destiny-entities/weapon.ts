@@ -4,7 +4,7 @@ import { WeaponCommandOptions } from "../commands/weaponCommand";
 import { BUNGIE_URL_ROOT } from "../constants";
 import Perk from "./perk";
 import Socket from "./socket";
-import { WeaponArchetypeData, WeaponBaseArchetype } from "./weaponBaseArchetype";
+import { WeaponArchetypeData, WeaponArchetype } from "./weaponArchetype";
 import WeaponStats from "./weaponStats";
 
 export class Weapon implements BaseMetadata {
@@ -16,7 +16,7 @@ export class Weapon implements BaseMetadata {
   hash: number;
   stats?: WeaponStats;
   powerCapValues?: number[];
-  baseArchetype?: WeaponBaseArchetype;
+  archetype?: WeaponArchetype;
   sockets: Socket[] = [];
   options: WeaponCommandOptions;
 
@@ -52,7 +52,7 @@ export class Weapon implements BaseMetadata {
       weaponTierTypeHash
     );
 
-    this.setBaseArchetype(WeaponBaseArchetype.create(archetypeData, intrinsic));
+    this.setArchetype(WeaponArchetype.create(archetypeData, intrinsic));
 
     this.setSockets(sockets);
   }
@@ -61,8 +61,8 @@ export class Weapon implements BaseMetadata {
     this.powerCapValues = powerCapValues;
   }
 
-  setBaseArchetype(baseArchetype: WeaponBaseArchetype) {
-    this.baseArchetype = baseArchetype;
+  setArchetype(archetype: WeaponArchetype) {
+    this.archetype = archetype;
   }
 
   setSockets(sockets: Socket[]) {

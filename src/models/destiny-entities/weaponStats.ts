@@ -5,7 +5,7 @@ import {
 import { logger } from "../../logger";
 import { StatOrder, WeaponStat } from "../constants";
 import { BaseDestinyItem } from "./baseMetadata";
-const _logger = logger.getChildLogger({ name: "Weapon.Stats" });
+const _logger = logger.getSubLogger({ name: "Weapon.Stats" });
 
 export default class WeaponStats implements BaseDestinyItem {
   name: string;

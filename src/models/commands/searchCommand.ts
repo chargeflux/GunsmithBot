@@ -1,7 +1,7 @@
 import BaseCommand from "./baseCommand";
 import { CacheType, CommandInteractionOptionResolver } from "discord.js";
-import { WeaponTableHash, WeaponTables } from "../../services/weaponDbService";
-import { WeaponBaseArchetype } from "../destiny-entities/weaponBaseArchetype";
+import { PerkTableHash, PerkTables } from "../../services/weaponDbService";
+import { WeaponArchetype } from "../destiny-entities/weaponArchetype";
 import { stringIs } from "../../utils/validator";
 import PublicError from "../errors/publicError";
 
@@ -31,9 +31,9 @@ export const WeaponRarity = ["Basic", "Common", "Rare", "Legendary", "Exotic"] a
 
 export const WeaponDamageType = ["Kinetic", "Arc", "Solar", "Void", "Stasis"] as const;
 
-export const ArchetypeQueryCommand = ["slot", "class", "rarity", "damage"] as const; // mapped to buildCommands in DeployCommandService
+export const ArchetypeQueryCommand = ["slot", "class", "damage", "rarity"] as const; // mapped to buildCommands in DeployCommandService
 
-export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
+export default class SearchCommand implements BaseCommand<WeaponArchetype> {
   readonly archetypeToSearch: ArchetypeToSearch;
   input = "";
   perksToSearch: PerksToSearch;
@@ -56,7 +56,7 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
     options: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">
   ) {
     const perksToSearchRaw: PerksToSearch = new Map();
-    for (const name of WeaponTables) {
+    for (const name of PerkTables) {
       const value = options.getString(name);
       if (value) {
         perksToSearchRaw.set(name, value);
@@ -118,13 +118,7 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
     this.input = archetypeParts.concat(inputParts).join(", ");
   }
 
-  validateAndAddResult(resultArchetype: WeaponBaseArchetype) {
-    // validate archetype properties match between query and result
-    for (const name of ArchetypeQueryCommand) {
-      if (this.archetypeToSearch[name])
-        if (resultArchetype[name] != this.archetypeToSearch[name]) return;
-    }
-
+  validateAndAddResult(resultArchetype: WeaponArchetype) {
     if (this.results[resultArchetype.class])
       this.results[resultArchetype.class].push(resultArchetype);
     else this.results[resultArchetype.class] = [resultArchetype];
@@ -143,7 +137,7 @@ export default class SearchCommand implements BaseCommand<WeaponBaseArchetype> {
   }
 }
 
-export type PerksToSearch = Map<keyof typeof WeaponTableHash, string>;
+export type PerksToSearch = Map<keyof typeof PerkTableHash, string>;
 
 export type ArchetypeToSearch = {
   slot?: typeof WeaponSlots[number];
@@ -153,7 +147,7 @@ export type ArchetypeToSearch = {
 };
 
 export type SearchResult = {
-  [category: string]: WeaponBaseArchetype[];
+  [category: string]: WeaponArchetype[];
 };
 
 export enum ValidTraitsOptions {

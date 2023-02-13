@@ -3,7 +3,7 @@ import { logger } from "../../logger";
 import { BaseMetadata } from "./baseMetadata";
 import { BUNGIE_URL_ROOT, PlugCategory } from "../constants";
 
-const _logger = logger.getChildLogger({ name: "Perk" });
+const _logger = logger.getSubLogger({ name: "Perk" });
 
 export default class Perk implements BaseMetadata {
   name: string;

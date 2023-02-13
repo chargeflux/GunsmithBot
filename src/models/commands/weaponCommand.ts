@@ -21,8 +21,8 @@ export default class WeaponCommand implements BaseCommand<Weapon> {
     const weapons: Weapon[] = [];
     const names: string[] = weaponResults.map((x) => x.name);
     for (const weapon of weaponResults) {
-      if (weapon.baseArchetype) {
-        if (weapon.hasRandomRolls || weapon.baseArchetype.rarity == "Exotic") {
+      if (weapon.archetype) {
+        if (weapon.hasRandomRolls || weapon.archetype.rarity == "Exotic") {
           const idx: number = names.indexOf(weapon.name);
           if (idx > -1) weapons.splice(idx, 0, weapon);
         } else weapons.push(weapon);

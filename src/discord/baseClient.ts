@@ -12,7 +12,7 @@ import deployCommands from "./deployCommand";
 import { logger } from "../logger";
 import ArmorController from "../controllers/armorController";
 
-const _logger = logger.getChildLogger({ name: "BaseClient" });
+const _logger = logger.getSubLogger({ name: "BaseClient" });
 
 export default class BaseClient {
   client: Discord.Client;
@@ -61,11 +61,13 @@ export default class BaseClient {
         if (reinitialize || !WeaponDBService.exists()) {
           _logger.info("Reinitializing Weapon DB");
           const weaponItems = await getInventoryItemsWeapons(dbService.db);
-          const tables = await new SearchController().createWeaponTables(weaponItems);
+          const { perkDBTables, archetypes } = await new SearchController().createWeaponTables(
+            weaponItems
+          );
           try {
-            new WeaponDBService().construct(tables);
+            new WeaponDBService().construct(perkDBTables, archetypes);
           } catch (e) {
-            _logger.fatal("Failed to construct WeaponDB. Shutting down.");
+            _logger.fatal("Failed to construct WeaponDB. Shutting down.", e);
             this.client.destroy();
             process.exit();
           }
@@ -104,7 +106,7 @@ export default class BaseClient {
         _logger.info("Running update");
         this.tearDown();
         await this.initializeControllers();
-      },
+      }
     );
   }
 }

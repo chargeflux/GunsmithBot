@@ -3,7 +3,7 @@ import { logger } from "../../logger";
 import { ManifestTableRecordJSON } from "../../models/database/manifestTable";
 import { ManifestDB } from "../manifestDbService";
 
-const _logger = logger.getChildLogger({ name: "CollectibleService" });
+const _logger = logger.getSubLogger({ name: "CollectibleService" });
 
 export async function getCollectibleByHash(
   db: ManifestDB,

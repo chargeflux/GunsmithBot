@@ -2,7 +2,7 @@ import { ManifestTableRecordJSON } from "../../models/database/manifestTable";
 import { logger } from "../../logger";
 import { ManifestDB } from "../manifestDbService";
 
-const _logger = logger.getChildLogger({ name: "PowerCapService" });
+const _logger = logger.getSubLogger({ name: "PowerCapService" });
 
 export default async function getPowerCap(db: ManifestDB, hashes: number[]): Promise<number[]> {
   try {

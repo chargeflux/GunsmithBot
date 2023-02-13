@@ -7,7 +7,7 @@ import ManifestDBService from "./manifestDbService";
 import { logger } from "../logger";
 import ConfigurationError from "../models/errors/configurationError";
 
-const _logger = logger.getChildLogger({ name: "ManifestService" });
+const _logger = logger.getSubLogger({ name: "ManifestService" });
 
 const BUNGIE_API_MANIFEST_URL = "https://www.bungie.net/Platform/Destiny2/Manifest/";
 

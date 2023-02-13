@@ -6,7 +6,7 @@ import { logger } from "../../logger";
 import { ManifestTableRecordJSON } from "../../models/database/manifestTable";
 import { ManifestDB } from "../manifestDbService";
 
-const _logger = logger.getChildLogger({ name: "PlugsetService" });
+const _logger = logger.getSubLogger({ name: "PlugsetService" });
 
 export async function getPlugItemHash(db: ManifestDB, hash: number): Promise<number> {
   try {

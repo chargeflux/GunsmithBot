@@ -34,8 +34,9 @@ export enum PlugCategory {
   "Default" = -1, // User Defined
 }
 
-export enum WeaponBase {
-  "Weapon" = 1,
+export const WEAPON_CATEGORY_HASH = 1;
+
+export enum WeaponSlot {
   "Kinetic" = 2,
   "Energy" = 3,
   "Power" = 4,

@@ -3,7 +3,7 @@ import { logger } from "../../logger";
 import { ManifestTableRecordJSON } from "../../models/database/manifestTable";
 import { ManifestDB } from "../manifestDbService";
 
-const _logger = logger.getChildLogger({ name: "SocketService" });
+const _logger = logger.getSubLogger({ name: "SocketService" });
 
 export async function getSocketTypeHash(db: ManifestDB, hash: number): Promise<number> {
   try {

@@ -2,7 +2,7 @@ import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import { BaseMetadata } from "./baseMetadata";
 import { BUNGIE_URL_ROOT } from "../constants";
 import Perk from "./perk";
-import { ArmorArchetypeData, ArmorBaseArchetype } from "./armorBaseArchetype";
+import { ArmorArchetypeData, ArmorArchetype } from "./armorArchetype";
 
 export class Armor implements BaseMetadata {
   name: string;
@@ -11,7 +11,7 @@ export class Armor implements BaseMetadata {
   screenshot: string;
   hash: number;
   powerCapValues?: number[];
-  baseArchetype?: ArmorBaseArchetype;
+  archetype?: ArmorArchetype;
   source: string;
 
   constructor(
@@ -37,14 +37,14 @@ export class Armor implements BaseMetadata {
       tierTypeHash
     );
 
-    this.setBaseArchetype(ArmorBaseArchetype.create(archetypeData, intrinsic));
+    this.setArchetype(ArmorArchetype.create(archetypeData, intrinsic));
   }
 
   setPowerCapValues(powerCapValues: number[]) {
     this.powerCapValues = powerCapValues;
   }
 
-  setBaseArchetype(baseArchetype: ArmorBaseArchetype) {
-    this.baseArchetype = baseArchetype;
+  setArchetype(archetype: ArmorArchetype) {
+    this.archetype = archetype;
   }
 }
