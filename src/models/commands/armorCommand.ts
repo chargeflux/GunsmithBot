@@ -15,12 +15,10 @@ export default class ArmorCommand implements BaseCommand<Armor> {
 
   orderResultsByTierType(armorResults: Armor[]): Armor[] {
     const armorPieces: Armor[] = [];
-    const names: string[] = armorResults.map((x) => x.name);
     for (const armor of armorResults) {
       if (armor.archetype) {
         if (armor.archetype.rarity == "Exotic") {
-          const idx: number = names.indexOf(armor.name);
-          if (idx > -1) armorPieces.splice(idx, 0, armor);
+          armorPieces.splice(0, 0, armor);
         } else armorPieces.push(armor);
       }
     }

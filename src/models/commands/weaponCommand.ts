@@ -12,23 +12,24 @@ export default class WeaponCommand implements BaseCommand<Weapon> {
   constructor(input: string, options: WeaponCommandOptions, weaponResults: Weapon[]) {
     this.input = input;
     this.options = options;
-    const orderedResultsName = orderResultsByName(this.input, weaponResults);
-    this.results = this.orderByRandomRollAndTierType(orderedResultsName);
+    const results = this.orderByRandomRollAndTierType(weaponResults);
+    this.results = orderResultsByName(this.input, results);
     this.count = this.results.length;
   }
 
   orderByRandomRollAndTierType(weaponResults: Weapon[]) {
-    const weapons: Weapon[] = [];
-    const names: string[] = weaponResults.map((x) => x.name);
-    for (const weapon of weaponResults) {
-      if (weapon.archetype) {
-        if (weapon.hasRandomRolls || weapon.archetype.rarity == "Exotic") {
-          const idx: number = names.indexOf(weapon.name);
-          if (idx > -1) weapons.splice(idx, 0, weapon);
-        } else weapons.push(weapon);
+    return weaponResults.sort((a, b) => {
+      if (!a.hasRandomRolls && a.archetype.rarity != "Exotic") {
+        return 1;
       }
-    }
-    return weapons;
+      if (!b.hasRandomRolls && b.archetype.rarity != "Exotic") {
+        return -1;
+      }
+      if (a.archetype.powerCap == b.archetype.powerCap) {
+        return b.seasonNumber - a.seasonNumber;
+      }
+      return b.archetype.powerCap - a.archetype.powerCap;
+    });
   }
 }
 

@@ -1,7 +1,7 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import { BaseMetadata } from "./baseMetadata";
 import { WeaponCommandOptions } from "../commands/weaponCommand";
-import { BUNGIE_URL_ROOT } from "../constants";
+import { BUNGIE_URL_ROOT, WATERMARK_TO_SEASON_NUMBER } from "../constants";
 import Perk from "./perk";
 import Socket from "./socket";
 import { WeaponArchetypeData, WeaponArchetype } from "./weaponArchetype";
@@ -13,10 +13,11 @@ export class Weapon implements BaseMetadata {
   icon: string;
   screenshot: string;
   hasRandomRolls: boolean;
+  seasonNumber: number;
   hash: number;
   stats?: WeaponStats;
   powerCapValues?: number[];
-  archetype?: WeaponArchetype;
+  archetype: WeaponArchetype;
   sockets: Socket[] = [];
   options: WeaponCommandOptions;
 
@@ -33,6 +34,10 @@ export class Weapon implements BaseMetadata {
     this.icon = BUNGIE_URL_ROOT + rawWeaponData.displayProperties.icon;
     this.hasRandomRolls = rawWeaponData.displaySource != "";
     this.hash = rawWeaponData.hash;
+    this.seasonNumber =
+      WATERMARK_TO_SEASON_NUMBER[
+        rawWeaponData.iconWatermark ?? rawWeaponData.quality?.displayVersionWatermarkIcons[0]
+      ] ?? -1;
     this.options = options;
     if (!this.options.isDefault) {
       if (rawWeaponData.stats) this.stats = new WeaponStats(this.name, rawWeaponData.stats);
@@ -52,17 +57,13 @@ export class Weapon implements BaseMetadata {
       weaponTierTypeHash
     );
 
-    this.setArchetype(WeaponArchetype.create(archetypeData, intrinsic));
+    this.archetype = WeaponArchetype.create(archetypeData, intrinsic);
 
     this.setSockets(sockets);
   }
 
   setPowerCapValues(powerCapValues: number[]) {
     this.powerCapValues = powerCapValues;
-  }
-
-  setArchetype(archetype: WeaponArchetype) {
-    this.archetype = archetype;
   }
 
   setSockets(sockets: Socket[]) {

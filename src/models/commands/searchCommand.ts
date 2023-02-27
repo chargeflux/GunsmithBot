@@ -63,6 +63,10 @@ export default class SearchCommand implements BaseCommand<WeaponArchetype> {
       }
     }
 
+    if (perksToSearchRaw.size == 0) {
+      throw new PublicError("Specify at least one parameter");
+    }
+
     const archetypeToSearch: ArchetypeToSearch = {};
     for (const name of ArchetypeQueryCommand) {
       const value = options.getString(name) ?? "";
