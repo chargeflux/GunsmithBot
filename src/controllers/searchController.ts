@@ -97,10 +97,10 @@ export default class SearchController {
       }
     }
 
-    if (searchCommand.archetypeToSearch) {
-      const { archetypeStmt, archetypeQueries } = this.buildQueryArchetype(
-        searchCommand.archetypeToSearch
-      );
+    const { archetypeStmt, archetypeQueries } = this.buildQueryArchetype(
+      searchCommand.archetypeToSearch
+    );
+    if (archetypeQueries.length > 0) {
       stmt += archetypeStmt;
       queries = queries.concat(archetypeQueries);
     }
