@@ -81,6 +81,7 @@ export enum DamageType {
   "Void" = 4,
   "Raid" = 5,
   "Stasis" = 6,
+  "Strand" = 7,
 }
 
 export enum WeaponStat {
@@ -154,7 +155,6 @@ export enum EnergyType {
   "Ghost" = 4,
   "Subclass" = 5,
   "Stasis" = 6,
-  "Strand" = 7,
 }
 
 export enum GuardianClass {
