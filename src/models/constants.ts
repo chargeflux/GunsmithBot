@@ -154,6 +154,7 @@ export enum EnergyType {
   "Ghost" = 4,
   "Subclass" = 5,
   "Stasis" = 6,
+  "Strand" = 7,
 }
 
 export enum GuardianClass {
