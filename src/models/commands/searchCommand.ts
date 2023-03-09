@@ -63,10 +63,6 @@ export default class SearchCommand implements BaseCommand<WeaponArchetype> {
       }
     }
 
-    if (perksToSearchRaw.size == 0) {
-      throw new PublicError("Specify at least one parameter");
-    }
-
     const archetypeToSearch: ArchetypeToSearch = {};
     for (const name of ArchetypeQueryCommand) {
       const value = options.getString(name) ?? "";
@@ -95,6 +91,10 @@ export default class SearchCommand implements BaseCommand<WeaponArchetype> {
           throw Error("Unknown query type");
         }
       }
+    }
+
+    if (perksToSearchRaw.size == 0 && Object.keys(archetypeToSearch).length == 0) {
+      throw new PublicError("Specify at least one parameter");
     }
 
     this.archetypeToSearch = archetypeToSearch;
