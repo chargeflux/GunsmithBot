@@ -11,6 +11,7 @@ import WeaponDBService from "../services/weaponDbService";
 import deployCommands from "./deployCommand";
 import { logger } from "../logger";
 import ArmorController from "../controllers/armorController";
+import { initializeCache } from "../utils/utils";
 
 const _logger = logger.getSubLogger({ name: "BaseClient" });
 
@@ -36,6 +37,7 @@ export default class BaseClient {
       if (process.env.AUTOMATIC_MANIFEST_UPDATE == "true") {
         this.startCronSchedules();
       }
+      await initializeCache();
       _logger.info("Ready!");
     });
 

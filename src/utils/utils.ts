@@ -36,10 +36,13 @@ export function validateWeaponSearch(rawWeaponData: DestinyInventoryItemDefiniti
   return true;
 }
 
-export async function getImageBuffer(url: string, cache = true): Promise<Buffer> {
+export async function initializeCache() {
   if (!fs.existsSync(CACHE_LOCATION)) {
     await fsPromises.mkdir(CACHE_LOCATION);
   }
+}
+
+export async function getImageBuffer(url: string, cache = true): Promise<Buffer> {
   const filePath = CACHE_LOCATION + url.split("/").pop();
   if (cache) {
     if (fs.existsSync(filePath)) {
