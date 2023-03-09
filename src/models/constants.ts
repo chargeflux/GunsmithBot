@@ -218,6 +218,7 @@ export const WATERMARK_TO_SEASON_NUMBER: { [key: string]: number } = {
   "/common/destiny2_content/icons/81edbfbf0bacf8e2117c00d1d6115f1b.png": 17,
   "/common/destiny2_content/icons/f359d68324ae21522c299983ff1ef9f2.png": 18,
   "/common/destiny2_content/icons/1a68ada4fb21371c5f2b7e2eae1ebce8.png": 19,
+  "/common/destiny2_content/icons/e6af18ae79b74e76dab327ec183f8228.png": 20,
 };
 
 export const CRAFTED_ICON_URL =
