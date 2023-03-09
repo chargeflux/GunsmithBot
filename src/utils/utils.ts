@@ -61,11 +61,12 @@ export async function getImageBuffer(url: string, cache = true): Promise<Buffer>
   if (response?.status != 200) {
     throw Error("failed to get image");
   }
-  if (!fs.existsSync(filePath)) {
-    await fs.promises.writeFile(filePath, Buffer.from(response.data as ArrayBuffer));
+  const buffer = Buffer.from(response.data as ArrayBuffer);
+  if (cache) {
+    await fs.promises.writeFile(filePath, buffer);
   }
 
-  return Buffer.from(response.data as ArrayBuffer);
+  return buffer;
 }
 
 export async function overlayImages(images: Buffer[]): Promise<Buffer> {
