@@ -11,6 +11,7 @@ import WeaponDBService from "../services/weaponDbService";
 import deployCommands from "./deployCommand";
 import { logger } from "../logger";
 import ArmorController from "../controllers/armorController";
+import { initializeCache } from "../utils/utils";
 
 const _logger = logger.getSubLogger({ name: "BaseClient" });
 
@@ -36,6 +37,7 @@ export default class BaseClient {
       if (process.env.AUTOMATIC_MANIFEST_UPDATE == "true") {
         this.startCronSchedules();
       }
+      await initializeCache();
       _logger.info("Ready!");
     });
 
@@ -56,16 +58,18 @@ export default class BaseClient {
 
   async initializeControllers() {
     const dbService = new ManifestDBService();
+    const weaponDBService = new WeaponDBService();
     try {
-      await updateManifest(dbService).then(async (reinitialize: boolean) => {
-        if (reinitialize || !WeaponDBService.exists()) {
+      await updateManifest(dbService).then(async (version: string) => {
+        if (version != weaponDBService.getVersion()) {
           _logger.info("Reinitializing Weapon DB");
           const weaponItems = await getInventoryItemsWeapons(dbService.db);
           const { perkDBTables, archetypes } = await new SearchController().createWeaponTables(
             weaponItems
           );
           try {
-            new WeaponDBService().construct(perkDBTables, archetypes);
+            weaponDBService.construct(perkDBTables, archetypes);
+            weaponDBService.setVersion(version);
           } catch (e) {
             _logger.fatal("Failed to construct WeaponDB. Shutting down.", e);
             this.client.destroy();

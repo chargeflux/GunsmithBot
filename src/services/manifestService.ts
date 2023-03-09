@@ -22,20 +22,24 @@ export const TABLES = [
   "DestinyCollectibleDefinition",
 ] as const;
 
-export async function updateManifest(db: ManifestDBService): Promise<boolean> {
+export async function updateManifest(db: ManifestDBService): Promise<string> {
   const manifest = await getManifest();
   _logger.info("Checking if manifest is up to date");
-  if (manifest.Response.version != (await getCurrentVersion()) || !ManifestDBService.exists()) {
+  if (
+    manifest.Response.version != (await getCurrentVersion()) ||
+    manifest.Response.version != db.getVersion()
+  ) {
     _logger.info("Version is outdated. Updating manifest");
     const tables = await getManifestTables(manifest);
     processAndSaveManifestDataJSON(manifest, tables);
     _logger.info("Saved new processed manifest tables to JSON");
     db.construct(tables);
     _logger.info("Saved new processed manifest tables to DB");
-    return true;
+    db.setVersion(manifest.Response.version);
+    return manifest.Response.version;
   }
   _logger.info("Manifest is up to date");
-  return false;
+  return manifest.Response.version;
 }
 
 async function getManifest(): Promise<PartialDestinyManifest> {

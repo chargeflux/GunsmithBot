@@ -29,7 +29,7 @@ export const WeaponClasses = [
 
 export const WeaponRarity = ["Basic", "Common", "Rare", "Legendary", "Exotic"] as const;
 
-export const WeaponDamageType = ["Kinetic", "Arc", "Solar", "Void", "Stasis"] as const;
+export const WeaponDamageType = ["Kinetic", "Arc", "Solar", "Void", "Stasis", "Strand"] as const;
 
 export const ArchetypeQueryCommand = ["slot", "class", "damage", "rarity"] as const; // mapped to buildCommands in DeployCommandService
 
@@ -91,6 +91,10 @@ export default class SearchCommand implements BaseCommand<WeaponArchetype> {
           throw Error("Unknown query type");
         }
       }
+    }
+
+    if (perksToSearchRaw.size == 0 && Object.keys(archetypeToSearch).length == 0) {
+      throw new PublicError("Specify at least one parameter");
     }
 
     this.archetypeToSearch = archetypeToSearch;

@@ -1,4 +1,4 @@
-import { APIEmbedField, EmbedBuilder, RestOrArray } from "discord.js";
+import { APIEmbedField, EmbedBuilder, AttachmentBuilder } from "discord.js";
 import ArmorCommand from "../models/commands/armorCommand";
 import BaseCommand from "../models/commands/baseCommand";
 import CompareCommand from "../models/commands/compareCommand";
@@ -16,44 +16,49 @@ import { logger } from "../logger";
 
 const _logger = logger.getSubLogger({ name: "Embed" });
 
-export default function createEmbed(
+export type EmbedPayload = {
+  embed: EmbedBuilder;
+  files?: AttachmentBuilder;
+};
+
+export default async function createEmbed(
   queryType: QueryType,
   data: BaseCommand<BaseDestinyItem>
-): EmbedBuilder[] {
+): Promise<EmbedPayload> {
   switch (queryType) {
     case QueryType.Perk: {
       const perkCommand = data as PerkCommand;
       const results = perkCommand.results;
       const embed = createPerkEmbed(results[0]);
-      return [embed];
+      return { embed };
     }
     case QueryType.Weapon: {
       const weaponCommand = data as WeaponCommand;
       const results = weaponCommand.results;
-      const embed = createWeaponEmbed(results[0], weaponCommand?.options);
-      return [embed];
+      const embed = await createWeaponEmbed(results[0], weaponCommand?.options);
+      return embed;
     }
     case QueryType.Armor: {
       const armorCommand = data as ArmorCommand;
       const results = armorCommand.results;
       const embed = createArmorEmbed(results[0]);
-      return [embed];
+      return { embed };
     }
     case QueryType.Mod: {
       const modCommand = data as ModCommand;
       const results = modCommand.results;
       const embed = createModEmbed(results[0]);
-      return [embed];
+      return { embed };
     }
     case QueryType.Compare: {
       const compareCommand = data as CompareCommand;
       const embed = createCompareEmbed(compareCommand);
-      return [embed];
+      return { embed };
     }
     case QueryType.Search: {
       const searchCommand = data as SearchCommand;
       const embed = createSearchEmbed(searchCommand);
-      return [embed];
+      return { embed };
     }
     default: {
       throw Error(`Query not supported: ${queryType}`);
@@ -135,8 +140,12 @@ function createCompareEmbed(processedCommand: CompareCommand): EmbedBuilder {
   return embed;
 }
 
-function createWeaponEmbed(weaponResult: Weapon, options: WeaponCommandOptions): EmbedBuilder {
+async function createWeaponEmbed(
+  weaponResult: Weapon,
+  options: WeaponCommandOptions
+): Promise<EmbedPayload> {
   let embed;
+  let image;
   if (options.full) embed = createFullWeaponEmbed(weaponResult);
   else if (options.stats) embed = createStatsWeaponEmbed(weaponResult);
   else {
@@ -146,8 +155,16 @@ function createWeaponEmbed(weaponResult: Weapon, options: WeaponCommandOptions):
     embed = new EmbedBuilder()
       .setTitle(weaponResult.name)
       .setDescription(description)
-      .setColor(DISCORD_BG_HEX)
-      .setThumbnail(weaponResult.icon);
+      .setColor(DISCORD_BG_HEX);
+
+    try {
+      const thumbnail = await weaponResult.getThumbnail();
+      image = new AttachmentBuilder(thumbnail, { name: "icon.jpg" });
+      embed.setThumbnail("attachment://icon.jpg");
+    } catch {
+      _logger.error("Failed to get icon");
+      embed.setThumbnail(weaponResult.icon);
+    }
 
     if (weaponResult.sockets.length <= 2 || options.isDefault) {
       for (const socket of weaponResult.sockets) {
@@ -179,7 +196,10 @@ function createWeaponEmbed(weaponResult: Weapon, options: WeaponCommandOptions):
   embed.addFields({ name: "\u200b", value: endingText, inline: false });
   _logger.info("Returning embed");
 
-  return embed;
+  if (image) {
+    return { embed, files: image };
+  }
+  return { embed };
 }
 
 function createFullWeaponEmbed(weaponResult: Weapon): EmbedBuilder {
