@@ -27,16 +27,12 @@ export default class Perk implements BaseMetadata {
     this.hash = rawPerkData.hash;
     this.isEnhanced = rawPerkData.inventory?.tierType == TierType.Common;
     if (this.isEnhanced) {
-      const beforeLength = this.name.length;
       this.name = this.name.replace(" Enhanced", "");
-      if (beforeLength !== this.name.length) {
-        _logger.debug(`Removed 'Enhanced' from: ${this.name}`);
-      }
     }
   }
 
   toString() {
-    if (this.currentlyCanRoll) return this.name + (this.isEnhanced == true ? "*" : "");
+    if (this.currentlyCanRoll) return this.name;
     else return "~~" + this.name + "~~";
   }
 }

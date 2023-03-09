@@ -29,7 +29,7 @@ export const WeaponClasses = [
 
 export const WeaponRarity = ["Basic", "Common", "Rare", "Legendary", "Exotic"] as const;
 
-export const WeaponDamageType = ["Kinetic", "Arc", "Solar", "Void", "Stasis"] as const;
+export const WeaponDamageType = ["Kinetic", "Arc", "Solar", "Void", "Stasis", "Strand"] as const;
 
 export const ArchetypeQueryCommand = ["slot", "class", "damage", "rarity"] as const; // mapped to buildCommands in DeployCommandService
 

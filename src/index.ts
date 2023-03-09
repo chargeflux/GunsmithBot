@@ -1,11 +1,11 @@
 import dotenv from "dotenv";
 import CompareCommand from "./models/commands/compareCommand";
 import PublicError from "./models/errors/publicError";
-import createEmbed from "./discord/createEmbed";
+import createEmbed, { EmbedPayload } from "./discord/createEmbed";
 import { logger } from "./logger";
 import BaseClient from "./discord/baseClient";
 import { BaseDestinyItem } from "./models/destiny-entities/baseMetadata";
-import { CommandInteraction, EmbedBuilder, Events } from "discord.js";
+import { CommandInteraction, Events } from "discord.js";
 import { QueryType } from "./models/constants";
 
 const _logger = logger;
@@ -20,11 +20,15 @@ function logQueryResults(results: BaseDestinyItem[]) {
 
 async function sendEmbed(
   interaction: CommandInteraction,
-  embeds: EmbedBuilder[],
+  payloads: EmbedPayload,
   queryType: QueryType
 ) {
   _logger.info(`Sending ${queryType} result`);
-  await interaction.editReply({ embeds: embeds });
+  if (payloads.files) {
+    await interaction.editReply({ embeds: [payloads.embed], files: [payloads.files] });
+  } else {
+    await interaction.editReply({ embeds: [payloads.embed] });
+  }
 }
 
 discordClient.on(Events.InteractionCreate, async (interaction) => {
@@ -55,7 +59,7 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
         const perkCommand = await baseClient.perkController.processQuery(inputString, options);
         if (perkCommand && perkCommand.count) {
           logQueryResults(perkCommand.results);
-          const embed = createEmbed(QueryType.Perk, perkCommand);
+          const embed = await createEmbed(QueryType.Perk, perkCommand);
           await sendEmbed(interaction, embed, QueryType.Perk);
         } else {
           await interaction.editReply("No results found");
@@ -70,7 +74,7 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
         );
         if (weaponCommand && weaponCommand.count) {
           logQueryResults(weaponCommand.results);
-          const embed = createEmbed(QueryType.Weapon, weaponCommand);
+          const embed = await createEmbed(QueryType.Weapon, weaponCommand);
           await sendEmbed(interaction, embed, QueryType.Weapon);
         } else {
           await interaction.editReply("No results found");
@@ -82,7 +86,7 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
         const armorCommand = await baseClient.armorController.processQuery(inputString);
         if (armorCommand && armorCommand.count) {
           logQueryResults(armorCommand.results);
-          const embed = createEmbed(QueryType.Armor, armorCommand);
+          const embed = await createEmbed(QueryType.Armor, armorCommand);
           sendEmbed(interaction, embed, QueryType.Armor);
         } else {
           await interaction.editReply("No results found");
@@ -94,7 +98,7 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
         const modCommand = await baseClient.modController.processQuery(inputString);
         if (modCommand && modCommand.count) {
           logQueryResults(modCommand.results);
-          const embed = createEmbed(QueryType.Mod, modCommand);
+          const embed = await createEmbed(QueryType.Mod, modCommand);
           sendEmbed(interaction, embed, QueryType.Mod);
         } else {
           await interaction.editReply("No results found");
@@ -122,7 +126,7 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
           const processedCommand = new CompareCommand(inputA + ", " + inputB, weaponA, weaponB);
           if (processedCommand.weaponStatDiff) {
             const embed = createEmbed(QueryType.Compare, processedCommand);
-            sendEmbed(interaction, embed, QueryType.Compare);
+            sendEmbed(interaction, await embed, QueryType.Compare);
           } else {
             _logger.error("No weapon stat diff found");
             await interaction.editReply("Invalid input. Please try again");
@@ -143,7 +147,7 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
         if (searchCommand) {
           _logger.info("Search query -", searchCommand.input);
           const embed = createEmbed(QueryType.Search, searchCommand);
-          sendEmbed(interaction, embed, QueryType.Search);
+          sendEmbed(interaction, await embed, QueryType.Search);
         } else {
           await interaction.editReply("No results found.");
         }

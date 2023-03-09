@@ -1,18 +1,21 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import { BaseMetadata } from "./baseMetadata";
 import { WeaponCommandOptions } from "../commands/weaponCommand";
-import { BUNGIE_URL_ROOT, WATERMARK_TO_SEASON_NUMBER } from "../constants";
+import { BUNGIE_URL_ROOT, CRAFTED_ICON_URL, WATERMARK_TO_SEASON_NUMBER } from "../constants";
 import Perk from "./perk";
 import Socket from "./socket";
 import { WeaponArchetypeData, WeaponArchetype } from "./weaponArchetype";
 import WeaponStats from "./weaponStats";
+import { getImageBuffer, overlayImages } from "../../utils/utils";
 
 export class Weapon implements BaseMetadata {
   name: string;
   flavorText: string;
   icon: string;
+  overlays: string[] = [];
   screenshot: string;
   hasRandomRolls: boolean;
+  craftable: boolean;
   seasonNumber: number;
   hash: number;
   stats?: WeaponStats;
@@ -38,6 +41,8 @@ export class Weapon implements BaseMetadata {
       WATERMARK_TO_SEASON_NUMBER[
         rawWeaponData.iconWatermark ?? rawWeaponData.quality?.displayVersionWatermarkIcons[0]
       ] ?? -1;
+    this.craftable = typeof rawWeaponData.inventory?.recipeItemHash === "number";
+
     this.options = options;
     if (!this.options.isDefault) {
       if (rawWeaponData.stats) this.stats = new WeaponStats(this.name, rawWeaponData.stats);
@@ -59,6 +64,16 @@ export class Weapon implements BaseMetadata {
 
     this.archetype = WeaponArchetype.create(archetypeData, intrinsic);
 
+    this.overlays.push(
+      BUNGIE_URL_ROOT +
+        (this.archetype.powerCap != 0
+          ? rawWeaponData.iconWatermarkShelved
+          : rawWeaponData.iconWatermark)
+    );
+    if (this.craftable) {
+      this.overlays.push(CRAFTED_ICON_URL);
+    }
+
     this.setSockets(sockets);
   }
 
@@ -68,5 +83,15 @@ export class Weapon implements BaseMetadata {
 
   setSockets(sockets: Socket[]) {
     this.sockets = sockets;
+  }
+
+  async getThumbnail() {
+    const bufs: Buffer[] = [await getImageBuffer(this.icon)];
+    for (const url of this.overlays) {
+      const buf = await getImageBuffer(url);
+      bufs.push(buf);
+    }
+    const final_icon = await overlayImages(bufs);
+    return final_icon;
   }
 }

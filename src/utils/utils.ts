@@ -1,7 +1,15 @@
+import axios from "axios";
+import fs from "fs";
+import { promises as fsPromises } from "fs";
+import path from "path";
+import sharp, { OverlayOptions } from "sharp";
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import fuzzysort from "fuzzysort";
-import { WeaponSlot, WeaponClass, WEAPON_CATEGORY_HASH } from "../models/constants";
+import { WeaponClass, WEAPON_CATEGORY_HASH } from "../models/constants";
 import { BaseMetadata } from "../models/destiny-entities/baseMetadata";
+import { MANIFEST_DATA_LOCATION } from "../services/manifestService";
+
+const CACHE_LOCATION = path.join(MANIFEST_DATA_LOCATION, "cache/");
 
 export function toTitleCase(text: string): string {
   return text
@@ -26,4 +34,43 @@ export function validateWeaponSearch(rawWeaponData: DestinyInventoryItemDefiniti
   if (categoryHashes.includes(WeaponClass.Dummy)) return false;
   if (!rawWeaponData.sockets) return false;
   return true;
+}
+
+export async function getImageBuffer(url: string, cache = true): Promise<Buffer> {
+  if (!fs.existsSync(CACHE_LOCATION)) {
+    await fsPromises.mkdir(CACHE_LOCATION);
+  }
+  const filePath = CACHE_LOCATION + url.split("/").pop();
+  if (cache) {
+    if (fs.existsSync(filePath)) {
+      const data = await fsPromises.readFile(filePath);
+      return data;
+    }
+  }
+  let response;
+  try {
+    response = await axios.get(url, {
+      responseType: "arraybuffer",
+    });
+  } catch {
+    throw Error("failed to get image");
+  }
+  if (response?.status != 200) {
+    throw Error("failed to get image");
+  }
+  if (!fs.existsSync(filePath)) {
+    await fs.promises.writeFile(filePath, Buffer.from(response.data as ArrayBuffer));
+  }
+
+  return Buffer.from(response.data as ArrayBuffer);
+}
+
+export async function overlayImages(images: Buffer[]): Promise<Buffer> {
+  const baseImage = sharp(images[0]);
+  const overlays: OverlayOptions[] = [];
+  for (let index = 1; index < images.length; index++) {
+    const element = images[index];
+    overlays.push({ input: element });
+  }
+  return baseImage.composite(overlays).toBuffer();
 }
