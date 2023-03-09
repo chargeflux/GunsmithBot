@@ -56,16 +56,18 @@ export default class BaseClient {
 
   async initializeControllers() {
     const dbService = new ManifestDBService();
+    const weaponDBService = new WeaponDBService();
     try {
-      await updateManifest(dbService).then(async (reinitialize: boolean) => {
-        if (reinitialize || !WeaponDBService.exists()) {
+      await updateManifest(dbService).then(async (version: string) => {
+        if (version != weaponDBService.getVersion()) {
           _logger.info("Reinitializing Weapon DB");
           const weaponItems = await getInventoryItemsWeapons(dbService.db);
           const { perkDBTables, archetypes } = await new SearchController().createWeaponTables(
             weaponItems
           );
           try {
-            new WeaponDBService().construct(perkDBTables, archetypes);
+            weaponDBService.construct(perkDBTables, archetypes);
+            weaponDBService.setVersion(version);
           } catch (e) {
             _logger.fatal("Failed to construct WeaponDB. Shutting down.", e);
             this.client.destroy();

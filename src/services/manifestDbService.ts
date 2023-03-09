@@ -21,8 +21,19 @@ export default class ManifestDBService {
     }
   }
 
-  static exists() {
-    return fs.existsSync(MANIFEST_DATA_LOCATION + dbName);
+  getVersion() {
+    try {
+      return this.db.prepare("SELECT version from Version ORDER BY timestamp desc").get().version;
+    } catch (e) {
+      _logger.warn(e, "Failed to get version");
+      return "";
+    }
+  }
+
+  setVersion(version: string) {
+    this.db.exec("CREATE TABLE IF NOT EXISTS Version (version TEXT, timestamp INTEGER)");
+    const stmt = this.db.prepare("INSERT INTO Version (version, timestamp) VALUES (?, ?)");
+    stmt.run(version, Date.now());
   }
 
   private getOrInitialize(): ManifestDB {
