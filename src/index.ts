@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+dotenv.config();
 import CompareCommand from "./models/commands/compareCommand";
 import PublicError from "./models/errors/publicError";
 import createEmbed, { EmbedPayload } from "./discord/createEmbed";
@@ -9,13 +10,12 @@ import { CommandInteraction, Events } from "discord.js";
 import { QueryType } from "./models/constants";
 
 const _logger = logger;
-dotenv.config();
 
 const baseClient = new BaseClient();
 const discordClient = baseClient.client;
 
 function logQueryResults(results: BaseDestinyItem[]) {
-  _logger.info(results.length, "results found!:", results.map((x) => x.name).join(", "));
+  _logger.info(results.length + " results found!: " + results.map((x) => x.name).join(", "));
 }
 
 async function sendEmbed(

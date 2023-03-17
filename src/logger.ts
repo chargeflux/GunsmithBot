@@ -25,7 +25,7 @@ logger.attachTransport((logObj) => {
   const argumentsArray = logObj.argumentsArray as unknown as unknown[];
   let message =
     `${meta.date.toISOString()} ${meta.logLevelName.toUpperCase()} ` +
-    `[${meta.name} ${meta.path?.fileNameWithLine} ${
+    `[${meta.name !== undefined ? meta.name + " " : ""}${meta.path?.fileNameWithLine} ${
       meta.path?.method !== undefined ? " " + meta.path?.method : ""
     }] `;
   for (const argument of argumentsArray) {
@@ -33,7 +33,7 @@ logger.attachTransport((logObj) => {
       const argumentParsed: IErrorObject = argument as IErrorObject;
       message += argumentParsed.name.toUpperCase() + ": " + argumentParsed.message + "\n";
       for (const element of argumentParsed.stack) {
-        message += `${element.fileName} ${element.method}\n${element.filePathWithLine}\n`;
+        message += `${element.fileName} ${element.method} [${element.filePathWithLine}]\n`;
       }
     } else {
       message += argument + "\n";

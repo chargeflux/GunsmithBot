@@ -41,7 +41,13 @@ export default class ManifestDBService {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);
       _logger.warn("DB and manifest data location does not exist. Creating folder");
     }
-    const db = new BetterSqlite3(MANIFEST_DATA_LOCATION + dbName);
+    const db = new BetterSqlite3(MANIFEST_DATA_LOCATION + dbName, {
+      verbose:
+        process.env.LOG_LEVEL == "trace"
+          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (message?: any, ...optionalParams: any[]) => _logger.trace(message, optionalParams)
+          : undefined,
+    });
     return db;
   }
 
