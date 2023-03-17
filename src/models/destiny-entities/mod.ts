@@ -46,8 +46,12 @@ export default class Mod implements BaseMetadata {
           continue;
         }
         let description = perk.displayProperties.description;
-        if (this.itemTypeDisplayName.includes("Stasis"))
+        if (
+          this.itemTypeDisplayName.includes("Stasis") ||
+          this.itemTypeDisplayName.includes("Strand")
+        )
           // addresses "[Stasis] Stasis"
+          // addresses "[Strand] Strand"
           description = description.replace(/ \[.*?\]/, "");
         const values = this.sections.get(perk.displayProperties.name) ?? [];
         values?.push(description);

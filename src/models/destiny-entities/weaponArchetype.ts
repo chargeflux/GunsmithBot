@@ -10,6 +10,7 @@ export class WeaponArchetype implements BaseDestinyItem {
   readonly damage: keyof typeof DamageType;
   readonly intrinsic?: Perk;
   readonly isKinetic: boolean;
+  readonly isDarkness: boolean;
   private _powerCap?: number;
 
   public set powerCap(value: number) {
@@ -35,6 +36,7 @@ export class WeaponArchetype implements BaseDestinyItem {
     this.rarity = weaponTierType;
     this.damage = weaponDamageType;
     this.isKinetic = isKinetic;
+    this.isDarkness = weaponDamageType == "Stasis" || weaponDamageType == "Strand";
     this.intrinsic = intrinsic;
   }
 
@@ -86,7 +88,7 @@ export class WeaponArchetype implements BaseDestinyItem {
 
   toString() {
     let stringToConstruct = "";
-    if (!this.isKinetic || this.damage == "Stasis") stringToConstruct += this.damage + " ";
+    if (!this.isKinetic || this.isDarkness) stringToConstruct += this.damage + " ";
     stringToConstruct += this.slot;
     stringToConstruct += " " + this.class;
     if (this.powerCap) stringToConstruct += " (" + this.powerCap.toString() + ")";
