@@ -60,7 +60,7 @@ export default class SearchController {
     const queryParts: string[] = [];
     const archetypeQueries: string[] = [];
     for (const name of ArchetypeQueryCommand) {
-      if (archetype[name]) {
+      if (archetype[name] !== undefined) {
         queryParts.push(`${name}=?`);
         archetypeQueries.push(archetype[name] as string);
       }

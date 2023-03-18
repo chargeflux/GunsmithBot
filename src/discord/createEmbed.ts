@@ -13,6 +13,7 @@ import Mod from "../models/destiny-entities/mod";
 import Perk from "../models/destiny-entities/perk";
 import { Weapon } from "../models/destiny-entities/weapon";
 import { logger } from "../logger";
+import PublicError from "../models/errors/publicError";
 
 const _logger = logger.getSubLogger({ name: "Embed" });
 
@@ -262,16 +263,28 @@ function createSearchEmbed(searchCommand: SearchCommand) {
   for (const weaponClass in searchCommand.results) {
     fields.push({
       name: weaponClass,
-      value: searchCommand.results[weaponClass]
+      value: [
+        ...new Set(
+          searchCommand.results[weaponClass].map((x) => {
+            if (x.powerCap) return "~~" + x.name + "~~";
+            if (x.craftable) return x.name + "*";
+            return x.name;
+          })
+        ),
+      ]
         .sort()
-        .map((x) => {
-          if (x.powerCap) return "~~" + x.name + "~~";
-          else return x.name;
-        })
         .join("\n"),
       inline: true,
     });
   }
+  fields.forEach((x) => {
+    if (x.value.length > 1024) {
+      throw new PublicError(
+        "Too many results found for a specific weapon class. Please narrow query"
+      );
+    }
+  });
+
   embed.addFields(fields.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0)));
   return embed;
 }

@@ -51,7 +51,6 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
     }
 
     inputString = inputString.replace("’", "'");
-
     switch (commandName) {
       case "perk": {
         _logger.info(`Searching for '${inputString}'`);
@@ -158,6 +157,11 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
     }
   } catch (err) {
     _logger.error("Failed to process command '" + commandName + "' with input " + inputString, err);
+    if (Object.prototype.hasOwnProperty.call(err, "errors")) {
+      for (const error of (err as unknown as { errors: [] }).errors) {
+        _logger.error(error);
+      }
+    }
 
     if (err instanceof PublicError) {
       await interaction.editReply(err.message);

@@ -124,6 +124,9 @@ function buildCommands() {
     for (const damage of WeaponDamageType) option.addChoices({ name: damage, value: damage });
     return option;
   });
+  searchBuilder.addBooleanOption((option: SlashCommandBooleanOption) =>
+    option.setName("craftable").setDescription("Search if craftable")
+  );
 
   for (const tableName of PerkTables) {
     searchBuilder.addStringOption((option: SlashCommandStringOption) =>

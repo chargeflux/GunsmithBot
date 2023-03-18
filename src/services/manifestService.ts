@@ -105,7 +105,7 @@ async function processAndSaveManifestDataJSON(
     for (const table of manifestTables) {
       if (process.env.DUMP_RAW_DATA == "true") {
         fs.writeFileSync(
-          MANIFEST_DATA_LOCATION + table.name + "Table.json",
+          MANIFEST_DATA_LOCATION + "raw/" + table.name + "Table.json",
           JSON.stringify(table.data, null, 2)
         );
         _logger.info("Saved table:", table.name);

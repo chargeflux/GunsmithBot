@@ -11,6 +11,7 @@ export class WeaponArchetype implements BaseDestinyItem {
   readonly intrinsic?: Perk;
   readonly isKinetic: boolean;
   readonly isDarkness: boolean;
+  readonly craftable: boolean;
   private _powerCap?: number;
 
   public set powerCap(value: number) {
@@ -28,6 +29,7 @@ export class WeaponArchetype implements BaseDestinyItem {
     weaponTierType: keyof typeof TierType,
     weaponDamageType: keyof typeof DamageType,
     isKinetic: boolean,
+    craftable: boolean,
     intrinsic?: Perk
   ) {
     this.name = name;
@@ -37,6 +39,7 @@ export class WeaponArchetype implements BaseDestinyItem {
     this.damage = weaponDamageType;
     this.isKinetic = isKinetic;
     this.isDarkness = weaponDamageType == "Stasis" || weaponDamageType == "Strand";
+    this.craftable = craftable;
     this.intrinsic = intrinsic;
   }
 
@@ -86,6 +89,7 @@ export class WeaponArchetype implements BaseDestinyItem {
       weaponTierType,
       damageType,
       isKinetic,
+      typeof data.recipeItemHash === "number",
       intrinsic
     );
 
@@ -114,6 +118,7 @@ export class WeaponArchetypeData {
   itemCategoryHashes: number[];
   weaponDamageTypeId: number;
   weaponTierTypeHash?: number;
+  recipeItemHash?: number;
   itemTypeDisplayName: string;
 
   constructor(
@@ -122,7 +127,8 @@ export class WeaponArchetypeData {
     itemCategoryHashes: number[],
     weaponDamageTypeId: number,
     itemTypeDisplayName: string,
-    weaponTierTypeHash?: number
+    weaponTierTypeHash?: number,
+    recipeItemHash?: number
   ) {
     this.name = name;
     this.powerCapValues = powerCapValues;
@@ -130,5 +136,6 @@ export class WeaponArchetypeData {
     this.weaponDamageTypeId = weaponDamageTypeId;
     this.weaponTierTypeHash = weaponTierTypeHash;
     this.itemTypeDisplayName = itemTypeDisplayName;
+    this.recipeItemHash = recipeItemHash;
   }
 }

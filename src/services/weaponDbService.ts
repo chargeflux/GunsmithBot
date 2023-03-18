@@ -130,7 +130,7 @@ export default class WeaponDBService {
     this.db.exec(
       "CREATE TABLE IF NOT EXISTS " +
         "Archetypes" +
-        " (id INTEGER PRIMARY KEY, weaponHash TEXT, name TEXT, slot TEXT, class TEXT, rarity TEXT, damage TEXT, powerCap TEXT)"
+        " (id INTEGER PRIMARY KEY, weaponHash TEXT, name TEXT, slot TEXT, class TEXT, rarity TEXT, damage TEXT, powerCap TEXT, craftable BOOLEAN NOT NULL CHECK (craftable IN (0, 1)))"
     );
   }
 
@@ -151,7 +151,7 @@ export default class WeaponDBService {
 
     const createArchetypesTxn = this.db.transaction((archetypes: ArchetypeWeaponMapping) => {
       const stmt = this.db.prepare(
-        "INSERT INTO archetypes (weaponHash, name, slot, class, rarity, damage, powerCap) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO archetypes (weaponHash, name, slot, class, rarity, damage, powerCap, craftable) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
       );
       for (const hash in archetypes) {
         const archetype = archetypes[hash];
@@ -162,7 +162,8 @@ export default class WeaponDBService {
           archetype.class,
           archetype.rarity,
           archetype.damage,
-          archetype.powerCap == 0 ? null : archetype.powerCap
+          archetype.powerCap == 0 ? null : archetype.powerCap,
+          Number(archetype.craftable)
         );
       }
     });
