@@ -7,7 +7,7 @@
     "build": "tsc",
     "start": "tsc && node dist/index.js",
     "test": "jest --config=jest.config.js",
-    "deployCommands": "tsc && node dist/discord/deployCommand.js"
+    "deployCommands": "tsc && node dist/discord/deployCommands.js"
   },
   "author": "chargeflux",
   "license": "MIT",

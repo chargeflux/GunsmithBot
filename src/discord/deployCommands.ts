@@ -144,6 +144,6 @@ function buildCommands() {
     deployCommands();
     _logger.info("Successfully refreshed application slash commands");
   } catch (e) {
-    _logger.error(e, "Failed to refresh application slash commands");
+    _logger.error("Failed to refresh application slash commands", e);
   }
 })();
