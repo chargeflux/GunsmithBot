@@ -12,7 +12,7 @@ Fill out the `.env` file with the appropriate values.
 
 ## Installation
 
-Node.js v16 is recommended.
+Node.js v16.17.0 is recommended.
 
 ```bash
 npm install
@@ -22,6 +22,12 @@ npm install
 
 ```bash
 npm start
+```
+
+To deploy slash commands
+
+```bash
+npm run deployCommands
 ```
 
 ## Contributing

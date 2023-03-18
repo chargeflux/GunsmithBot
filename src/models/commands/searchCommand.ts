@@ -31,7 +31,7 @@ export const WeaponRarity = ["Basic", "Common", "Rare", "Legendary", "Exotic"] a
 
 export const WeaponDamageType = ["Kinetic", "Arc", "Solar", "Void", "Stasis", "Strand"] as const;
 
-export const ArchetypeQueryCommand = ["slot", "class", "damage", "rarity"] as const; // mapped to buildCommands in DeployCommandService
+export const ArchetypeQueryCommand = ["slot", "class", "damage", "rarity", "craftable"] as const; // mapped to buildCommands in DeployCommand
 
 export default class SearchCommand implements BaseCommand<WeaponArchetype> {
   readonly archetypeToSearch: ArchetypeToSearch;
@@ -64,30 +64,38 @@ export default class SearchCommand implements BaseCommand<WeaponArchetype> {
     }
 
     const archetypeToSearch: ArchetypeToSearch = {};
-    for (const name of ArchetypeQueryCommand) {
-      const value = options.getString(name) ?? "";
-      switch (name) {
-        case "slot":
+    for (const item of options.data) {
+      switch (item.name) {
+        case "slot": {
+          const value = options.getString(item.name) ?? "";
           if (stringIs<typeof WeaponSlots[number]>(value, WeaponSlots))
             archetypeToSearch.slot = value;
           break;
-        case "class":
+        }
+        case "class": {
+          const value = options.getString(item.name) ?? "";
           if (stringIs<typeof WeaponClasses[number]>(value, WeaponClasses))
             archetypeToSearch.class = value;
           break;
-        case "damage":
+        }
+        case "damage": {
+          const value = options.getString(item.name) ?? "";
           if (stringIs<typeof WeaponDamageType[number]>(value, WeaponDamageType))
             archetypeToSearch.damage = value;
           break;
-        case "rarity":
+        }
+        case "rarity": {
+          const value = options.getString(item.name) ?? "";
           if (stringIs<typeof WeaponRarity[number]>(value, WeaponRarity))
             archetypeToSearch.rarity = value;
           break;
+        }
+        case "craftable": {
+          const value = options.getBoolean(item.name) ?? undefined;
+          archetypeToSearch.craftable = Number(value);
+          break;
+        }
         default: {
-          // https://www.typescriptlang.org/docs/handbook/2/narrowing.html#exhaustiveness-checking
-          // Prevent not accounting for new query types that was added to ArchetypeQueryCommand
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const _: never = name;
           throw Error("Unknown query type");
         }
       }
@@ -116,7 +124,7 @@ export default class SearchCommand implements BaseCommand<WeaponArchetype> {
   setInput(inputParts: string[]) {
     const archetypeParts: string[] = [];
     for (const name of ArchetypeQueryCommand) {
-      if (this.archetypeToSearch[name])
+      if (this.archetypeToSearch[name] !== undefined)
         archetypeParts.push(name + ": " + this.archetypeToSearch[name]);
     }
     this.input = archetypeParts.concat(inputParts).join(", ");
@@ -148,6 +156,7 @@ export type ArchetypeToSearch = {
   class?: typeof WeaponClasses[number];
   damage?: typeof WeaponDamageType[number];
   rarity?: typeof WeaponRarity[number];
+  craftable?: number;
 };
 
 export type SearchResult = {

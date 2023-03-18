@@ -59,7 +59,8 @@ export class Weapon implements BaseMetadata {
       itemCategoryHashes,
       weaponDamageTypeId,
       rawWeaponData.itemTypeDisplayName,
-      weaponTierTypeHash
+      weaponTierTypeHash,
+      rawWeaponData.inventory?.recipeItemHash
     );
 
     this.archetype = WeaponArchetype.create(archetypeData, intrinsic);

@@ -13,11 +13,11 @@ export type ManifestDB = BetterSqlite3.Database;
 export default class ManifestDBService {
   db: ManifestDB;
 
-  constructor(db?: BetterSqlite3.Database) {
+  constructor(db?: BetterSqlite3.Database, verbose?: boolean) {
     if (db) {
       this.db = db;
     } else {
-      this.db = this.getOrInitialize();
+      this.db = this.getOrInitialize(verbose ?? process.env.LOG_LEVEL == "trace");
     }
   }
 
@@ -36,12 +36,17 @@ export default class ManifestDBService {
     stmt.run(version, Date.now());
   }
 
-  private getOrInitialize(): ManifestDB {
+  private getOrInitialize(verbose: boolean): ManifestDB {
     if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);
       _logger.warn("DB and manifest data location does not exist. Creating folder");
     }
-    const db = new BetterSqlite3(MANIFEST_DATA_LOCATION + dbName);
+    const db = new BetterSqlite3(MANIFEST_DATA_LOCATION + dbName, {
+      verbose: verbose
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (message?: any, ...optionalParams: any[]) => _logger.trace(message, optionalParams)
+        : undefined,
+    });
     return db;
   }
 
@@ -50,7 +55,7 @@ export default class ManifestDBService {
     try {
       if (fs.existsSync(MANIFEST_DATA_LOCATION + dbName))
         fs.unlinkSync(MANIFEST_DATA_LOCATION + dbName);
-      this.db = this.getOrInitialize();
+      this.db = this.getOrInitialize(false);
     } catch (e) {
       _logger.error(e);
       throw new Error("Failed to delete manifest DB");

@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+dotenv.config();
 import CompareCommand from "./models/commands/compareCommand";
 import PublicError from "./models/errors/publicError";
 import createEmbed, { EmbedPayload } from "./discord/createEmbed";
@@ -8,14 +9,13 @@ import { BaseDestinyItem } from "./models/destiny-entities/baseMetadata";
 import { CommandInteraction, Events } from "discord.js";
 import { QueryType } from "./models/constants";
 
-const _logger = logger;
-dotenv.config();
+const _logger = logger.getSubLogger({ name: "Main" });
 
 const baseClient = new BaseClient();
 const discordClient = baseClient.client;
 
 function logQueryResults(results: BaseDestinyItem[]) {
-  _logger.info(results.length, "results found!:", results.map((x) => x.name).join(", "));
+  _logger.info(results.length + " results found!: " + results.map((x) => x.name).join(", "));
 }
 
 async function sendEmbed(
@@ -51,7 +51,6 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
     }
 
     inputString = inputString.replace("’", "'");
-
     switch (commandName) {
       case "perk": {
         _logger.info(`Searching for '${inputString}'`);
@@ -158,6 +157,11 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
     }
   } catch (err) {
     _logger.error("Failed to process command '" + commandName + "' with input " + inputString, err);
+    if (Object.prototype.hasOwnProperty.call(err, "errors")) {
+      for (const error of (err as unknown as { errors: [] }).errors) {
+        _logger.error(error);
+      }
+    }
 
     if (err instanceof PublicError) {
       await interaction.editReply(err.message);

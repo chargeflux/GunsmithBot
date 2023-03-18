@@ -40,7 +40,7 @@ export async function getWeaponArchetypes(db: WeaponDB, hashes: number[]) {
   try {
     const archetypes: WeaponArchetype[] = db
       .prepare(
-        `SELECT name, slot, class, rarity, damage, powerCap FROM archetypes WHERE weaponHash in (${"?,"
+        `SELECT name, slot, class, rarity, damage, powerCap, craftable FROM archetypes WHERE weaponHash in (${"?,"
           .repeat(hashes.length)
           .slice(0, -1)}) ORDER BY powerCap`
       )
