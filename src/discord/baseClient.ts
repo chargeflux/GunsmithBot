@@ -8,7 +8,6 @@ import ManifestDBService from "../services/manifestDbService";
 import { getInventoryItemsWeapons } from "../services/dbQuery/inventoryItem";
 import { getCurrentVersion, updateManifest } from "../services/manifestService";
 import WeaponDBService from "../services/weaponDbService";
-import deployCommands from "./deployCommand";
 import { logger } from "../logger";
 import ArmorController from "../controllers/armorController";
 import { initializeCache } from "../utils/utils";
@@ -39,20 +38,6 @@ export default class BaseClient {
       }
       await initializeCache();
       _logger.info("Ready!");
-    });
-
-    this.client.on("messageCreate", async (message) => {
-      if (
-        message.content.toLowerCase() === "!deploy" &&
-        process.env.APPLICATION_AUTHOR_ID == message.author.id
-      )
-        try {
-          deployCommands();
-          await message.reply("Deployed commands");
-        } catch (e) {
-          _logger.error("Failed to deploy commands", e);
-          await message.reply("Failed to deploy commands");
-        }
     });
   }
 

@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import {
   REST,
   Routes,
@@ -17,9 +19,9 @@ import ConfigurationError from "../models/errors/configurationError";
 
 const _logger = logger.getSubLogger({ name: "Deploy" });
 
-export default function deployCommands() {
+function deployCommands() {
   if (process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_BOT_CLIENT_ID) {
-    const rest = new REST({ version: "9" }).setToken(process.env.DISCORD_BOT_TOKEN);
+    const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_BOT_TOKEN);
     const commands = buildCommands();
     const guildIds = loadGuilds();
     for (const id of guildIds) {
@@ -132,3 +134,13 @@ function buildCommands() {
 
   return commands.map((command) => command.toJSON());
 }
+
+(async () => {
+  try {
+    _logger.info("Refreshing application slash commands");
+    deployCommands();
+    _logger.info("Successfully refreshed application slash commands");
+  } catch (e) {
+    _logger.error(e, "Failed to refresh application slash commands");
+  }
+})();
