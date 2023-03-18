@@ -45,6 +45,15 @@ export class WeaponArchetype implements BaseDestinyItem {
     let weaponClass: keyof typeof WeaponClass | undefined;
     let weaponTierType: keyof typeof TierType | undefined;
     let isKinetic = false;
+
+    // Linear Fusion Rifles are also classified as Fusion Rifles so pick only LFR
+    if (data.itemCategoryHashes.includes(WeaponClass["Linear Fusion Rifle"])) {
+      const index = data.itemCategoryHashes.indexOf(WeaponClass["Fusion Rifle"]);
+      if (index !== -1) {
+        data.itemCategoryHashes.splice(index, 1);
+      }
+    }
+
     for (const hash of data.itemCategoryHashes.sort().slice(1)) {
       const category = WeaponSlot[hash] as keyof typeof WeaponSlot | undefined;
       if (category) {
