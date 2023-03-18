@@ -57,26 +57,25 @@ const dbName = "weapon-db.sqlite3";
 export default class WeaponDBService {
   db: WeaponDB;
 
-  constructor(db?: BetterSqlite3.Database) {
+  constructor(db?: BetterSqlite3.Database, verbose?: boolean) {
     if (db) {
       this.db = db;
     } else {
-      this.db = this.getOrInitialize();
+      this.db = this.getOrInitialize(verbose ?? process.env.LOG_LEVEL == "trace");
     }
   }
 
-  private getOrInitialize(): WeaponDB {
+  private getOrInitialize(verbose: boolean): WeaponDB {
     if (!fs.existsSync(MANIFEST_DATA_LOCATION)) {
       fs.mkdirSync(MANIFEST_DATA_LOCATION);
       _logger.warn("DB and manifest data location does not exist. Creating folder");
     }
 
     const db = new BetterSqlite3(MANIFEST_DATA_LOCATION + dbName, {
-      verbose:
-        process.env.LOG_LEVEL == "trace"
-          ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (message?: any, ...optionalParams: any[]) => _logger.trace(message, optionalParams)
-          : undefined,
+      verbose: verbose
+        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (message?: any, ...optionalParams: any[]) => _logger.trace(message, optionalParams)
+        : undefined,
     });
 
     return db;
@@ -102,7 +101,7 @@ export default class WeaponDBService {
     try {
       if (fs.existsSync(MANIFEST_DATA_LOCATION + dbName))
         fs.unlinkSync(MANIFEST_DATA_LOCATION + dbName);
-      this.db = this.getOrInitialize();
+      this.db = this.getOrInitialize(false);
     } catch (e) {
       _logger.error(e);
       throw new Error("Failed to delete manifest DB");

@@ -9,7 +9,7 @@ import { BaseDestinyItem } from "./models/destiny-entities/baseMetadata";
 import { CommandInteraction, Events } from "discord.js";
 import { QueryType } from "./models/constants";
 
-const _logger = logger;
+const _logger = logger.getSubLogger({ name: "Main" });
 
 const baseClient = new BaseClient();
 const discordClient = baseClient.client;

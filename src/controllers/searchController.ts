@@ -178,7 +178,7 @@ export default class SearchController {
       launchers: undefined,
     };
     const archetypes: ArchetypeWeaponMapping = {};
-    const weaponController = new WeaponController(this.dbService);
+    const weaponController = new WeaponController(new ManifestDBService(undefined, false));
     for (const weapon of weaponItems) {
       if (!validateWeaponSearch(weapon.data)) continue;
       const newWeapon = await weaponController.createWeapon(

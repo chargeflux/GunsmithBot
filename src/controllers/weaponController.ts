@@ -177,8 +177,9 @@ export default class WeaponController {
         );
         continue;
       }
-      if (!plugSetHash) {
-        _logger.debug("plugSetHash is undefined");
+      if (plugSetHash === undefined) {
+        // Occurs for some exotics
+        _logger.trace("plugSetHash is undefined");
         continue;
       }
 

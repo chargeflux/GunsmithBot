@@ -27,7 +27,7 @@ export default class WeaponStats implements BaseDestinyItem {
       }
       const statValue = stat.value;
       if (statValue == 0) {
-        _logger.debug(statType, "had a value of 0");
+        _logger.trace(statType, "had a value of 0");
         continue;
       }
       const weaponStatBlock = new WeaponStatBlock(idx, new WeaponStatData(statType, statValue));
