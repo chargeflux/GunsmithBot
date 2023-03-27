@@ -28,7 +28,7 @@ export default class WeaponCommand implements BaseCommand<Weapon> {
       if (a.archetype.powerCap == b.archetype.powerCap) {
         return b.seasonNumber - a.seasonNumber;
       }
-      return b.archetype.powerCap - a.archetype.powerCap;
+      return a.archetype.powerCap - b.archetype.powerCap;
     });
   }
 }
