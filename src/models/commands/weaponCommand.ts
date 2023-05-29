@@ -11,6 +11,9 @@ export default class WeaponCommand implements BaseCommand<Weapon> {
   constructor(input: string, options: WeaponOptions, weaponResults: Weapon[]) {
     this.input = input;
     this.options = options;
+    if (options.adept) {
+      weaponResults = weaponResults.filter((x) => x.name.includes("(Adept)"));
+    }
     const results = this.orderByRandomRollAndTierType(weaponResults);
     this.results = orderResultsByName(this.input, results);
     this.count = this.results.length;

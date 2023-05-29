@@ -7,7 +7,9 @@ import { TABLES } from "../services/manifestService";
 import WeaponDBService from "../services/weaponDbService";
 import path from "path";
 
-test.skip("build database from json", async () => {
+const maybe = process.env.TEST_INTEGRATION_DATABASE ? test : test.skip;
+
+maybe("build database from json", async () => {
   const MANIFEST_DATA_LOCATION = "data/raw/";
   const dbService = new ManifestDBService();
   const manifestTables: ManifestTable[] = [];
@@ -24,7 +26,7 @@ test.skip("build database from json", async () => {
   new WeaponDBService().construct(perkDBTables, archetypes);
 });
 
-test.skip("validate columns", () => {
+maybe("validate columns", () => {
   const dbService = new ManifestDBService();
   const result = dbService.db
     .prepare("SELECT name FROM DestinyInventoryItemDefinition LIMIT 1")

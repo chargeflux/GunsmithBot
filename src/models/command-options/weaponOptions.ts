@@ -6,16 +6,18 @@ export default class WeaponOptions implements BaseOptions {
   full: boolean;
   isDefault: boolean;
   stats: boolean;
+  adept: boolean;
 
   get state() {
     return (
       ((this.stats ? 1 : 0) << 2) | ((this.isDefault ? 1 : 0) << 1) | ((this.full ? 1 : 0) << 0)
     );
   }
-  constructor(full = false, isDefault = false, stats = false) {
+  constructor(full = false, isDefault = false, stats = false, adept = false) {
     this.full = full;
     this.isDefault = isDefault;
     this.stats = stats;
+    this.adept = adept;
 
     if (!this.validateState()) throw new ValidationError("Command options are invalid");
   }
@@ -26,8 +28,9 @@ export default class WeaponOptions implements BaseOptions {
     const full = options.getBoolean("full") ?? false;
     const isDefault = options.getBoolean("default") ?? false;
     const stats = options.getBoolean("stats") ?? false;
+    const adept = options.getBoolean("adept") ?? false;
 
-    return new WeaponOptions(full, isDefault, stats);
+    return new WeaponOptions(full, isDefault, stats, adept);
   }
 
   validateState() {

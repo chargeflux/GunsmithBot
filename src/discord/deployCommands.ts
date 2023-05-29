@@ -67,6 +67,9 @@ function buildCommands() {
       )
       .addBooleanOption((option: SlashCommandBooleanOption) =>
         option.setName("stats").setDescription("Get the stats for a weapon")
+      )
+      .addBooleanOption((option: SlashCommandBooleanOption) =>
+        option.setName("adept").setDescription("Get adept version for a weapon")
       ),
     new SlashCommandBuilder()
       .setName("compare")
