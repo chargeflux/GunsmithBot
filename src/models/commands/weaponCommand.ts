@@ -14,15 +14,20 @@ export default class WeaponCommand implements BaseCommand<Weapon> {
     if (options.adept) {
       weaponResults = weaponResults.filter((x) => x.name.includes("(Adept)"));
     }
-    const results = this.orderByRandomRollAndTierType(weaponResults);
+    const results = this.orderByWeaponHeuristics(weaponResults);
     this.results = orderResultsByName(this.input, results);
     this.count = this.results.length;
   }
 
-  orderByRandomRollAndTierType(weaponResults: Weapon[]) {
+  orderByWeaponHeuristics(weaponResults: Weapon[]) {
     return weaponResults.sort((a, b) => {
+      let seasonalDiff = b.seasonNumber - a.seasonNumber;
+      if (seasonalDiff == 0) {
+        // Handle event weapons
+        seasonalDiff = b.index - a.index;
+      }
       if (a.name == b.name) {
-        return b.seasonNumber - a.seasonNumber;
+        return seasonalDiff;
       }
       if (!a.hasRandomRolls && a.archetype.rarity != "Exotic") {
         return 1;
@@ -31,7 +36,7 @@ export default class WeaponCommand implements BaseCommand<Weapon> {
         return -1;
       }
       if (a.archetype.powerCap == b.archetype.powerCap) {
-        return b.seasonNumber - a.seasonNumber;
+        return seasonalDiff;
       }
       const diff = a.archetype.powerCap - b.archetype.powerCap;
       if (a.archetype.powerCap != 0 && b.archetype.powerCap != 0) {

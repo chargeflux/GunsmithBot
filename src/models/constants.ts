@@ -224,5 +224,16 @@ export const WATERMARK_TO_SEASON_NUMBER: { [key: string]: number } = {
   "/common/destiny2_content/icons/6026e9d64e8c2b19f302dafb0286897b.png": 21,
 };
 
+export const EVENT_WATERMARK = [
+  "/common/destiny2_content/icons/efdb35540cd169fa6e334995c2ce87b6.png",
+  "/common/destiny2_content/icons/ad7fdb049d430c1fac1d20cf39059702.png",
+  "/common/destiny2_content/icons/f80e39c767f309f0b2be625dae0e3744.png",
+  "/common/destiny2_content/icons/52523b49e5965f6f33ab86710215c676.png",
+  "/common/destiny2_content/icons/04de56db6d59127239ed51e82d16c06c.png",
+];
+
+export const UNKNOWN_SEASON_WATERMARK =
+  "/common/destiny2_content/icons/3543d23d9063fbf7332c7f129a74ada2.png";
+
 export const CRAFTED_ICON_URL =
   "https://www.bungie.net/img/destiny_content/border_items/crafted-icon-overlay-96x96.png";

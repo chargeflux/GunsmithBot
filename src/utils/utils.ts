@@ -52,21 +52,21 @@ export function orderResultsByName<k extends BaseMetadata>(query: string, metada
 export function groupByDuplicates<k>(items: k[]): number[][] {
   const fn = (items: k[], start: number) => {
     let first = null;
-    const indexes = [];
+    const indices = [];
     for (let index = start; index < items.length; index++) {
       const element = items[index];
       if (first === null) {
         first = element;
-        indexes.push(index);
+        indices.push(index);
         continue;
       }
       if (first === element) {
-        indexes.push(index);
+        indices.push(index);
       } else {
         break;
       }
     }
-    return indexes;
+    return indices;
   };
 
   const groups = [];
