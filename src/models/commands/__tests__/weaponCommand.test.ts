@@ -178,6 +178,68 @@ describe("order", () => {
       ],
       expected: [0, 2, 1],
     },
+    {
+      query: "A",
+      weapons: [
+        {
+          name: "A",
+          hasRandomRolls: true,
+          seasonNumber: 8,
+          archetype: {
+            name: "A",
+            slot: "Kinetic",
+            class: "Shotgun",
+            rarity: "Legendary",
+            damage: "Kinetic",
+            isKinetic: true,
+            powerCap: 1060,
+          },
+        },
+        {
+          name: "A",
+          hasRandomRolls: true,
+          seasonNumber: 12,
+          archetype: {
+            name: "A",
+            slot: "Kinetic",
+            class: "Shotgun",
+            rarity: "Legendary",
+            damage: "Kinetic",
+            isKinetic: true,
+            powerCap: 0,
+          },
+        },
+        {
+          name: "A",
+          hasRandomRolls: true,
+          seasonNumber: 9,
+          archetype: {
+            name: "A",
+            slot: "Kinetic",
+            class: "Shotgun",
+            rarity: "Legendary",
+            damage: "Kinetic",
+            isKinetic: true,
+            powerCap: 1260,
+          },
+        },
+        {
+          name: "A (B)",
+          hasRandomRolls: true,
+          seasonNumber: 9,
+          archetype: {
+            name: "A (B)",
+            slot: "Kinetic",
+            class: "Shotgun",
+            rarity: "Legendary",
+            damage: "Kinetic",
+            isKinetic: true,
+            powerCap: 1160,
+          },
+        },
+      ],
+      expected: [1, 2, 0, 3],
+    },
   ])("order results - $query", ({ query, weapons, expected }) => {
     const command = new WeaponCommand(query, new WeaponCommandOptions(), [
       ...(weapons as unknown as Weapon[]),

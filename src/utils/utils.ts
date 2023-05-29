@@ -19,13 +19,64 @@ export function toTitleCase(text: string): string {
     .join(" ");
 }
 
+/**
+ * Fuzzy sort results with stability by using hash as identifier
+ */
 export function orderResultsByName<k extends BaseMetadata>(query: string, metadata: k[]) {
-  const results = fuzzysort.go(query, metadata, {
+  const fzResults = fuzzysort.go(query, metadata, {
     allowTypo: false,
     key: "name",
   });
 
-  return results.map((x) => x.obj);
+  const groups = groupByDuplicates(fzResults.map((x) => x.score));
+
+  let all_results: k[] = [];
+
+  for (let index = 0; index < groups.length; index++) {
+    const group = groups[index];
+    const results = [];
+    for (let index = 0; index < group.length; index++) {
+      const element = group[index];
+      const item = fzResults[element];
+      results.push(item.obj);
+    }
+    results.sort((a, b) => {
+      return metadata.indexOf(a) - metadata.indexOf(b);
+    });
+    all_results = all_results.concat(results);
+  }
+
+  return all_results;
+}
+
+export function groupByDuplicates<k>(items: k[]): number[][] {
+  const fn = (items: k[], start: number) => {
+    let first = null;
+    const indexes = [];
+    for (let index = start; index < items.length; index++) {
+      const element = items[index];
+      if (first === null) {
+        first = element;
+        indexes.push(index);
+        continue;
+      }
+      if (first === element) {
+        indexes.push(index);
+      } else {
+        break;
+      }
+    }
+    return indexes;
+  };
+
+  const groups = [];
+  let current_idx = 0;
+  while (current_idx != items.length) {
+    const indices = fn(items, current_idx);
+    groups.push(indices);
+    current_idx += indices.length;
+  }
+  return groups;
 }
 
 export function validateWeaponSearch(rawWeaponData: DestinyInventoryItemDefinition): boolean {

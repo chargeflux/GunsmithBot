@@ -19,6 +19,9 @@ export default class WeaponCommand implements BaseCommand<Weapon> {
 
   orderByRandomRollAndTierType(weaponResults: Weapon[]) {
     return weaponResults.sort((a, b) => {
+      if (a.name == b.name) {
+        return b.seasonNumber - a.seasonNumber;
+      }
       if (!a.hasRandomRolls && a.archetype.rarity != "Exotic") {
         return 1;
       }
@@ -28,7 +31,12 @@ export default class WeaponCommand implements BaseCommand<Weapon> {
       if (a.archetype.powerCap == b.archetype.powerCap) {
         return b.seasonNumber - a.seasonNumber;
       }
-      return a.archetype.powerCap - b.archetype.powerCap;
+      const diff = a.archetype.powerCap - b.archetype.powerCap;
+      if (a.archetype.powerCap != 0 && b.archetype.powerCap != 0) {
+        return -diff;
+      } else {
+        return diff;
+      }
     });
   }
 }
