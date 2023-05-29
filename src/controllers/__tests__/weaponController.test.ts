@@ -2,7 +2,7 @@ import WeaponController from "../weaponController";
 import ManifestDBService from "../../services/manifestDbService";
 import WeaponOptions from "../../models/command-options/weaponOptions";
 
-const maybe = process.env.TEST_INTEGRATION ? describe : describe.skip;
+const maybe = process.env.TEST_INTEGRATION === "true" ? describe : describe.skip;
 
 maybe("search weapons", () => {
   test.each([

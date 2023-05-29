@@ -30,6 +30,24 @@ To deploy slash commands
 npm run deployCommands
 ```
 
+To run tests
+
+```bash
+npm run test
+```
+
+To run integration tests
+
+```bash
+cp .env.testing.sample .env.testing
+```
+
+Enable integration testing environment variables as needed and the bot should be run at least once or run the database creation test first to instantiate the database.
+
+```bash
+npm run test
+```
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

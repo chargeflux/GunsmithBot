@@ -4,10 +4,9 @@ import ManifestDBService from "../../services/manifestDbService";
 import SearchController from "../searchController";
 import { ArchetypeToSearch } from "../../models/commands/searchCommand";
 
-jest.mock("../../services/manifestDbService");
-jest.mock("../../services/weaponDbService");
-
-describe("search", () => {
+describe("build search query", () => {
+  jest.mock("../../services/manifestDbService");
+  jest.mock("../../services/weaponDbService");
   test.each([
     {
       sockets: ["arrows", "barrels"],
