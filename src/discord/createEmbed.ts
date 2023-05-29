@@ -5,7 +5,8 @@ import CompareCommand from "../models/commands/compareCommand";
 import ModCommand from "../models/commands/modCommand";
 import PerkCommand from "../models/commands/perkCommand";
 import SearchCommand from "../models/commands/searchCommand";
-import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weaponCommand";
+import WeaponCommand from "../models/commands/weaponCommand";
+import WeaponOptions from "../models/command-options/weaponOptions";
 import { DISCORD_BG_HEX, QueryType } from "../models/constants";
 import { Armor } from "../models/destiny-entities/armor";
 import { BaseDestinyItem } from "../models/destiny-entities/baseMetadata";
@@ -143,7 +144,7 @@ function createCompareEmbed(processedCommand: CompareCommand): EmbedBuilder {
 
 async function createWeaponEmbed(
   weaponResult: Weapon,
-  options: WeaponCommandOptions
+  options: WeaponOptions
 ): Promise<EmbedPayload> {
   let embed;
   let image;

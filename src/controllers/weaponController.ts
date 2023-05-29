@@ -3,8 +3,7 @@ import {
   DestinyItemSocketBlockDefinition,
   DestinyItemSocketEntryDefinition,
 } from "bungie-api-ts/destiny2";
-import { CacheType, CommandInteractionOptionResolver } from "discord.js";
-import WeaponCommand, { WeaponCommandOptions } from "../models/commands/weaponCommand";
+import WeaponCommand from "../models/commands/weaponCommand";
 import { PlugCategory, SocketCategoryHash } from "../models/constants";
 import Perk from "../models/destiny-entities/perk";
 import Socket from "../models/destiny-entities/socket";
@@ -20,6 +19,7 @@ import { getPlugItemHash, getPlugItemsByHash } from "../services/dbQuery/plugset
 import getPowerCap from "../services/dbQuery/powerCap";
 import { getSocketTypeHash } from "../services/dbQuery/socketType";
 import { validateWeaponSearch } from "../utils/utils";
+import WeaponOptions from "../models/command-options/weaponOptions";
 
 const _logger = logger.getSubLogger({ name: "WeaponController" });
 
@@ -32,29 +32,25 @@ export default class WeaponController {
 
   async processWeaponQuery(
     input: string,
-    interactionOptions: Omit<
-      CommandInteractionOptionResolver<CacheType>,
-      "getMessage" | "getFocused"
-    >
+    options: WeaponOptions
   ): Promise<WeaponCommand | undefined> {
     let weaponCommand;
     if (input) {
-      const parsedOptions = WeaponCommandOptions.parseDiscordInteractionOptions(interactionOptions);
       const results = await getInventoryItemsByName(this.dbService.db, input);
       const weaponResults: Weapon[] = [];
       for (const weaponData of results) {
         if (!validateWeaponSearch(weaponData)) continue;
-        const newWeapon = await this.createWeapon(weaponData, parsedOptions);
+        const newWeapon = await this.createWeapon(weaponData, options);
         weaponResults.push(newWeapon);
       }
-      weaponCommand = new WeaponCommand(input, parsedOptions, weaponResults);
+      weaponCommand = new WeaponCommand(input, options, weaponResults);
     }
     return weaponCommand;
   }
 
   async createWeapon(
     weaponData: DestinyInventoryItemDefinition,
-    options: WeaponCommandOptions,
+    options: WeaponOptions,
     minimal = false
   ) {
     const powerCapValues = await this.getPowerCapValues(weaponData);

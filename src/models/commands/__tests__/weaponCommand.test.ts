@@ -1,5 +1,6 @@
 import { Weapon } from "../../destiny-entities/weapon";
-import WeaponCommand, { WeaponCommandOptions } from "../weaponCommand";
+import WeaponCommand from "../weaponCommand";
+import WeaponOptions from "../../command-options/weaponOptions";
 
 describe("order", () => {
   test.each([
@@ -241,7 +242,7 @@ describe("order", () => {
       expected: [1, 2, 0, 3],
     },
   ])("order results - $query", ({ query, weapons, expected }) => {
-    const command = new WeaponCommand(query, new WeaponCommandOptions(), [
+    const command = new WeaponCommand(query, new WeaponOptions(), [
       ...(weapons as unknown as Weapon[]),
     ]);
     for (let index = 0; index < command.results.length; index++) {

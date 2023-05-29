@@ -1,12 +1,13 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import { BaseMetadata } from "./baseMetadata";
-import { WeaponCommandOptions } from "../commands/weaponCommand";
+import WeaponOptions from "../command-options/weaponOptions";
 import { BUNGIE_URL_ROOT, CRAFTED_ICON_URL, WATERMARK_TO_SEASON_NUMBER } from "../constants";
 import Perk from "./perk";
 import Socket from "./socket";
 import { WeaponArchetypeData, WeaponArchetype } from "./weaponArchetype";
 import WeaponStats from "./weaponStats";
 import { getImageBuffer, overlayImages } from "../../utils/utils";
+import PublicError from "../errors/publicError";
 
 export class Weapon implements BaseMetadata {
   name: string;
@@ -22,11 +23,11 @@ export class Weapon implements BaseMetadata {
   powerCapValues?: number[];
   archetype: WeaponArchetype;
   sockets: Socket[] = [];
-  options: WeaponCommandOptions;
+  options: WeaponOptions;
 
   constructor(
     rawWeaponData: DestinyInventoryItemDefinition,
-    options: WeaponCommandOptions,
+    options: WeaponOptions,
     powerCapValues: number[],
     sockets: Socket[],
     intrinsic?: Perk
@@ -41,6 +42,9 @@ export class Weapon implements BaseMetadata {
       WATERMARK_TO_SEASON_NUMBER[
         rawWeaponData.iconWatermark ?? rawWeaponData.quality?.displayVersionWatermarkIcons[0]
       ] ?? -1;
+    if (this.seasonNumber === -1) {
+      throw new PublicError("Fatal: Failed to parse season number");
+    }
     this.craftable = typeof rawWeaponData.inventory?.recipeItemHash === "number";
 
     this.options = options;

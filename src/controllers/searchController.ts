@@ -5,7 +5,7 @@ import SearchCommand, {
   ArchetypeToSearch,
   ValidTraitsOptions,
 } from "../models/commands/searchCommand";
-import { WeaponCommandOptions } from "../models/commands/weaponCommand";
+import WeaponOptions from "../models/command-options/weaponOptions";
 import { PlugCategory } from "../models/constants";
 import {
   ArchetypeWeaponMapping,
@@ -181,10 +181,7 @@ export default class SearchController {
     const weaponController = new WeaponController(new ManifestDBService(undefined, false));
     for (const weapon of weaponItems) {
       if (!validateWeaponSearch(weapon.data)) continue;
-      const newWeapon = await weaponController.createWeapon(
-        weapon.data,
-        new WeaponCommandOptions(true)
-      );
+      const newWeapon = await weaponController.createWeapon(weapon.data, new WeaponOptions(true));
       if (!newWeapon.archetype || !newWeapon.archetype.intrinsic) {
         continue;
       }
