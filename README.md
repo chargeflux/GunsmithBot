@@ -42,7 +42,7 @@ To run integration tests
 cp .env.testing.sample .env.testing
 ```
 
-Enable integration testing environment variables as needed and the bot should be run at least once or run the database creation test first to instantiate the database.
+Enable integration testing environment variables as needed and the bot should be run at least once to instantiate the database.
 
 ```bash
 npm run test
