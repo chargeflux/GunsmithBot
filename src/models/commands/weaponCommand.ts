@@ -1,24 +1,34 @@
-import { CacheType, CommandInteractionOptionResolver } from "discord.js";
 import { orderResultsByName } from "../../utils/utils";
 import { Weapon } from "../destiny-entities/weapon";
-import ValidationError from "../errors/validationError";
 import BaseCommand from "./baseCommand";
+import WeaponOptions from "../command-options/weaponOptions";
 
 export default class WeaponCommand implements BaseCommand<Weapon> {
   readonly input: string;
   readonly results: Weapon[];
   readonly count: number;
-  options: WeaponCommandOptions;
-  constructor(input: string, options: WeaponCommandOptions, weaponResults: Weapon[]) {
+  options: WeaponOptions;
+  constructor(input: string, options: WeaponOptions, weaponResults: Weapon[]) {
     this.input = input;
     this.options = options;
-    const results = this.orderByRandomRollAndTierType(weaponResults);
+    if (options.adept) {
+      weaponResults = weaponResults.filter((x) => x.name.includes("(Adept)"));
+    }
+    const results = this.orderByWeaponHeuristics(weaponResults);
     this.results = orderResultsByName(this.input, results);
     this.count = this.results.length;
   }
 
-  orderByRandomRollAndTierType(weaponResults: Weapon[]) {
+  orderByWeaponHeuristics(weaponResults: Weapon[]) {
     return weaponResults.sort((a, b) => {
+      let seasonalDiff = b.seasonNumber - a.seasonNumber;
+      if (seasonalDiff == 0) {
+        // Handle event weapons
+        seasonalDiff = b.index - a.index;
+      }
+      if (a.name == b.name) {
+        return seasonalDiff;
+      }
       if (!a.hasRandomRolls && a.archetype.rarity != "Exotic") {
         return 1;
       }
@@ -26,49 +36,14 @@ export default class WeaponCommand implements BaseCommand<Weapon> {
         return -1;
       }
       if (a.archetype.powerCap == b.archetype.powerCap) {
-        return b.seasonNumber - a.seasonNumber;
+        return seasonalDiff;
       }
-      return b.archetype.powerCap - a.archetype.powerCap;
+      const diff = a.archetype.powerCap - b.archetype.powerCap;
+      if (a.archetype.powerCap != 0 && b.archetype.powerCap != 0) {
+        return -diff;
+      } else {
+        return diff;
+      }
     });
   }
-}
-
-export class WeaponCommandOptions {
-  full: boolean;
-  isDefault: boolean;
-  stats: boolean;
-
-  get state() {
-    return (
-      ((this.stats ? 1 : 0) << 2) | ((this.isDefault ? 1 : 0) << 1) | ((this.full ? 1 : 0) << 0)
-    );
-  }
-  constructor(full = false, isDefault = false, stats = false) {
-    this.full = full;
-    this.isDefault = isDefault;
-    this.stats = stats;
-
-    if (!this.validateState()) throw new ValidationError("Command options are invalid");
-  }
-
-  static parseDiscordInteractionOptions(
-    options: Omit<CommandInteractionOptionResolver<CacheType>, "getMessage" | "getFocused">
-  ): WeaponCommandOptions {
-    const full = options.getBoolean("full") ?? false;
-    const isDefault = options.getBoolean("default") ?? false;
-    const stats = options.getBoolean("stats") ?? false;
-
-    return new WeaponCommandOptions(full, isDefault, stats);
-  }
-
-  validateState() {
-    return ValidCommandOptionStates[this.state] ? true : false;
-  }
-}
-
-enum ValidCommandOptionStates {
-  NONE = 0,
-  FULL = 1 << 0,
-  DEFAULT = 1 << 1,
-  STATS = 1 << 2,
 }

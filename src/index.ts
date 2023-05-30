@@ -8,6 +8,7 @@ import BaseClient from "./discord/baseClient";
 import { BaseDestinyItem } from "./models/destiny-entities/baseMetadata";
 import { CommandInteraction, Events } from "discord.js";
 import { QueryType } from "./models/constants";
+import WeaponOptions from "./models/command-options/weaponOptions";
 
 const _logger = logger.getSubLogger({ name: "Main" });
 
@@ -67,9 +68,10 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
       }
       case "weapon": {
         _logger.info(`Searching for '${inputString}'`);
+        const parsedOptions = WeaponOptions.parseDiscordInteractionOptions(interaction.options);
         const weaponCommand = await baseClient.weaponController.processWeaponQuery(
           inputString,
-          interaction.options
+          parsedOptions
         );
         if (weaponCommand && weaponCommand.count) {
           logQueryResults(weaponCommand.results);
@@ -114,11 +116,12 @@ discordClient.on(Events.InteractionCreate, async (interaction) => {
         }
 
         _logger.info(`Comparing '${inputA}' and '${inputB}'`);
+        const parsedOptions = WeaponOptions.parseDiscordInteractionOptions(interaction.options);
         const weaponA = (
-          await baseClient.weaponController.processWeaponQuery(inputA, interaction.options)
+          await baseClient.weaponController.processWeaponQuery(inputA, parsedOptions)
         )?.results[0];
         const weaponB = (
-          await baseClient.weaponController.processWeaponQuery(inputB, interaction.options)
+          await baseClient.weaponController.processWeaponQuery(inputB, parsedOptions)
         )?.results[0];
 
         if (weaponA && weaponB) {

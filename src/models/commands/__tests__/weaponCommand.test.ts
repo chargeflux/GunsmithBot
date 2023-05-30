@@ -1,5 +1,6 @@
 import { Weapon } from "../../destiny-entities/weapon";
-import WeaponCommand, { WeaponCommandOptions } from "../weaponCommand";
+import WeaponCommand from "../weaponCommand";
+import WeaponOptions from "../../command-options/weaponOptions";
 
 describe("order", () => {
   test.each([
@@ -16,7 +17,7 @@ describe("order", () => {
             rarity: "Legendary",
             damage: "Arc",
             isKinetic: false,
-            _powerCap: 1060,
+            powerCap: 1060,
           },
         },
         {
@@ -29,6 +30,7 @@ describe("order", () => {
             rarity: "Legendary",
             damage: "Arc",
             isKinetic: false,
+            powercap: 0,
           },
         },
         {
@@ -41,6 +43,7 @@ describe("order", () => {
             rarity: "Legendary",
             damage: "Arc",
             isKinetic: false,
+            powercap: 0,
           },
         },
       ],
@@ -60,7 +63,7 @@ describe("order", () => {
             rarity: "Legendary",
             damage: "Kinetic",
             isKinetic: true,
-            _powerCap: 1060,
+            powerCap: 1060,
           },
         },
         {
@@ -74,7 +77,7 @@ describe("order", () => {
             rarity: "Legendary",
             damage: "Kinetic",
             isKinetic: true,
-            _powerCap: 1260,
+            powerCap: 1260,
           },
         },
         {
@@ -88,6 +91,7 @@ describe("order", () => {
             rarity: "Exotic",
             damage: "Kinetic",
             isKinetic: true,
+            powercap: 0,
           },
         },
       ],
@@ -107,7 +111,7 @@ describe("order", () => {
             rarity: "Legendary",
             damage: "Kinetic",
             isKinetic: true,
-            _powerCap: 1060,
+            powerCap: 1060,
           },
         },
         {
@@ -121,14 +125,124 @@ describe("order", () => {
             rarity: "Legendary",
             damage: "Kinetic",
             isKinetic: true,
-            _powerCap: 1260,
+            powerCap: 1260,
           },
         },
       ],
       expected: [1, 0],
     },
+    {
+      query: "Nameless Midnight",
+      weapons: [
+        {
+          name: "Nameless Midnight",
+          hasRandomRolls: true,
+          seasonNumber: 20,
+          archetype: {
+            name: "Nameless Midnight",
+            slot: "Kinetic",
+            class: "Scout Rifle",
+            rarity: "Legendary",
+            damage: "Kinetic",
+            isKinetic: true,
+            powerCap: 0,
+          },
+        },
+        {
+          name: "Nameless Midnight",
+          hasRandomRolls: false,
+          seasonNumber: 1,
+          archetype: {
+            name: "Nameless Midnight",
+            slot: "Kinetic",
+            class: "Scout Rifle",
+            rarity: "Legendary",
+            damage: "Kinetic",
+            isKinetic: true,
+            powerCap: 1060,
+          },
+        },
+        {
+          name: "Nameless Midnight",
+          hasRandomRolls: true,
+          seasonNumber: 4,
+          archetype: {
+            name: "Nameless Midnight",
+            slot: "Kinetic",
+            class: "Scout Rifle",
+            rarity: "Legendary",
+            damage: "Kinetic",
+            isKinetic: true,
+            powerCap: 1060,
+          },
+        },
+      ],
+      expected: [0, 2, 1],
+    },
+    {
+      query: "A",
+      weapons: [
+        {
+          name: "A",
+          hasRandomRolls: true,
+          seasonNumber: 8,
+          archetype: {
+            name: "A",
+            slot: "Kinetic",
+            class: "Shotgun",
+            rarity: "Legendary",
+            damage: "Kinetic",
+            isKinetic: true,
+            powerCap: 1060,
+          },
+        },
+        {
+          name: "A",
+          hasRandomRolls: true,
+          seasonNumber: 12,
+          archetype: {
+            name: "A",
+            slot: "Kinetic",
+            class: "Shotgun",
+            rarity: "Legendary",
+            damage: "Kinetic",
+            isKinetic: true,
+            powerCap: 0,
+          },
+        },
+        {
+          name: "A",
+          hasRandomRolls: true,
+          seasonNumber: 9,
+          archetype: {
+            name: "A",
+            slot: "Kinetic",
+            class: "Shotgun",
+            rarity: "Legendary",
+            damage: "Kinetic",
+            isKinetic: true,
+            powerCap: 1260,
+          },
+        },
+        {
+          name: "A (B)",
+          hasRandomRolls: true,
+          seasonNumber: 9,
+          archetype: {
+            name: "A (B)",
+            slot: "Kinetic",
+            class: "Shotgun",
+            rarity: "Legendary",
+            damage: "Kinetic",
+            isKinetic: true,
+            powerCap: 1160,
+          },
+        },
+      ],
+      expected: [1, 2, 0, 3],
+    },
   ])("order results - $query", ({ query, weapons, expected }) => {
-    const command = new WeaponCommand(query, new WeaponCommandOptions(), [
+    const command = new WeaponCommand(query, new WeaponOptions(), [
       ...(weapons as unknown as Weapon[]),
     ]);
     for (let index = 0; index < command.results.length; index++) {

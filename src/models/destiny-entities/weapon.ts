@@ -1,12 +1,19 @@
 import { DestinyInventoryItemDefinition } from "bungie-api-ts/destiny2";
 import { BaseMetadata } from "./baseMetadata";
-import { WeaponCommandOptions } from "../commands/weaponCommand";
-import { BUNGIE_URL_ROOT, CRAFTED_ICON_URL, WATERMARK_TO_SEASON_NUMBER } from "../constants";
+import WeaponOptions from "../command-options/weaponOptions";
+import {
+  BUNGIE_URL_ROOT,
+  CRAFTED_ICON_URL,
+  EVENT_WATERMARK,
+  UNKNOWN_SEASON_WATERMARK,
+  WATERMARK_TO_SEASON_NUMBER,
+} from "../constants";
 import Perk from "./perk";
 import Socket from "./socket";
 import { WeaponArchetypeData, WeaponArchetype } from "./weaponArchetype";
 import WeaponStats from "./weaponStats";
 import { getImageBuffer, overlayImages } from "../../utils/utils";
+import PublicError from "../errors/publicError";
 
 export class Weapon implements BaseMetadata {
   name: string;
@@ -18,15 +25,16 @@ export class Weapon implements BaseMetadata {
   craftable: boolean;
   seasonNumber: number;
   hash: number;
+  index: number;
   stats?: WeaponStats;
   powerCapValues?: number[];
   archetype: WeaponArchetype;
   sockets: Socket[] = [];
-  options: WeaponCommandOptions;
+  options: WeaponOptions;
 
   constructor(
     rawWeaponData: DestinyInventoryItemDefinition,
-    options: WeaponCommandOptions,
+    options: WeaponOptions,
     powerCapValues: number[],
     sockets: Socket[],
     intrinsic?: Perk
@@ -37,10 +45,8 @@ export class Weapon implements BaseMetadata {
     this.icon = BUNGIE_URL_ROOT + rawWeaponData.displayProperties.icon;
     this.hasRandomRolls = rawWeaponData.displaySource != "";
     this.hash = rawWeaponData.hash;
-    this.seasonNumber =
-      WATERMARK_TO_SEASON_NUMBER[
-        rawWeaponData.iconWatermark ?? rawWeaponData.quality?.displayVersionWatermarkIcons[0]
-      ] ?? -1;
+    this.index = rawWeaponData.index;
+    this.seasonNumber = this.determineSeasonNumber(rawWeaponData);
     this.craftable = typeof rawWeaponData.inventory?.recipeItemHash === "number";
 
     this.options = options;
@@ -76,6 +82,21 @@ export class Weapon implements BaseMetadata {
     }
 
     this.setSockets(sockets);
+  }
+
+  determineSeasonNumber(rawWeaponData: DestinyInventoryItemDefinition): number {
+    const seasonNumber =
+      WATERMARK_TO_SEASON_NUMBER[
+        rawWeaponData.iconWatermark ?? rawWeaponData.quality?.displayVersionWatermarkIcons[0]
+      ] ?? -1;
+    if (
+      seasonNumber === -1 &&
+      !EVENT_WATERMARK.includes(rawWeaponData.iconWatermark) &&
+      rawWeaponData.iconWatermark != UNKNOWN_SEASON_WATERMARK
+    ) {
+      throw new PublicError("Fatal: Failed to parse season number");
+    }
+    return seasonNumber;
   }
 
   setPowerCapValues(powerCapValues: number[]) {
