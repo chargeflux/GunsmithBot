@@ -14,6 +14,9 @@ import { WeaponArchetypeData, WeaponArchetype } from "./weaponArchetype";
 import WeaponStats from "./weaponStats";
 import { getImageBuffer, overlayImages } from "../../utils/utils";
 import PublicError from "../errors/publicError";
+import { logger } from "../../logger";
+
+const _logger = logger.getSubLogger({ name: "Weapon" });
 
 export class Weapon implements BaseMetadata {
   name: string;
@@ -73,9 +76,9 @@ export class Weapon implements BaseMetadata {
 
     this.overlays.push(
       BUNGIE_URL_ROOT +
-        (this.archetype.powerCap != 0
-          ? rawWeaponData.iconWatermarkShelved
-          : rawWeaponData.iconWatermark)
+      (this.archetype.powerCap != 0
+        ? rawWeaponData.iconWatermarkShelved
+        : rawWeaponData.iconWatermark)
     );
     if (this.craftable) {
       this.overlays.push(CRAFTED_ICON_URL);
@@ -87,13 +90,14 @@ export class Weapon implements BaseMetadata {
   determineSeasonNumber(rawWeaponData: DestinyInventoryItemDefinition): number {
     const seasonNumber =
       WATERMARK_TO_SEASON_NUMBER[
-        rawWeaponData.iconWatermark ?? rawWeaponData.quality?.displayVersionWatermarkIcons[0]
+      rawWeaponData.iconWatermark ?? rawWeaponData.quality?.displayVersionWatermarkIcons[0]
       ] ?? -1;
     if (
       seasonNumber === -1 &&
       !EVENT_WATERMARK.includes(rawWeaponData.iconWatermark) &&
       rawWeaponData.iconWatermark != UNKNOWN_SEASON_WATERMARK
     ) {
+      _logger.error(`Unknown season watermark URL: ${rawWeaponData.iconWatermark}`)
       throw new PublicError("Fatal: Failed to parse season number");
     }
     return seasonNumber;

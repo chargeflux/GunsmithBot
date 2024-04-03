@@ -222,6 +222,9 @@ export const WATERMARK_TO_SEASON_NUMBER: { [key: string]: number } = {
   "/common/destiny2_content/icons/af00bdcd3e3b89e6e85c1f63ebc0b4e4.png": 20,
   "/common/destiny2_content/icons/a568c77f423d1b49aeccbce0e7af79f6.png": 20,
   "/common/destiny2_content/icons/6026e9d64e8c2b19f302dafb0286897b.png": 21,
+  "/common/destiny2_content/icons/3de52d90db7ee2feb086ef6665b736b6.png": 22,
+  "/common/destiny2_content/icons/a2fb48090c8bc0e5785975fab9596ab5.png": 23,
+  "/common/destiny2_content/icons/d5a3f4d7d20fefc781fea3c60bde9434.png": 23
 };
 
 export const EVENT_WATERMARK = [
