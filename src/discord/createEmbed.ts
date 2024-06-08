@@ -190,9 +190,11 @@ async function createWeaponEmbed(
   }
 
   const lightGGURL = "https://www.light.gg/db/items/" + weaponResult.hash;
+  const d2FoundryURL = "https://d2foundry.gg/w/" + weaponResult.hash;
   const endingTextComponents = [
     `[Screenshot](${weaponResult.screenshot})`,
     `[light.gg](${lightGGURL})`,
+    `[D2 Foundry](${d2FoundryURL})`,
   ];
   const endingText = endingTextComponents.join(" • ");
   embed.addFields({ name: "\u200b", value: endingText, inline: false });
@@ -227,15 +229,13 @@ function createFullWeaponEmbed(weaponResult: Weapon): EmbedBuilder {
   } else {
     let fieldIdx = 0;
     for (const socket of weaponResult.sockets) {
-      if ((fieldIdx + 1) % 3 == 0) {
-        if (fieldIdx + 1 == 3) embed.addFields({ name: "**Stats**", value: STATS, inline: true });
-        else embed.addFields({ name: "\u200b", value: "\u200b", inline: true });
+      if (fieldIdx + 1 == 3) {
+        embed.addFields({ name: "**Stats**", value: STATS, inline: true });
         fieldIdx += 1;
       }
       embed.addFields({ name: "**" + socket.name + "**", value: socket.toString(), inline: true });
       fieldIdx += 1;
     }
-    embed.addFields({ name: "\u200b", value: "\u200b", inline: true });
   }
   return embed;
 }

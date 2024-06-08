@@ -15,7 +15,7 @@ import {
   getInventoryItemsByHashes,
   getInventoryItemsByName,
 } from "../services/dbQuery/inventoryItem";
-import { getPlugItemHash, getPlugItemsByHash } from "../services/dbQuery/plugset";
+import { getPlugItemsByHash } from "../services/dbQuery/plugset";
 import getPowerCap from "../services/dbQuery/powerCap";
 import { getSocketTypeHash } from "../services/dbQuery/socketType";
 import { validateWeaponSearch } from "../utils/utils";
@@ -89,13 +89,22 @@ export default class WeaponController {
       if (category.socketCategoryHash == SocketCategoryHash.Intrinsics) {
         const index = category.socketIndexes[0]; // assume only one intrinisic socket
         const socket = socketData.socketEntries[index];
-        intrinsic = await this.processSocketIntrinisic(socket); // FIXME: Revision Zero has multiple intrinsics in reusablePlugItems
+        const intrinsicData = await this.processSocketIntrinisic(socket);
+        if (!intrinsicData) continue;
+        intrinsic = intrinsicData.perk;
+        if (intrinsicData.num > 1) {
+          sockets = sockets.concat(
+            await this.processSocketPerks(
+              socketData.socketEntries,
+              category.socketIndexes,
+              isDefault
+            )
+          );
+        }
       }
       if (category.socketCategoryHash == SocketCategoryHash.WeaponPerks) {
-        sockets = await this.processSocketPerks(
-          socketData.socketEntries,
-          category.socketIndexes,
-          isDefault
+        sockets = sockets.concat(
+          await this.processSocketPerks(socketData.socketEntries, category.socketIndexes, isDefault)
         );
       }
     }
@@ -106,12 +115,26 @@ export default class WeaponController {
 
   private async processSocketIntrinisic(
     socketEntry: DestinyItemSocketEntryDefinition
-  ): Promise<Perk | undefined> {
+  ): Promise<{ perk: Perk; num: number } | undefined> {
     let itemHash: number;
+    let numPlugItems: number;
     if (socketEntry.reusablePlugSetHash) {
-      itemHash = await getPlugItemHash(this.dbService.db, socketEntry.reusablePlugSetHash);
+      const plugItems = await getPlugItemsByHash(
+        this.dbService.db,
+        socketEntry.reusablePlugSetHash
+      );
+      itemHash = plugItems[0].plugItemHash;
+      numPlugItems = plugItems.length;
+    } else if (socketEntry.randomizedPlugSetHash) {
+      const plugItems = await getPlugItemsByHash(
+        this.dbService.db,
+        socketEntry.randomizedPlugSetHash
+      );
+      itemHash = plugItems[0].plugItemHash;
+      numPlugItems = plugItems.length;
     } else {
       itemHash = socketEntry.singleInitialItemHash;
+      numPlugItems = 1;
     }
 
     const item = await getInventoryItemByHash(this.dbService.db, itemHash);
@@ -119,10 +142,10 @@ export default class WeaponController {
     if (plugCategoryHash) {
       const category = PlugCategory[plugCategoryHash] as keyof typeof PlugCategory | undefined;
       if (!category) {
-        _logger.error("Unknown plug category hash for intrinsic:", plugCategoryHash); // expect only one valid intrinsic and should be matched accordingly
+        _logger.error("Unknown plug category hash for intrinsic:", plugCategoryHash);
         return;
       }
-      return new Perk(item, category, true);
+      return { perk: new Perk(item, category, true), num: numPlugItems };
     }
   }
 
